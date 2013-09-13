@@ -1,0 +1,128 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Applications", "{9D60B828-E0D2-49C2-BFCA-A22D33495898}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{03C274B8-D21E-4B76-8A23-B9E8741AD366}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{DD87CC4D-1310-4E04-A8BB-FFFDC701F0A9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{7E4E34BA-FB7F-497C-BB89-C45FF2C8CED9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7281BCE-EBD9-49A4-8838-D29C62925EC9}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE.txt = LICENSE.txt
+		NOTICE.txt = NOTICE.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotNetZip", "DotNetZip", "{14FF1B8B-AC52-4873-BF97-6C453B517FA3}"
+	ProjectSection(SolutionItems) = preProject
+		Dependencies\DotNetZip\Ionic.Zlib.dll = Dependencies\DotNetZip\Ionic.Zlib.dll
+		Dependencies\DotNetZip\Ionic.Zlib.xml = Dependencies\DotNetZip\Ionic.Zlib.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GSF", "GSF", "{9907A455-D34C-4DF0-B319-BF96D1BDC1CF}"
+	ProjectSection(SolutionItems) = preProject
+		Dependencies\GSF\GSF.Communication.dll = Dependencies\GSF\GSF.Communication.dll
+		Dependencies\GSF\GSF.Communication.pdb = Dependencies\GSF\GSF.Communication.pdb
+		Dependencies\GSF\GSF.Communication.xml = Dependencies\GSF\GSF.Communication.xml
+		Dependencies\GSF\GSF.Core.dll = Dependencies\GSF\GSF.Core.dll
+		Dependencies\GSF\GSF.Core.pdb = Dependencies\GSF\GSF.Core.pdb
+		Dependencies\GSF\GSF.Core.xml = Dependencies\GSF\GSF.Core.xml
+		Dependencies\GSF\GSF.InstallerActions.CA.dll = Dependencies\GSF\GSF.InstallerActions.CA.dll
+		Dependencies\GSF\GSF.PhasorProtocols.dll = Dependencies\GSF\GSF.PhasorProtocols.dll
+		Dependencies\GSF\GSF.PhasorProtocols.pdb = Dependencies\GSF\GSF.PhasorProtocols.pdb
+		Dependencies\GSF\GSF.PhasorProtocols.xml = Dependencies\GSF\GSF.PhasorProtocols.xml
+		Dependencies\GSF\GSF.Security.dll = Dependencies\GSF\GSF.Security.dll
+		Dependencies\GSF\GSF.Security.pdb = Dependencies\GSF\GSF.Security.pdb
+		Dependencies\GSF\GSF.Security.xml = Dependencies\GSF\GSF.Security.xml
+		Dependencies\GSF\GSF.ServiceBus.dll = Dependencies\GSF\GSF.ServiceBus.dll
+		Dependencies\GSF\GSF.ServiceBus.pdb = Dependencies\GSF\GSF.ServiceBus.pdb
+		Dependencies\GSF\GSF.ServiceBus.xml = Dependencies\GSF\GSF.ServiceBus.xml
+		Dependencies\GSF\GSF.ServiceModel.dll = Dependencies\GSF\GSF.ServiceModel.dll
+		Dependencies\GSF\GSF.ServiceModel.pdb = Dependencies\GSF\GSF.ServiceModel.pdb
+		Dependencies\GSF\GSF.ServiceModel.xml = Dependencies\GSF\GSF.ServiceModel.xml
+		Dependencies\GSF\GSF.ServiceProcess.dll = Dependencies\GSF\GSF.ServiceProcess.dll
+		Dependencies\GSF\GSF.ServiceProcess.pdb = Dependencies\GSF\GSF.ServiceProcess.pdb
+		Dependencies\GSF\GSF.ServiceProcess.xml = Dependencies\GSF\GSF.ServiceProcess.xml
+		Dependencies\GSF\GSF.TimeSeries.dll = Dependencies\GSF\GSF.TimeSeries.dll
+		Dependencies\GSF\GSF.TimeSeries.pdb = Dependencies\GSF\GSF.TimeSeries.pdb
+		Dependencies\GSF\GSF.TimeSeries.xml = Dependencies\GSF\GSF.TimeSeries.xml
+		Dependencies\GSF\GSF.Windows.dll = Dependencies\GSF\GSF.Windows.dll
+		Dependencies\GSF\GSF.Windows.pdb = Dependencies\GSF\GSF.Windows.pdb
+		Dependencies\GSF\GSF.Windows.xml = Dependencies\GSF\GSF.Windows.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WiX", "WiX", "{59B1811E-D12D-417C-AA12-22CFC2297FA9}"
+	ProjectSection(SolutionItems) = preProject
+		Dependencies\WiX\WixUIExtension.dll = Dependencies\WiX\WixUIExtension.dll
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamSplitter", "Applications\StreamSplitter\StreamSplitter.csproj", "{7E475E71-0956-4FB9-81A7-543C3D8A4C21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamSplitterConsole", "Applications\StreamSplitterConsole\StreamSplitterConsole.csproj", "{514C1869-C4FE-4E5C-9578-02FE97B82AD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamSplitterManager", "Applications\StreamSplitterManager\StreamSplitterManager.csproj", "{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "StreamSplitterSetup", "Applications\StreamSplitterSetup\StreamSplitterSetup.wixproj", "{69BB6C3E-5C48-482B-BDF6-A265A606CC03}"
+	ProjectSection(ProjectDependencies) = postProject
+		{514C1869-C4FE-4E5C-9578-02FE97B82AD1} = {514C1869-C4FE-4E5C-9578-02FE97B82AD1}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyConnection", "Libraries\ProxyConnection\ProxyConnection.csproj", "{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E475E71-0956-4FB9-81A7-543C3D8A4C21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E475E71-0956-4FB9-81A7-543C3D8A4C21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E475E71-0956-4FB9-81A7-543C3D8A4C21}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7E475E71-0956-4FB9-81A7-543C3D8A4C21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E475E71-0956-4FB9-81A7-543C3D8A4C21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E475E71-0956-4FB9-81A7-543C3D8A4C21}.Release|x64.ActiveCfg = Release|Any CPU
+		{514C1869-C4FE-4E5C-9578-02FE97B82AD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{514C1869-C4FE-4E5C-9578-02FE97B82AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{514C1869-C4FE-4E5C-9578-02FE97B82AD1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{514C1869-C4FE-4E5C-9578-02FE97B82AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{514C1869-C4FE-4E5C-9578-02FE97B82AD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{514C1869-C4FE-4E5C-9578-02FE97B82AD1}.Release|x64.ActiveCfg = Release|Any CPU
+		{514C1869-C4FE-4E5C-9578-02FE97B82AD1}.Release|x64.Build.0 = Release|Any CPU
+		{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}.Release|x64.ActiveCfg = Release|Any CPU
+		{69BB6C3E-5C48-482B-BDF6-A265A606CC03}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{69BB6C3E-5C48-482B-BDF6-A265A606CC03}.Debug|x64.ActiveCfg = Debug|x64
+		{69BB6C3E-5C48-482B-BDF6-A265A606CC03}.Debug|x64.Build.0 = Debug|x64
+		{69BB6C3E-5C48-482B-BDF6-A265A606CC03}.Release|Any CPU.ActiveCfg = Release|x64
+		{69BB6C3E-5C48-482B-BDF6-A265A606CC03}.Release|Any CPU.Build.0 = Release|x64
+		{69BB6C3E-5C48-482B-BDF6-A265A606CC03}.Release|x64.ActiveCfg = Release|x64
+		{69BB6C3E-5C48-482B-BDF6-A265A606CC03}.Release|x64.Build.0 = Release|x64
+		{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B}.Release|x64.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7E475E71-0956-4FB9-81A7-543C3D8A4C21} = {9D60B828-E0D2-49C2-BFCA-A22D33495898}
+		{514C1869-C4FE-4E5C-9578-02FE97B82AD1} = {9D60B828-E0D2-49C2-BFCA-A22D33495898}
+		{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90} = {9D60B828-E0D2-49C2-BFCA-A22D33495898}
+		{69BB6C3E-5C48-482B-BDF6-A265A606CC03} = {9D60B828-E0D2-49C2-BFCA-A22D33495898}
+		{14FF1B8B-AC52-4873-BF97-6C453B517FA3} = {03C274B8-D21E-4B76-8A23-B9E8741AD366}
+		{9907A455-D34C-4DF0-B319-BF96D1BDC1CF} = {03C274B8-D21E-4B76-8A23-B9E8741AD366}
+		{59B1811E-D12D-417C-AA12-22CFC2297FA9} = {03C274B8-D21E-4B76-8A23-B9E8741AD366}
+		{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B} = {7E4E34BA-FB7F-497C-BB89-C45FF2C8CED9}
+	EndGlobalSection
+EndGlobal
