@@ -53,6 +53,7 @@
       <HintPath>..\..\Dependencies\GSF\GSF.Windows.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -106,10 +107,21 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Images\DownloadConfig.png" />
+    <Content Include="Images\GPAIcon.png" />
     <Content Include="Images\Gray.png" />
     <Content Include="Images\Green.png" />
+    <Content Include="Images\LoadConfig.png" />
+    <Content Include="Images\NewConfig.png" />
+    <Content Include="Images\Reconnect.png" />
     <Content Include="Images\Red.png" />
+    <Content Include="Images\Retsart.png" />
+    <Content Include="Images\SaveConfig.png" />
+    <Content Include="Images\SaveConfigAs.png" />
+    <Content Include="Images\ServiceConnected.png" />
+    <Content Include="Images\ServiceDisconnected.png" />
     <Content Include="Images\StreamSplitter.png" />
+    <Content Include="Images\UploadConfig.png" />
     <Content Include="Images\Yellow.png" />
     <Content Include="StreamSplitterManager.ico" />
   </ItemGroup>
@@ -123,7 +135,8 @@
   <PropertyGroup>
     <PostBuildEvent>IF EXIST "$(TargetDir)..\StreamSplitter" COPY "$(TargetPath)" "$(TargetDir)..\StreamSplitter"
 IF EXIST "$(TargetDir)..\StreamSplitter" COPY "$(TargetDir)$(TargetFileName).config" "$(TargetDir)..\StreamSplitter"
-IF EXIST "$(TargetDir)..\StreamSplitter" COPY "$(TargetDir)*.dll" "$(TargetDir)..\StreamSplitter"</PostBuildEvent>
+IF EXIST "$(TargetDir)..\StreamSplitter" COPY "$(TargetDir)*.dll" "$(TargetDir)..\StreamSplitter"
+IF EXIST "$(TargetDir)..\StreamSplitter" COPY "$(TargetDir)*.pdb" "$(TargetDir)..\StreamSplitter"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

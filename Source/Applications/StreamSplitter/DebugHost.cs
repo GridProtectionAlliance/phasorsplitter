@@ -41,6 +41,7 @@ namespace StreamSplitter
         // Fields
         private string m_productName;
         private Process m_remoteConsole;
+        private Process m_remoteManager;
 
         #endregion
 
@@ -65,9 +66,13 @@ namespace StreamSplitter
         {
             // Start remote console session
             const string serviceClientName = "StreamSplitterConsole.exe";
+            const string serviceManager = "StreamSplitterManager.exe";
 
             if (!string.IsNullOrWhiteSpace(serviceClientName))
                 m_remoteConsole = Process.Start(FilePath.GetAbsolutePath(serviceClientName));
+
+            if (!string.IsNullOrWhiteSpace(serviceManager))
+                m_remoteManager = Process.Start(FilePath.GetAbsolutePath(serviceManager));
         }
 
         /// <summary>
@@ -78,6 +83,10 @@ namespace StreamSplitter
             // Close remote console session
             if (m_remoteConsole != null && !m_remoteConsole.HasExited)
                 m_remoteConsole.Kill();
+
+            // Close remote manager session
+            if (m_remoteManager != null && !m_remoteManager.HasExited)
+                m_remoteManager.Kill();
         }
 
         private void DebugHost_Load(object sender, EventArgs e)

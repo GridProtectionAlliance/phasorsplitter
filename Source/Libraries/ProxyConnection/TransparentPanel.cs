@@ -105,10 +105,12 @@ namespace StreamSplitter
             //using (HatchBrush brush = new HatchBrush(HatchStyle.DashedDownwardDiagonal, SystemColors.ControlDark, Color.Transparent))
             //    e.Graphics.FillRectangle(brush, e.ClipRectangle);
 
+            //e.Graphics.FillRectangle(m_brush, 0, 0, Width, Height);
+
             if ((object)m_brush != null)
             {
                 e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
-                e.Graphics.FillRectangle(m_brush, 0, 0, Width, Height);
+                e.Graphics.FillRectangle(m_brush, e.ClipRectangle);
             }
         }
 

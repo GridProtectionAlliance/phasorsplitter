@@ -21,11 +21,11 @@
 //
 //******************************************************************************************************
 
-using System;
-using System.Threading;
 using GSF;
 using GSF.Communication;
 using GSF.ServiceProcess;
+using System;
+using System.Threading;
 
 namespace StreamSplitter
 {
@@ -118,6 +118,28 @@ namespace StreamSplitter
             }
         }
 
+        /// <summary>
+        /// Gets or sets the maximum number of times the service connection will attempt to connect to the service.
+        /// </summary>
+        /// <remarks>
+        /// Set <see cref="MaxConnectionAttempts"/> to -1 for infinite connection attempts.
+        /// </remarks>
+        public int MaxConnectionAttempts
+        {
+            get
+            {
+                if ((object)m_remotingClient != null)
+                    return m_remotingClient.MaxConnectionAttempts;
+
+                return -1;
+            }
+            set
+            {
+                if ((object)m_remotingClient != null)
+                    m_remotingClient.MaxConnectionAttempts = value;
+            }
+        }
+
         #endregion
 
         #region [ Methods ]
@@ -177,8 +199,13 @@ namespace StreamSplitter
             {
                 if ((object)m_clientHelper != null && (object)m_remotingClient != null)
                 {
+                    // Disconnect if currently connected to allow actual "reconnect"
                     if (m_remotingClient.CurrentState == ClientState.Connected)
+                    {
                         m_clientHelper.Disconnect();
+                        OnConnectionState(false);
+                        Thread.Sleep(1000);
+                    }
 
                     if (m_remotingClient.CurrentState == ClientState.Disconnected)
                         m_clientHelper.Connect();

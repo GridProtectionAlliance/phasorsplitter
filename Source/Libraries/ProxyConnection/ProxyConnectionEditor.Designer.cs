@@ -91,7 +91,6 @@ namespace StreamSplitter
             this.pictureBoxRed = new System.Windows.Forms.PictureBox();
             this.pictureBoxYellow = new System.Windows.Forms.PictureBox();
             this.pictureBoxGray = new System.Windows.Forms.PictureBox();
-            this.buttonSave = new System.Windows.Forms.Button();
             this.checkBoxEnabled = new System.Windows.Forms.CheckBox();
             this.textBoxConnectionStatus = new System.Windows.Forms.TextBox();
             this.tabControlProxyDestinationType = new System.Windows.Forms.TabControl();
@@ -357,7 +356,6 @@ namespace StreamSplitter
             this.groupBoxProxyDestinations.Controls.Add(this.pictureBoxRed);
             this.groupBoxProxyDestinations.Controls.Add(this.pictureBoxYellow);
             this.groupBoxProxyDestinations.Controls.Add(this.pictureBoxGray);
-            this.groupBoxProxyDestinations.Controls.Add(this.buttonSave);
             this.groupBoxProxyDestinations.Controls.Add(this.checkBoxEnabled);
             this.groupBoxProxyDestinations.Controls.Add(this.textBoxConnectionStatus);
             this.groupBoxProxyDestinations.Controls.Add(this.tabControlProxyDestinationType);
@@ -421,18 +419,6 @@ namespace StreamSplitter
             this.pictureBoxGray.TabIndex = 4;
             this.pictureBoxGray.TabStop = false;
             this.toolTip.SetToolTip(this.pictureBoxGray, "Connection is not enabled.");
-            // 
-            // buttonSave
-            // 
-            this.buttonSave.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonSave.Location = new System.Drawing.Point(6, 184);
-            this.buttonSave.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.buttonSave.Name = "buttonSave";
-            this.buttonSave.Size = new System.Drawing.Size(68, 22);
-            this.buttonSave.TabIndex = 3;
-            this.buttonSave.Text = "&Save";
-            this.buttonSave.UseVisualStyleBackColor = false;
-            this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
             // 
             // checkBoxEnabled
             // 
@@ -711,7 +697,6 @@ namespace StreamSplitter
         private System.Windows.Forms.TextBox textBoxUdpRebroadcast0;
         private System.Windows.Forms.Label labelUdpListeningPort;
         private System.Windows.Forms.TextBox textBoxUdpListeningPort;
-        private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.CheckBox checkBoxEnabled;
         private System.Windows.Forms.ComboBox comboBoxProtocol;
         private System.Windows.Forms.GroupBox groupBoxProtocolParameters;

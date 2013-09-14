@@ -21,6 +21,9 @@
 //
 //******************************************************************************************************
 
+using GSF;
+using GSF.Communication;
+using GSF.PhasorProtocols;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,9 +31,6 @@ using System.Drawing;
 using System.Linq;
 using System.Timers;
 using System.Windows.Forms;
-using GSF;
-using GSF.Communication;
-using GSF.PhasorProtocols;
 using Timer = System.Timers.Timer;
 
 namespace StreamSplitter
@@ -49,9 +49,9 @@ namespace StreamSplitter
         // Events
 
         /// <summary>
-        /// Sends notification that user requested that the proxy connection should be saved.
+        /// Sends notification that configuration data has changed.
         /// </summary>
-        public event EventHandler SaveRecord;
+        public event EventHandler ConfigurationChanged;
 
         /// <summary>
         /// Sends notification that the enabled state has changed.
@@ -249,6 +249,10 @@ namespace StreamSplitter
             }
             set
             {
+                // Don't update controls if value hasn't changed
+                if (value == ConnectionState)
+                    return;
+
                 pictureBoxRed.Visible = false;
                 pictureBoxYellow.Visible = false;
                 pictureBoxGreen.Visible = false;
@@ -279,6 +283,10 @@ namespace StreamSplitter
         {
             set
             {
+                // Don't update controls unless text has changed
+                if (string.Compare(textBoxConnectionStatus.Text, value, StringComparison.InvariantCulture) == 0)
+                    return;
+
                 textBoxConnectionStatus.Text = value;
                 textBoxConnectionStatus.SelectionStart = textBoxConnectionStatus.Text.ToNonNullString().Length;
                 textBoxConnectionStatus.SelectionLength = 0;
@@ -293,7 +301,7 @@ namespace StreamSplitter
 
         #region [ Methods ]
 
-        // Handle user control focus propagation from sub-controls
+        // Handle event propagation from sub-controls
 
         private void RegisterControls(ControlCollection controlCollection = null)
         {
@@ -326,7 +334,15 @@ namespace StreamSplitter
 
         private void m_paintTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Invoke((Action)transparentPanel.Invalidate);
+            try
+            {
+                Invoke((Action)transparentPanel.Invalidate);
+            }
+            catch
+            {
+                // Since this is on a delay timer, this can fail if control is disposed
+                // then the invalidation is requested...
+            }
         }
 
         // Handle connection string manipulations
@@ -546,6 +562,7 @@ namespace StreamSplitter
             try
             {
                 textBoxConnectionString.Text = GenerateConnectionString();
+                OnConfigurationChanged();
             }
             finally
             {
@@ -563,6 +580,7 @@ namespace StreamSplitter
             try
             {
                 ParseConnectionString();
+                OnConfigurationChanged();
             }
             finally
             {
@@ -657,12 +675,6 @@ namespace StreamSplitter
 
         // Handle event interactions
 
-        private void buttonSave_Click(object sender, EventArgs e)
-        {
-            // Raise event to serialize updates and send service notification to "reload" this proxy connection
-            OnSaveRecord();
-        }
-
         private void checkBoxEnabled_CheckedChanged(object sender, EventArgs e)
         {
             UpdateConnectionString();
@@ -697,12 +709,12 @@ namespace StreamSplitter
         }
 
         /// <summary>
-        /// Raises the <see cref="SaveRecord"/> event.
+        /// Raises the <see cref="ConfigurationChanged"/> event.
         /// </summary>
-        protected virtual void OnSaveRecord()
+        protected virtual void OnConfigurationChanged()
         {
-            if ((object)SaveRecord != null)
-                SaveRecord(this, EventArgs.Empty);
+            if ((object)ConfigurationChanged != null)
+                ConfigurationChanged(this, EventArgs.Empty);
         }
 
         /// <summary>

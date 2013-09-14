@@ -80,14 +80,14 @@ Global
 		SccProjectTopLevelParentUniqueName3 = StreamSplitter.sln
 		SccProjectName3 = Applications/StreamSplitterManager
 		SccLocalPath3 = Applications\\StreamSplitterManager
-		SccProjectUniqueName4 = Applications\\StreamSplitterSetup\\StreamSplitterSetup.wixproj
+		SccProjectUniqueName4 = Libraries\\ProxyConnection\\ProxyConnection.csproj
 		SccProjectTopLevelParentUniqueName4 = StreamSplitter.sln
-		SccProjectName4 = Applications/StreamSplitterSetup
-		SccLocalPath4 = Applications\\StreamSplitterSetup
-		SccProjectUniqueName5 = Libraries\\ProxyConnection\\ProxyConnection.csproj
+		SccProjectName4 = Libraries/ProxyConnection
+		SccLocalPath4 = Libraries\\ProxyConnection
+		SccProjectUniqueName5 = Applications\\StreamSplitterSetup\\StreamSplitterSetup.wixproj
 		SccProjectTopLevelParentUniqueName5 = StreamSplitter.sln
-		SccProjectName5 = Libraries/ProxyConnection
-		SccLocalPath5 = Libraries\\ProxyConnection
+		SccProjectName5 = Applications/StreamSplitterSetup
+		SccLocalPath5 = Applications\\StreamSplitterSetup
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -22,7 +22,6 @@
 //******************************************************************************************************
 
 using GSF;
-using GSF.IO;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -58,12 +57,12 @@ namespace StreamSplitter
         public event EventHandler<EventArgs<ProxyConnection>> GotFocus;
 
         /// <summary>
-        /// Sends notification that the <see cref="ProxyConnection"/> should be saved.
+        /// Sends notification that the <see cref="ProxyConnection"/> has changed and should be saved.
         /// </summary>
         /// <remarks>
         /// This event will only be raised if the proxy connection is associated with an editor control.
         /// </remarks>
-        public event EventHandler<EventArgs<ProxyConnection>> SaveRecord;
+        public event EventHandler<EventArgs<ProxyConnection>> ConfigurationChanged;
 
         /// <summary>
         /// Sends notification that the <see cref="ProxyConnection"/> enabled state has changed.
@@ -144,7 +143,7 @@ namespace StreamSplitter
             if ((object)editorControl != null)
             {
                 editorControl.GotFocus += editorControl_GotFocus;
-                editorControl.SaveRecord += editorControl_SaveRecord;
+                editorControl.ConfigurationChanged += editorControl_ConfigurationChanged;
                 editorControl.EnabledStateChanged += editorControl_EnabledStateChanged;
             }
 
@@ -170,7 +169,7 @@ namespace StreamSplitter
                 if ((object)editorControl != null)
                 {
                     editorControl.GotFocus -= editorControl_GotFocus;
-                    editorControl.SaveRecord -= editorControl_SaveRecord;
+                    editorControl.ConfigurationChanged -= editorControl_ConfigurationChanged;
                     editorControl.EnabledStateChanged -= editorControl_EnabledStateChanged;
                 }
 
@@ -193,13 +192,13 @@ namespace StreamSplitter
         }
 
         /// <summary>
-        /// Raises the <see cref="SaveRecord"/> event.
+        /// Raises the <see cref="ConfigurationChanged"/> event.
         /// </summary>
-        /// <param name="connection"><see cref="ProxyConnection"/> object that has requested a save.</param>
-        protected virtual void OnSaveRecord(ProxyConnection connection)
+        /// <param name="connection"><see cref="ProxyConnection"/> object that has changed.</param>
+        protected virtual void OnConfigurationChanged(ProxyConnection connection)
         {
-            if ((object)SaveRecord != null)
-                SaveRecord(this, new EventArgs<ProxyConnection>(connection));
+            if ((object)ConfigurationChanged != null)
+                ConfigurationChanged(this, new EventArgs<ProxyConnection>(connection));
         }
 
         /// <summary>
@@ -245,7 +244,7 @@ namespace StreamSplitter
                     if ((object)editorControl != null)
                     {
                         editorControl.GotFocus += editorControl_GotFocus;
-                        editorControl.SaveRecord += editorControl_SaveRecord;
+                        editorControl.ConfigurationChanged += editorControl_ConfigurationChanged;
                         editorControl.EnabledStateChanged += editorControl_EnabledStateChanged;
                     }
                 }
@@ -261,12 +260,12 @@ namespace StreamSplitter
                 OnGotFocus(editorControl.ProxyConnection);
         }
 
-        private void editorControl_SaveRecord(object sender, EventArgs e)
+        private void editorControl_ConfigurationChanged(object sender, EventArgs e)
         {
             ProxyConnectionEditor editorControl = sender as ProxyConnectionEditor;
 
             if ((object)editorControl != null)
-                OnSaveRecord(editorControl.ProxyConnection);
+                OnConfigurationChanged(editorControl.ProxyConnection);
         }
 
         private void editorControl_EnabledStateChanged(object sender, EventArgs<bool> e)
@@ -286,19 +285,21 @@ namespace StreamSplitter
         /// <summary>
         /// Loads proxy connections from a previously saved configuration file.
         /// </summary>
-        /// <param name="filename">Configuration file to load.</param>
-        /// <returns>New <see cref="ProxyConnections"/> instance from specified <paramref name="filename"/>.</returns>
-        public static ProxyConnections LoadConfiguration(string filename)
+        /// <param name="fileName">Configuration file to load.</param>
+        /// <returns>New <see cref="ProxyConnections"/> instance from specified <paramref name="fileName"/>.</returns>
+        public static ProxyConnections LoadConfiguration(string fileName)
         {
             ProxyConnections proxyConnections = null;
             FileStream settingsFile = null;
-            filename = FilePath.GetAbsolutePath(filename);
 
-            if (File.Exists(filename))
+            if ((object)fileName == null)
+                fileName = string.Empty;
+
+            if (File.Exists(fileName))
             {
                 try
                 {
-                    settingsFile = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    settingsFile = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
                     SoapFormatter formatter = new SoapFormatter
                     {
@@ -326,15 +327,14 @@ namespace StreamSplitter
         /// Saves proxy connections to a configuration file.
         /// </summary>
         /// <param name="proxyConnections">Existing <see cref="ProxyConnections"/> instance to save.</param>
-        /// <param name="filename">Configuration file name to use when saving.</param>
-        public static void SaveConfiguration(ProxyConnections proxyConnections, string filename)
+        /// <param name="fileName">Configuration file name to use when saving.</param>
+        public static void SaveConfiguration(ProxyConnections proxyConnections, string fileName)
         {
             FileStream settingsFile = null;
-            filename = FilePath.GetAbsolutePath(filename);
 
             try
             {
-                settingsFile = File.Create(filename);
+                settingsFile = File.Create(fileName);
 
                 SoapFormatter formatter = new SoapFormatter
                 {
