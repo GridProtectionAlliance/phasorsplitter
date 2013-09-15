@@ -4,40 +4,39 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.7</ProductVersion>
-    <ProjectGuid>{69bb6c3e-5c48-482b-bdf6-a265a606cc03}</ProjectGuid>
+    <ProjectGuid>c66edab2-8091-4312-a73b-1d2c3d016b9a</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>StreamSplitterSetup</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <SccProjectName>$/phasorsplitter/Main/Source/Applications/StreamSplitterSetup</SccProjectName>
-    <SccProvider>{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}</SccProvider>
-    <SccAuxPath>https://tfs.codeplex.com/tfs/tfs07</SccAuxPath>
-    <SccLocalPath>.</SccLocalPath>
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <OutputPath>..\..\..\Build\Output\$(Configuration)\Applications\StreamSplitter\</OutputPath>
+    <OutputPath>..\..\..\Build\Output\$(Configuration)\Applications\StreamSplitter\Setup\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug</DefineConstants>
+    <SuppressPdbOutput>False</SuppressPdbOutput>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <OutputPath>..\..\..\Build\Output\$(Configuration)\Applications\StreamSplitter\</OutputPath>
+    <OutputPath>..\..\..\Build\Output\$(Configuration)\Applications\StreamSplitter\Setup\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <SuppressPdbOutput>True</SuppressPdbOutput>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DefineConstants>Debug</DefineConstants>
-    <OutputPath>..\..\..\Build\Output\$(Configuration)\Applications\StreamSplitter\</OutputPath>
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <OutputPath>..\..\..\Build\Output\$(Configuration)\Applications\StreamSplitter\</OutputPath>
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="StreamSplitterSetup.wxs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\StreamSplitter\StreamSplitter.csproj">
+    <ProjectReference Include="..\..\Libraries\StreamSplitterLibrary\StreamSplitterLibrary.csproj">
       <Name>StreamSplitterLibrary</Name>
       <Project>{98bca2f9-cc4f-4df2-ac60-040dd106aa6b}</Project>
       <Private>True</Private>
@@ -69,18 +68,20 @@
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
-    <ProjectReference Include="..\StreamSplitter\StreamSplitter.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="INSTALL_LICENSE.rtf" />
-    <Content Include="StreamSplitterSetupBanner.bmp" />
-    <Content Include="StreamSplitterSetupDialog.bmp" />
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="WixUIExtension">
       <HintPath>..\..\Dependencies\WiX\WixUIExtension.dll</HintPath>
       <Name>WixUIExtension</Name>
     </WixExtension>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="StreamSplitterSetup.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="INSTALL_LICENSE.rtf" />
+    <Content Include="StreamSplitterSetupBanner.bmp" />
+    <Content Include="StreamSplitterSetupDialog.bmp" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <!--
