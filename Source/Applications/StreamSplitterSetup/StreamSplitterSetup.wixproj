@@ -37,9 +37,17 @@
     <Compile Include="StreamSplitterSetup.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\StreamSplitter\StreamSplitter.csproj">
+      <Name>StreamSplitterLibrary</Name>
+      <Project>{98bca2f9-cc4f-4df2-ac60-040dd106aa6b}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
     <ProjectReference Include="..\StreamSplitterConsole\StreamSplitterConsole.csproj">
       <Name>StreamSplitterConsole</Name>
-      <Project>{7E475E71-0956-4FB9-81A7-543C3D8A4C21}</Project>
+      <Project>{514c1869-c4fe-4e5c-9578-02fe97b82ad1}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
@@ -55,12 +63,13 @@
     </ProjectReference>
     <ProjectReference Include="..\StreamSplitter\StreamSplitter.csproj">
       <Name>StreamSplitter</Name>
-      <Project>{7E475E71-0956-4FB9-81A7-543C3D8A4C21}</Project>
+      <Project>{7e475e71-0956-4fb9-81a7-543c3d8a4c21}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
+    <ProjectReference Include="..\StreamSplitter\StreamSplitter.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="INSTALL_LICENSE.rtf" />

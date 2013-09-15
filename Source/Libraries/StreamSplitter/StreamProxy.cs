@@ -549,6 +549,9 @@ namespace StreamSplitter
                 finally
                 {
                     m_disposed = true;  // Prevent duplicate dispose.
+
+                    if ((object)Disposed != null)
+                        Disposed(this, EventArgs.Empty);
                 }
             }
         }
@@ -717,7 +720,7 @@ namespace StreamSplitter
         /// </remarks>
         protected virtual void OnProcessException(Exception processException)
         {
-            if (ProcessException != null)
+            if ((object)ProcessException != null)
                 ProcessException(this, new EventArgs<Exception>(processException));
         }
 
