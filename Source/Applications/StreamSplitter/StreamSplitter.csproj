@@ -8,7 +8,7 @@
     <ProjectGuid>{7E475E71-0956-4FB9-81A7-543C3D8A4C21}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>StreamSplitter</RootNamespace>
+    <RootNamespace>StreamSplitterService</RootNamespace>
     <AssemblyName>StreamSplitter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

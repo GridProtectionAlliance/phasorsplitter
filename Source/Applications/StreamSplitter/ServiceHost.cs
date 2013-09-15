@@ -21,25 +21,27 @@
 //
 //******************************************************************************************************
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime;
-using System.ServiceProcess;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using GSF;
 using GSF.Communication;
 using GSF.IO;
 using GSF.ServiceProcess;
 using GSF.Units;
 using Microsoft.Win32;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime;
+using System.ServiceProcess;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using StreamSplitter;
 
-namespace StreamSplitter
+namespace StreamSplitterService
 {
     /// <summary>
     /// Synchrophasor Stream Splitter Service Host
@@ -50,6 +52,7 @@ namespace StreamSplitter
 
         // Constants
         private const string ConfigurationFileName = "ProxyConnections.xml";
+        private const int ConfigurationBackups = 5;
 
         // Fields
         private AutoResetEvent m_configurationLoadComplete;
@@ -183,8 +186,10 @@ namespace StreamSplitter
 
             // Setup custom service commands
             m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("Restart", "Attempts to restart the host service", RestartServiceHandler));
-            m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("ReloadConfig", "Reloads the current configuration", ReloadConfigurationHandler));
             m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("GetStreamProxyStatus", "Gets current status for all stream proxies", GetStreamProxyStatus));
+            m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("ReloadConfig", "Reloads the current configuration", ReloadConfigurationHandler));
+            m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("DownloadConfig", "Provides the current configuration to requester", DownloadConfigurationHandler));
+            m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("UploadConfig", "Deserializes and loads received configuration", UploadConfigurationHandler));
 
             LoadCurrentConfiguration();
         }
@@ -319,12 +324,12 @@ namespace StreamSplitter
             {
                 Ticks startTime = DateTime.UtcNow.Ticks;
                 ProxyConnectionCollection currentConfiguration;
-                string filename = FilePath.GetAbsolutePath(ConfigurationFileName);
+                string configurationFile = FilePath.GetAbsolutePath(ConfigurationFileName);
 
                 // Attempt to load current configuration
-                currentConfiguration = ProxyConnectionCollection.LoadConfiguration(filename);
+                currentConfiguration = ProxyConnectionCollection.LoadConfiguration(configurationFile);
 
-                DisplayStatusMessage("Loaded {0} connections from \"{1}\".", UpdateType.Information, currentConfiguration.Count, filename);
+                DisplayStatusMessage("Loaded {0} connections from \"{1}\".", UpdateType.Information, currentConfiguration.Count, configurationFile);
 
                 ProxyConnection[] newConnections;
                 ProxyConnection[] deletedConnections;
@@ -417,6 +422,54 @@ namespace StreamSplitter
             }
         }
 
+        private void BackupConfiguration()
+        {
+            string configurationFile = FilePath.GetAbsolutePath(ConfigurationFileName);
+
+            try
+            {
+                // Create multiple backup configurations
+                for (int i = ConfigurationBackups; i > 0; i--)
+                {
+                    string origConfigFile = configurationFile + ".backup" + (i == 1 ? "" : (i - 1).ToString());
+
+                    if (File.Exists(origConfigFile))
+                    {
+                        string nextConfigFile = configurationFile + ".backup" + i;
+
+                        if (File.Exists(nextConfigFile))
+                            File.Delete(nextConfigFile);
+
+                        File.Move(origConfigFile, nextConfigFile);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                DisplayStatusMessage("Failed to create extra backup configurations due to exception: {0}", UpdateType.Warning, ex.Message);
+                m_serviceHelper.ErrorLogger.Log(ex);
+            }
+
+            try
+            {
+                // Back up current configuration file, if any
+                if (File.Exists(configurationFile))
+                {
+                    string backupConfigFile = configurationFile + ".backup";
+
+                    if (File.Exists(backupConfigFile))
+                        File.Delete(backupConfigFile);
+
+                    File.Move(configurationFile, backupConfigFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                DisplayStatusMessage("Failed to backup last known cached configuration due to exception: {0}", UpdateType.Warning, ex.Message);
+                m_serviceHelper.ErrorLogger.Log(ex);
+            }
+        }
+
         #endregion
 
         #region [ Service Command Handlers ]
@@ -476,35 +529,6 @@ namespace StreamSplitter
             }
         }
 
-        // Reload the current configuration
-        private void ReloadConfigurationHandler(ClientRequestInfo requestInfo)
-        {
-            if (requestInfo.Request.Arguments.ContainsHelpRequest)
-            {
-                StringBuilder helpMessage = new StringBuilder();
-
-                helpMessage.Append("Reloads the current configuration.");
-                helpMessage.AppendLine();
-                helpMessage.AppendLine();
-                helpMessage.Append("   Usage:");
-                helpMessage.AppendLine();
-                helpMessage.Append("       ReloadConfig [Options]");
-                helpMessage.AppendLine();
-                helpMessage.AppendLine();
-                helpMessage.Append("   Options:");
-                helpMessage.AppendLine();
-                helpMessage.Append("       -?".PadRight(20));
-                helpMessage.Append("Displays this help message");
-
-                DisplayResponseMessage(requestInfo, helpMessage.ToString());
-            }
-            else
-            {
-                LoadCurrentConfiguration();
-                SendResponse(requestInfo, true);
-            }
-        }
-
         private void GetStreamProxyStatus(ClientRequestInfo requestInfo)
         {
             if (requestInfo.Request.Arguments.ContainsHelpRequest)
@@ -536,7 +560,125 @@ namespace StreamSplitter
                     streamProxies = m_streamSplitters.Select(splitter => splitter.StreamProxyStatus).ToArray();
                 }
 
-                SendResponseWithAttachment(requestInfo, true, (object)streamProxies, null);
+                SendResponseWithAttachment(requestInfo, true, streamProxies, null);
+            }
+        }
+
+        // Reload the current configuration
+        private void ReloadConfigurationHandler(ClientRequestInfo requestInfo)
+        {
+            if (requestInfo.Request.Arguments.ContainsHelpRequest)
+            {
+                StringBuilder helpMessage = new StringBuilder();
+
+                helpMessage.Append("Reloads the current configuration.");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Usage:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       ReloadConfig [Options]");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Options:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       -?".PadRight(20));
+                helpMessage.Append("Displays this help message");
+
+                DisplayResponseMessage(requestInfo, helpMessage.ToString());
+            }
+            else
+            {
+                LoadCurrentConfiguration();
+                SendResponse(requestInfo, true);
+            }
+        }
+
+        // Send the current configuration to requester
+        private void DownloadConfigurationHandler(ClientRequestInfo requestInfo)
+        {
+            if (requestInfo.Request.Arguments.ContainsHelpRequest)
+            {
+                StringBuilder helpMessage = new StringBuilder();
+
+                helpMessage.Append("Provides the current configuration to requester.");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Usage:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       DownloadConfig [Options]");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Options:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       -?".PadRight(20));
+                helpMessage.Append("Displays this help message");
+
+                DisplayResponseMessage(requestInfo, helpMessage.ToString());
+            }
+            else
+            {
+                // Send current running configuration back to requester
+                SendResponseWithAttachment(requestInfo, true, ProxyConnectionCollection.SerializeConfiguration(m_currentConfiguration), null);
+            }
+        }
+
+        // Apply the received configuration to as the running configuration
+        private void UploadConfigurationHandler(ClientRequestInfo requestInfo)
+        {
+            if (requestInfo.Request.Arguments.ContainsHelpRequest)
+            {
+                StringBuilder helpMessage = new StringBuilder();
+
+                helpMessage.Append("Deserializes and loads received configuration.");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Usage:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       UploadConfig [Options]");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Options:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       -?".PadRight(20));
+                helpMessage.Append("Displays this help message");
+
+                DisplayResponseMessage(requestInfo, helpMessage.ToString());
+            }
+            else
+            {
+                if (requestInfo.Request.Attachments.Count > 0)
+                {
+                    try
+                    {
+                        // Attempt to deserialize received configuration
+                        ProxyConnectionCollection receivedConfiguration = ProxyConnectionCollection.DeserializeConfiguration(requestInfo.Request.Attachments[0] as byte[]);
+
+                        // Backup existing service configuration
+                        BackupConfiguration();
+
+                        // Save new service configuration
+                        ProxyConnectionCollection.SaveConfiguration(receivedConfiguration, FilePath.GetAbsolutePath(ConfigurationFileName));
+
+                        // Apply changes
+                        LoadCurrentConfiguration();
+
+                        // Send response that upload succeeded
+                        SendResponse(requestInfo, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        string message = string.Format("Failed to apply new configuration due to exception: {0}", ex.Message);
+                        DisplayStatusMessage(message, UpdateType.Warning);
+                        SendResponse(requestInfo, false, message);
+                        m_serviceHelper.ErrorLogger.Log(ex);
+                    }
+                }
+                else
+                {
+                    const string message = "No configuration was uploaded - could not apply new configuration.";
+                    DisplayStatusMessage(message, UpdateType.Warning);
+                    SendResponse(requestInfo, false, message);
+                }
             }
         }
 
@@ -686,7 +828,7 @@ namespace StreamSplitter
         {
             return m_derivedNameCache.GetOrAdd(sender, key =>
             {
-                string name = null;
+                string name;
                 IProvideStatus statusProvider = key as IProvideStatus;
 
                 if ((object)statusProvider != null)

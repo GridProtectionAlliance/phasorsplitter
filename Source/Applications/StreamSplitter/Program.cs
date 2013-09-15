@@ -31,7 +31,7 @@ using System.ServiceProcess;
 using System.Windows.Forms;
 #endif
 
-namespace StreamSplitter
+namespace StreamSplitterService
 {
     static class Program
     {

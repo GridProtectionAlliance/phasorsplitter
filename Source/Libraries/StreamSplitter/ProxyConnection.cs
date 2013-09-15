@@ -31,7 +31,7 @@ using System.Runtime.Serialization;
 namespace StreamSplitter
 {
     /// <summary>
-    /// Represents attributes for a proxy connection.
+    /// Represents the needed attributes for a <see cref="StreamProxy"/> connection.
     /// </summary>
     [Serializable]
     public class ProxyConnection : INotifyPropertyChanged, ISerializable

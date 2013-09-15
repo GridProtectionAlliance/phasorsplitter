@@ -23,7 +23,7 @@
 
 using System.Windows.Forms;
 
-namespace StreamSplitter
+namespace StreamSplitterService
 {
     partial class DebugHost : Form
     {
@@ -56,7 +56,7 @@ namespace StreamSplitter
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DebugHost));
             this.m_labelNotice = new System.Windows.Forms.Label();
-            this.m_serviceHost = new StreamSplitter.ServiceHost(this.components);
+            this.m_serviceHost = new StreamSplitterService.ServiceHost(this.components);
             this.m_notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.m_contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.m_showToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -141,7 +141,7 @@ namespace StreamSplitter
         #endregion
 
         private System.Windows.Forms.Label m_labelNotice;
-        private StreamSplitter.ServiceHost m_serviceHost;
+        private StreamSplitterService.ServiceHost m_serviceHost;
         private System.Windows.Forms.NotifyIcon m_notifyIcon;
         private System.Windows.Forms.ContextMenuStrip m_contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem m_showToolStripMenuItem;

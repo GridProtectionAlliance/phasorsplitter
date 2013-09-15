@@ -36,7 +36,7 @@ using Timer = System.Timers.Timer;
 namespace StreamSplitter
 {
     /// <summary>
-    /// Defines a user control to configure proxy connection settings.
+    /// Defines a user control to configure <see cref="ProxyConnection"/> settings.
     /// </summary>
     public partial class ProxyConnectionEditor : UserControl
     {

@@ -845,13 +845,12 @@ namespace StreamSplitter
                         }
                         break;
                     case DeviceCommand.EnableRealTimeData:
-                        OnStatusMessage("Request for \"EnableRealTimeData\" from \"{0}\" was ignored - splitter is set to automatically start.", connectionID);
-                        break;
                     case DeviceCommand.DisableRealTimeData:
-                        OnStatusMessage("Request for \"DisableRealTimeData\" from \"{0}\" was ignored - splitter may have multiple clients.", connectionID);
+                        // We ignore these commands without message, these commands are normally sent by synchrophasor devices
+                        // but we do not allow stream control in a proxy situation
                         break;
                     default:
-                        OnStatusMessage("Request for \"{0}\" from \"{1}\" was ignored - device command is unsupported.", commandFrame.Command, connectionID);
+                        OnStatusMessage("Request for \"{0}\" from \"{1}\" was ignored - device command is unsupported by stream splitter.", commandFrame.Command, connectionID);
                         break;
                 }
             }
@@ -1015,8 +1014,8 @@ namespace StreamSplitter
 
         private void udpPublishChannel_ReceiveClientDataComplete(object sender, EventArgs<Guid, byte[], int> e)
         {
-            // Queue up derived class device command handling on a different thread since this will
-            // often engage sending data back on the same command channel and we want this async
+            // Queue up device command handling on a different thread since this will often
+            // engage sending data back on the same command channel and we want this async
             // thread to complete gracefully...
             if ((object)m_publishChannel == null)
                 ThreadPool.QueueUserWorkItem(DeviceCommandHandlerProc, e);

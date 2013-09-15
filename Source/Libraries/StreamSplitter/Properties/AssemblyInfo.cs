@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Proxy Connection Library")]
-[assembly: AssemblyDescription("Synchrophasor Stream Splitter Proxy Connection Management Library")]
+[assembly: AssemblyTitle("Stream Splitter Library")]
+[assembly: AssemblyDescription("Synchrophasor Stream Splitter Proxy Management Library")]
 [assembly: AssemblyProduct("Synchrophasor Stream Splitter")]
 [assembly: AssemblyCompany("Grid Protection Alliance")]
 [assembly: AssemblyCopyright("Copyright © GPA, 2013.  All Rights Reserved.")]

@@ -54,7 +54,7 @@ namespace StreamSplitter
     #endregion
 
     /// <summary>
-    /// Represents the current status of a stream proxy.
+    /// Represents the current status of a <see cref="StreamProxy"/>.
     /// </summary>
     [Serializable]
     public class StreamProxyStatus
@@ -127,7 +127,7 @@ namespace StreamSplitter
         /// Gets recent status messages for a stream proxy.
         /// </summary>
         /// <remarks>
-        /// This property is usually accessed post-deserialization in the manager.
+        /// This property is usually accessed post-deserialization in the stream splitter manager.
         /// </remarks>
         public string RecentStatusMessages
         {
@@ -146,7 +146,7 @@ namespace StreamSplitter
         /// </summary>
         /// <param name="statusMessage">New status message to append to current messages.</param>
         /// <remarks>
-        /// This method is usually accessed pre-serialization in the service.
+        /// This method is usually accessed pre-serialization in the service (via <see cref="StreamProxy"/>).
         /// </remarks>
         public void AppendStatusMessage(string statusMessage)
         {
