@@ -701,8 +701,12 @@ namespace StreamSplitter
         {
             try
             {
+                string status = string.Format(formattedStatus, args);
+
+                m_streamProxyStatus.AppendStatusMessage(status);
+
                 if ((object)StatusMessage != null)
-                    StatusMessage(this, new EventArgs<string>(string.Format(formattedStatus, args)));
+                    StatusMessage(this, new EventArgs<string>(status));
             }
             catch (Exception ex)
             {
@@ -720,6 +724,8 @@ namespace StreamSplitter
         /// </remarks>
         protected virtual void OnProcessException(Exception processException)
         {
+            m_streamProxyStatus.AppendStatusMessage("ERROR: " + processException.Message);
+
             if ((object)ProcessException != null)
                 ProcessException(this, new EventArgs<Exception>(processException));
         }

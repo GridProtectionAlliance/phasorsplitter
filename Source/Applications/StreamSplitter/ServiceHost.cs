@@ -39,7 +39,6 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using StreamSplitter;
 
 namespace StreamSplitter
 {
@@ -619,6 +618,7 @@ namespace StreamSplitter
             {
                 // Send current running configuration back to requester
                 SendResponseWithAttachment(requestInfo, true, ProxyConnectionCollection.SerializeConfiguration(m_currentConfiguration), null);
+                DisplayStatusMessage("Running configuration sent to requester.", UpdateType.Information);
             }
         }
 
@@ -664,6 +664,8 @@ namespace StreamSplitter
 
                         // Send response that upload succeeded
                         SendResponse(requestInfo, true);
+
+                        DisplayStatusMessage("Uploaded configuration applied.", UpdateType.Information);
                     }
                     catch (Exception ex)
                     {

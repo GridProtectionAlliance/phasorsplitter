@@ -79,6 +79,7 @@ namespace StreamSplitter
         private ServiceConnection m_serviceConnection;
         private Timer m_refreshProxyStatusTimer;
         private bool m_lastConnectedState;
+        private bool m_configRequested;
         private bool m_loaded;
 
         #endregion
@@ -242,10 +243,7 @@ namespace StreamSplitter
             ConfigurationSaved = true;
 
             // Change form title to include working file name
-            if (string.IsNullOrEmpty(m_configurationFileName))
-                Text = Tag.ToString();
-            else
-                Text = Tag + " - " + FilePath.GetFileName(m_configurationFileName);
+            UpdateFormTitle();
         }
 
         // Load existing configuration
@@ -292,7 +290,7 @@ namespace StreamSplitter
                     ThreadPool.QueueUserWorkItem(PostProxyConnectionsLoad);
 
                 // Change form title to include working file name
-                Text = Tag + " - " + FilePath.GetFileName(m_configurationFileName);
+                UpdateFormTitle();
             }
             catch (Exception ex)
             {
@@ -339,7 +337,7 @@ namespace StreamSplitter
                 ConfigurationSaved = true;
 
                 // Change form title to include working file name
-                Text = Tag + " - " + FilePath.GetFileName(m_configurationFileName);
+                UpdateFormTitle();
 
                 return SaveState.Saved;
             }
@@ -390,9 +388,12 @@ namespace StreamSplitter
         // Unselect all existing controls
         private void UnselectProxyConnectionEditorControls()
         {
-            foreach (ProxyConnectionEditor control in flowLayoutPanelProxyConnections.Controls)
+            if (flowLayoutPanelProxyConnections.Controls.Count > 1)
             {
-                control.Selected = false;
+                foreach (ProxyConnectionEditor control in flowLayoutPanelProxyConnections.Controls)
+                {
+                    control.Selected = false;
+                }
             }
         }
 
@@ -517,6 +518,7 @@ namespace StreamSplitter
             {
                 m_configurationFileName = saveFileDialog.FileName;
                 SaveConfiguration();
+                UpdateFormTitle();
             }
         }
 
@@ -524,8 +526,6 @@ namespace StreamSplitter
         {
             if (SaveConfiguration(true, "Current configuration is not saved. Do you want to save changes to the current configuration before downloading the running service configuration?") != SaveState.Canceled)
             {
-                m_configurationFileName = null;
-
                 if ((object)m_serviceConnection != null)
                     m_serviceConnection.SendCommand("DownloadConfig");
             }
@@ -543,7 +543,7 @@ namespace StreamSplitter
                 return;
             }
 
-            if (SaveConfiguration(true, "Current configuration must be saved before you upload it. Do you want to save changes to the current configuration?") != SaveState.Saved)
+            if (SaveConfiguration(true, "Current configuration must be saved before you upload it. Do you want to save changes to the current configuration?") == SaveState.Saved)
             {
                 if ((object)m_serviceConnection != null && MessageBox.Show(string.Format("Are you sure you want to upload the current local configuration and make it the running service configuration?"), Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     m_serviceConnection.SendCommand("UploadConfig", ProxyConnectionCollection.SerializeConfiguration(m_proxyConnections));
@@ -588,7 +588,7 @@ namespace StreamSplitter
             bool connected = e.Argument;
 
             // Only refresh controls if state has actually changed
-            if (connected != m_lastConnectedState && (object)m_proxyConnections != null)
+            if (connected != m_lastConnectedState)
             {
                 m_lastConnectedState = connected;
 
@@ -602,9 +602,9 @@ namespace StreamSplitter
                 BeginInvoke((Action)(() => toolStripButtonUploadConfig.Enabled = connected));
                 BeginInvoke((Action)(() => toolStripButtonRestartService.Enabled = connected));
 
-                if (!connected)
+                if (!connected && (object)m_proxyConnections != null)
                 {
-                    // Reset all connection indication bubbles to green
+                    // Reset all connection indication bubbles to gray when disconnected
                     lock (m_proxyConnections)
                     {
                         foreach (ProxyConnection proxyConnection in m_proxyConnections)
@@ -615,6 +615,30 @@ namespace StreamSplitter
                                 BeginInvoke((Action)(() => editorControl.ConnectionState = ConnectionState.Disabled));
                         }
                     }
+                }
+
+                // If we are now connected and no configuration is loaded - we download config from the server
+                if (connected)
+                {
+                    if (!m_configRequested && ((object)m_proxyConnections == null || m_proxyConnections.Count == 0))
+                    {
+                        m_configRequested = true;
+
+                        // Kick-off request for configuration download from another thread to let event
+                        // handler the state change on the service connection complete gracefully
+                        ThreadPool.QueueUserWorkItem(state =>
+                        {
+                            if ((object)m_serviceConnection != null)
+                            {
+                                if (MessageBox.Show(string.Format("Connected to service. Would you like to download the current running configuration?"), Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                                    m_serviceConnection.SendCommand("DownloadConfig");
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    m_configRequested = false;
                 }
 
                 BeginInvoke((Action)Refresh);
@@ -663,18 +687,16 @@ namespace StreamSplitter
             List<object> attachments = response.Attachments;
             bool attachmentsExist = ((object)attachments != null && attachments.Count > 1);
 
-            // Handle "GetStreamProxyStatus" response
+            // Handle command responses
             if (string.Compare(sourceCommand, "GetStreamProxyStatus", true) == 0)
             {
                 if (responseSuccess && attachmentsExist)
                     ThreadPool.QueueUserWorkItem(ApplyStreamProxyStatusUpdates, attachments[0] as StreamProxyStatus[]);
             }
-
-            // Handle "DownloadConfig" response
-            if (string.Compare(sourceCommand, "DownloadConfig", true) == 0)
+            else if (string.Compare(sourceCommand, "DownloadConfig", true) == 0)
             {
                 if (responseSuccess && attachmentsExist)
-                    ThreadPool.QueueUserWorkItem(ApplyDownloadedProxyConnections, attachments[0] as ProxyConnectionCollection);
+                    ThreadPool.QueueUserWorkItem(ApplyDownloadedProxyConnections, ProxyConnectionCollection.DeserializeConfiguration(attachments[0] as byte[]));
             }
         }
 
@@ -715,13 +737,51 @@ namespace StreamSplitter
 
         private void ApplyDownloadedProxyConnections(object state)
         {
-            Invoke((Action)(() => ProxyConnections = state as ProxyConnectionCollection));
+            Invoke((Action)(() =>
+            {
+                ProxyConnections = state as ProxyConnectionCollection;
+
+                if ((object)m_proxyConnections != null && m_proxyConnections.Count > 0)
+                {
+                    // Establish an editing user control for each proxy connection
+                    foreach (ProxyConnection connection in m_proxyConnections)
+                    {
+                        // Editing-control creation happens after proxy connection exists and is in the binding list,
+                        // so we depend on the PropertyChanged event to attach to needed control events
+                        AddProxyConnectionEditorControl(connection);
+                    }
+
+                    ConfigurationSaved = false;
+
+                    ThreadPool.QueueUserWorkItem(PostProxyConnectionsLoad);
+                }
+
+                // Mark new configuration as unsaved
+                m_configurationFileName = null;
+                UpdateFormTitle();
+            }));
         }
 
         private void PostProxyConnectionsLoad(object state)
         {
             Invoke((Action)bindingSource.MoveFirst);
-            Invoke((Action)Refresh);
+
+            ProxyConnection proxyConnection = bindingSource.Current as ProxyConnection;
+
+            if ((object)proxyConnection != null)
+                Invoke((Action<ProxyConnectionEditor>)SelectProxyConnectionEditorControl, proxyConnection.ProxyConnectionEditor);
+        }
+
+        private void UpdateFormTitle()
+        {
+            if (InvokeRequired)
+                Invoke((Action)UpdateFormTitle);
+
+            // Change form title to include working file name
+            if (string.IsNullOrEmpty(m_configurationFileName))
+                Text = Tag.ToString();
+            else
+                Text = Tag + " - " + FilePath.GetFileName(m_configurationFileName);
         }
 
         #endregion

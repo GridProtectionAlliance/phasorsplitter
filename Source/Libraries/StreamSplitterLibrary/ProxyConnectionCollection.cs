@@ -348,6 +348,9 @@ namespace StreamSplitter
         /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="buffer"/>.</returns>
         public static ProxyConnectionCollection DeserializeConfiguration(byte[] buffer)
         {
+            if ((object)buffer == null)
+                return null;
+
             using (MemoryStream sourceStream = new MemoryStream(buffer))
             {
                 return DeserializeConfiguration(sourceStream);
