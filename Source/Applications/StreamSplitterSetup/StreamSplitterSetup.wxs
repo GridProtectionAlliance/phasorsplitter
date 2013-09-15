@@ -80,8 +80,8 @@
       </Component>
 
       <!-- Libraries -->
-      <Component Id="ProxyConnection">
-        <File Id="ProxyConnection.dll" Name="$(var.ProxyConnection.TargetFileName)" Source="$(var.ProxyConnection.TargetPath)" />
+      <Component Id="StreamSplitterLibrary">
+        <File Id="StreamSplitter.dll" Name="$(var.StreamSplitterLibrary.TargetFileName)" Source="$(var.StreamSplitterLibrary.TargetPath)" />
       </Component>
       
       <!-- DotNetZip Dependencies -->

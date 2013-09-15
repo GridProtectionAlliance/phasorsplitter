@@ -10,6 +10,10 @@
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+    <SccProjectName>$/phasorsplitter/Main/Source/Applications/StreamSplitterSetup</SccProjectName>
+    <SccProvider>{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}</SccProvider>
+    <SccAuxPath>https://tfs.codeplex.com/tfs/tfs07</SccAuxPath>
+    <SccLocalPath>.</SccLocalPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>..\..\..\Build\Output\$(Configuration)\Applications\StreamSplitter\</OutputPath>
@@ -33,8 +37,8 @@
     <Compile Include="StreamSplitterSetup.wxs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\ProxyConnection\ProxyConnection.csproj">
-      <Name>ProxyConnection</Name>
+    <ProjectReference Include="..\..\Libraries\ProxyConnection\StreamSplitter.csproj">
+      <Name>StreamSplitter</Name>
       <Project>{98bca2f9-cc4f-4df2-ac60-040dd106aa6b}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>

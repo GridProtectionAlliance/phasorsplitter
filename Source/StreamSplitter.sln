@@ -60,11 +60,11 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "StreamSplitterSetup", "Appl
 		{514C1869-C4FE-4E5C-9578-02FE97B82AD1} = {514C1869-C4FE-4E5C-9578-02FE97B82AD1}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyConnection", "Libraries\ProxyConnection\ProxyConnection.csproj", "{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamSplitter", "Libraries\StreamSplitter\StreamSplitter.csproj", "{98BCA2F9-CC4F-4DF2-AC60-040DD106AA6B}"
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
+		SccNumberOfProjects = 5
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs07
 		SccLocalPath0 = .
@@ -80,14 +80,10 @@ Global
 		SccProjectTopLevelParentUniqueName3 = StreamSplitter.sln
 		SccProjectName3 = Applications/StreamSplitterManager
 		SccLocalPath3 = Applications\\StreamSplitterManager
-		SccProjectUniqueName4 = Libraries\\ProxyConnection\\ProxyConnection.csproj
+		SccProjectUniqueName4 = Applications\\StreamSplitterSetup\\StreamSplitterSetup.wixproj
 		SccProjectTopLevelParentUniqueName4 = StreamSplitter.sln
-		SccProjectName4 = Libraries/ProxyConnection
-		SccLocalPath4 = Libraries\\ProxyConnection
-		SccProjectUniqueName5 = Applications\\StreamSplitterSetup\\StreamSplitterSetup.wixproj
-		SccProjectTopLevelParentUniqueName5 = StreamSplitter.sln
-		SccProjectName5 = Applications/StreamSplitterSetup
-		SccLocalPath5 = Applications\\StreamSplitterSetup
+		SccProjectName4 = Applications/StreamSplitterSetup
+		SccLocalPath4 = Applications\\StreamSplitterSetup
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -54,7 +54,7 @@ namespace StreamSplitter
         // Fields
         private AutoResetEvent m_configurationLoadComplete;
         private object m_queuedConfigurationLoadPending;
-        private volatile ProxyConnections m_currentConfiguration;
+        private volatile ProxyConnectionCollection m_currentConfiguration;
         private List<StreamProxy> m_streamSplitters;
         private readonly ConcurrentDictionary<object, string> m_derivedNameCache;
 
@@ -318,11 +318,11 @@ namespace StreamSplitter
             try
             {
                 Ticks startTime = DateTime.UtcNow.Ticks;
-                ProxyConnections currentConfiguration;
+                ProxyConnectionCollection currentConfiguration;
                 string filename = FilePath.GetAbsolutePath(ConfigurationFileName);
 
                 // Attempt to load current configuration
-                currentConfiguration = ProxyConnections.LoadConfiguration(filename);
+                currentConfiguration = ProxyConnectionCollection.LoadConfiguration(filename);
 
                 DisplayStatusMessage("Loaded {0} connections from \"{1}\".", UpdateType.Information, currentConfiguration.Count, filename);
 

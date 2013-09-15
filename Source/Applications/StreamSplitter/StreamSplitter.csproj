@@ -96,7 +96,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StreamProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DebugHost.resx">
@@ -113,9 +112,9 @@
     <Content Include="StreamSplitter.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\ProxyConnection\ProxyConnection.csproj">
+    <ProjectReference Include="..\..\Libraries\ProxyConnection\StreamSplitter.csproj">
       <Project>{98bca2f9-cc4f-4df2-ac60-040dd106aa6b}</Project>
-      <Name>ProxyConnection</Name>
+      <Name>StreamSplitter %28Libraries\StreamSplitter%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
