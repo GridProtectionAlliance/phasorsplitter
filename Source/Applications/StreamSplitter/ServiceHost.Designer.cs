@@ -21,7 +21,7 @@
 //
 //******************************************************************************************************
 
-namespace StreamSplitterService
+namespace StreamSplitter
 {
     partial class ServiceHost
     {

@@ -8,7 +8,7 @@
     <ProjectGuid>{7E475E71-0956-4FB9-81A7-543C3D8A4C21}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>StreamSplitterService</RootNamespace>
+    <RootNamespace>StreamSplitter</RootNamespace>
     <AssemblyName>StreamSplitter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -123,9 +123,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\StreamSplitter\StreamSplitter.csproj">
+    <ProjectReference Include="..\..\Libraries\StreamSplitterLibrary\StreamSplitterLibrary.csproj">
       <Project>{98bca2f9-cc4f-4df2-ac60-040dd106aa6b}</Project>
-      <Name>StreamSplitter %28Libraries\StreamSplitter%29</Name>
+      <Name>StreamSplitterLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

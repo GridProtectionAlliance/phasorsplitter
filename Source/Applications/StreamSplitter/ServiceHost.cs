@@ -41,7 +41,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using StreamSplitter;
 
-namespace StreamSplitterService
+namespace StreamSplitter
 {
     /// <summary>
     /// Synchrophasor Stream Splitter Service Host

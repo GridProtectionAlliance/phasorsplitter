@@ -29,7 +29,7 @@ using System;
 using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace StreamSplitterService
+namespace StreamSplitter
 {
     /// <summary>
     /// Windows form application used to host the time-series framework service.
