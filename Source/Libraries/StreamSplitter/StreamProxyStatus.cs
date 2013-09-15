@@ -67,7 +67,7 @@ namespace StreamSplitter
         /// Maximum size of status string to be maintained.
         /// </summary>
         /// <remarks>
-        /// Value should be less than or equal to ProxyConnectionEditor.textBoxConnectionStatus.MaxLength.
+        /// Value should not exceed TextBox.MaxLength (i.e., 32767).
         /// </remarks>
         public const int MaximumStatusSize = 1024;
 
@@ -75,6 +75,9 @@ namespace StreamSplitter
         private ConnectionState m_connectionState;
         private string m_recentStatusMessages;
         private readonly Guid m_id;
+
+        [NonSerialized]
+        private readonly object m_updateLock;
 
         #endregion
 
@@ -87,6 +90,7 @@ namespace StreamSplitter
         public StreamProxyStatus(Guid id)
         {
             m_id = id;
+            m_updateLock = new object();
         }
 
         #endregion
@@ -122,6 +126,9 @@ namespace StreamSplitter
         /// <summary>
         /// Gets recent status messages for a stream proxy.
         /// </summary>
+        /// <remarks>
+        /// This property is usually accessed post-deserialization in the manager.
+        /// </remarks>
         public string RecentStatusMessages
         {
             get
@@ -138,22 +145,30 @@ namespace StreamSplitter
         /// Append a new status message for the stream proxy.
         /// </summary>
         /// <param name="statusMessage">New status message to append to current messages.</param>
+        /// <remarks>
+        /// This method is usually accessed pre-serialization in the service.
+        /// </remarks>
         public void AppendStatusMessage(string statusMessage)
         {
             if (string.IsNullOrWhiteSpace(statusMessage))
                 return;
 
-            if (string.IsNullOrEmpty(m_recentStatusMessages))
+            lock (m_updateLock)
             {
-                m_recentStatusMessages = statusMessage;
-                return;
+                if (string.IsNullOrEmpty(m_recentStatusMessages))
+                {
+                    m_recentStatusMessages = statusMessage;
+                    return;
+                }
+
+                string updatedStatusMessages = m_recentStatusMessages + Environment.NewLine + statusMessage;
+
+                // Truncate from the left to maintain maximum status size
+                if (updatedStatusMessages.Length > MaximumStatusSize)
+                    updatedStatusMessages = updatedStatusMessages.Substring(updatedStatusMessages.Length - MaximumStatusSize);
+
+                m_recentStatusMessages = updatedStatusMessages;
             }
-
-            m_recentStatusMessages += Environment.NewLine + statusMessage;
-
-            // Truncate from the left to maintain maximum status size
-            if (m_recentStatusMessages.Length > MaximumStatusSize)
-                m_recentStatusMessages = m_recentStatusMessages.Substring(m_recentStatusMessages.Length - MaximumStatusSize);
         }
 
         #endregion

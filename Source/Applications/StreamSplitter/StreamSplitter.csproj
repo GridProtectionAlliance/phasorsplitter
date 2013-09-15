@@ -112,12 +112,6 @@
     <Content Include="StreamSplitter.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\ProxyConnection\StreamSplitter.csproj">
-      <Project>{98bca2f9-cc4f-4df2-ac60-040dd106aa6b}</Project>
-      <Name>StreamSplitter %28Libraries\StreamSplitter%29</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>

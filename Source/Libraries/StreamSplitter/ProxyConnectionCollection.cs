@@ -42,7 +42,7 @@ namespace StreamSplitter
     /// makes the class suitable for use in non-UI based applications, e.g., a service host.
     /// </remarks>
     [Serializable]
-    public class ProxyConnections : BindingList<ProxyConnection>, ISerializable
+    public class ProxyConnectionCollection : BindingList<ProxyConnection>, ISerializable
     {
         #region [ Members ]
 
@@ -87,18 +87,18 @@ namespace StreamSplitter
         #region [ Constructors ]
 
         /// <summary>
-        /// Creates a new <see cref="ProxyConnections"/>.
+        /// Creates a new <see cref="ProxyConnectionCollection"/>.
         /// </summary>
-        public ProxyConnections()
+        public ProxyConnectionCollection()
         {
         }
 
         /// <summary>
-        /// Creates a new <see cref="ProxyConnections"/> from serialization parameters.
+        /// Creates a new <see cref="ProxyConnectionCollection"/> from serialization parameters.
         /// </summary>
         /// <param name="info">The <see cref="SerializationInfo"/> with populated with data.</param>
         /// <param name="context">The source <see cref="StreamingContext"/> for this deserialization.</param>
-        protected ProxyConnections(SerializationInfo info, StreamingContext context)
+        protected ProxyConnectionCollection(SerializationInfo info, StreamingContext context)
         {
             // Deserialize proxy connection collection
             for (int x = 0; x < info.GetInt32("count"); x++)
@@ -283,78 +283,115 @@ namespace StreamSplitter
         // Static Methods
 
         /// <summary>
-        /// Loads proxy connections from a previously saved configuration file.
+        /// Serializes proxy connections to a stream.
         /// </summary>
-        /// <param name="fileName">Configuration file to load.</param>
-        /// <returns>New <see cref="ProxyConnections"/> instance from specified <paramref name="fileName"/>.</returns>
-        public static ProxyConnections LoadConfiguration(string fileName)
+        /// <param name="proxyConnections">Existing <see cref="ProxyConnectionCollection"/> instance to save.</param>
+        /// <param name="destinationStream">Destination stream.</param>
+        public static void SerializeConfiguration(ProxyConnectionCollection proxyConnections, Stream destinationStream)
         {
-            ProxyConnections proxyConnections = null;
-            FileStream settingsFile = null;
-
-            if ((object)fileName == null)
-                fileName = string.Empty;
-
-            if (File.Exists(fileName))
+            SoapFormatter formatter = new SoapFormatter
             {
-                try
-                {
-                    settingsFile = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                AssemblyFormat = FormatterAssemblyStyle.Simple,
+                TypeFormat = FormatterTypeStyle.TypesWhenNeeded
+            };
 
-                    SoapFormatter formatter = new SoapFormatter
-                    {
-                        AssemblyFormat = FormatterAssemblyStyle.Simple,
-                        TypeFormat = FormatterTypeStyle.TypesWhenNeeded
-                    };
-
-                    proxyConnections = formatter.Deserialize(settingsFile) as ProxyConnections;
-                }
-                finally
-                {
-                    if ((object)settingsFile != null)
-                        settingsFile.Close();
-                }
-            }
-
-            // Create an empty proxy connection list if none exists
-            if ((object)proxyConnections == null)
-                proxyConnections = new ProxyConnections();
-
-            return proxyConnections;
+            formatter.Serialize(destinationStream, proxyConnections);
         }
 
         /// <summary>
-        /// Saves proxy connections to a configuration file.
+        /// Deserializes proxy connections from a stream.
         /// </summary>
-        /// <param name="proxyConnections">Existing <see cref="ProxyConnections"/> instance to save.</param>
-        /// <param name="fileName">Configuration file name to use when saving.</param>
-        public static void SaveConfiguration(ProxyConnections proxyConnections, string fileName)
+        /// <param name="sourceStream">Source stream.</param>
+        /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="sourceStream"/>.</returns>
+        public static ProxyConnectionCollection DeserializeConfiguration(Stream sourceStream)
         {
-            FileStream settingsFile = null;
+            ProxyConnectionCollection proxyConnections;
 
-            try
+            SoapFormatter formatter = new SoapFormatter
             {
-                settingsFile = File.Create(fileName);
+                AssemblyFormat = FormatterAssemblyStyle.Simple,
+                TypeFormat = FormatterTypeStyle.TypesWhenNeeded
+            };
 
-                SoapFormatter formatter = new SoapFormatter
-                {
-                    AssemblyFormat = FormatterAssemblyStyle.Simple,
-                    TypeFormat = FormatterTypeStyle.TypesWhenNeeded
-                };
+            proxyConnections = formatter.Deserialize(sourceStream) as ProxyConnectionCollection;
 
-                formatter.Serialize(settingsFile, proxyConnections);
-
+            if ((object)proxyConnections != null)
+            {
                 // Parse updated connection strings in proxy connections
                 foreach (ProxyConnection proxyConnection in proxyConnections)
                 {
                     proxyConnection.ParseConnectionString(proxyConnection.ConnectionString);
                 }
             }
-            finally
+
+            return proxyConnections;
+        }
+
+        /// <summary>
+        /// Serializes proxy connections to a byte-array.
+        /// </summary>
+        /// <param name="proxyConnections">Existing <see cref="ProxyConnectionCollection"/> instance to save.</param>
+        /// <returns>Buffer of serializes proxy connections.</returns>
+        public static byte[] SerializeConfiguration(ProxyConnectionCollection proxyConnections)
+        {
+            using (MemoryStream destinationStream = new MemoryStream())
             {
-                if ((object)settingsFile != null)
-                    settingsFile.Close();
+                SerializeConfiguration(proxyConnections, destinationStream);
+                return destinationStream.ToArray();
             }
+        }
+
+        /// <summary>
+        /// Deserializes proxy connections from a byte-array.
+        /// </summary>
+        /// <param name="buffer">Byte-array of serialized proxy connections.</param>
+        /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="buffer"/>.</returns>
+        public static ProxyConnectionCollection DeserializeConfiguration(byte[] buffer)
+        {
+            using (MemoryStream sourceStream = new MemoryStream(buffer))
+            {
+                return DeserializeConfiguration(sourceStream);
+            }
+        }
+
+        /// <summary>
+        /// Saves proxy connections to a configuration file.
+        /// </summary>
+        /// <param name="proxyConnections">Existing <see cref="ProxyConnectionCollection"/> instance to save.</param>
+        /// <param name="fileName">Configuration file name to use when saving.</param>
+        public static void SaveConfiguration(ProxyConnectionCollection proxyConnections, string fileName)
+        {
+            using (FileStream settingsFile = File.Create(fileName))
+            {
+                SerializeConfiguration(proxyConnections, settingsFile);
+            }
+        }
+
+        /// <summary>
+        /// Loads proxy connections from a previously saved configuration file.
+        /// </summary>
+        /// <param name="fileName">Configuration file to load.</param>
+        /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="fileName"/>.</returns>
+        public static ProxyConnectionCollection LoadConfiguration(string fileName)
+        {
+            ProxyConnectionCollection proxyConnections = null;
+
+            if ((object)fileName == null)
+                fileName = string.Empty;
+
+            if (File.Exists(fileName))
+            {
+                using (FileStream settingsFile = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    proxyConnections = DeserializeConfiguration(settingsFile);
+                }
+            }
+
+            // Create an empty proxy connection list if none exists
+            if ((object)proxyConnections == null)
+                proxyConnections = new ProxyConnectionCollection();
+
+            return proxyConnections;
         }
 
         #endregion

@@ -229,13 +229,22 @@ namespace StreamSplitter
         /// Sends a command request to the service.
         /// </summary>
         /// <param name="command">Command to send.</param>
-        public void SendCommand(string command)
+        /// <param name="attachments">Optional attachments to send with command.</param>
+        public void SendCommand(string command, params object[] attachments)
         {
             if ((object)m_clientHelper == null || (object)m_remotingClient == null)
                 throw new NullReferenceException("Client helper is not established - cannot send service command.");
 
             if (m_remotingClient.CurrentState == ClientState.Connected)
-                m_clientHelper.SendRequest(command);
+            {
+                ClientRequest request = new ClientRequest(command);
+
+                // Add any attachments to the client request
+                if ((object)attachments != null && attachments.Length > 0)
+                    request.Attachments.AddRange(attachments);
+
+                m_clientHelper.SendRequest(request);
+            }
         }
 
         /// <summary>
