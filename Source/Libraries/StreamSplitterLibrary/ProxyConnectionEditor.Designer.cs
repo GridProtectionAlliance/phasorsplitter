@@ -87,6 +87,7 @@ namespace StreamSplitter
             this.tabPageUdp = new System.Windows.Forms.TabPage();
             this.labelUdpListeningPort = new System.Windows.Forms.Label();
             this.groupBoxProxyDestinations = new System.Windows.Forms.GroupBox();
+            this.buttonApply = new System.Windows.Forms.Button();
             this.pictureBoxGreen = new System.Windows.Forms.PictureBox();
             this.pictureBoxRed = new System.Windows.Forms.PictureBox();
             this.pictureBoxYellow = new System.Windows.Forms.PictureBox();
@@ -352,6 +353,7 @@ namespace StreamSplitter
             // 
             // groupBoxProxyDestinations
             // 
+            this.groupBoxProxyDestinations.Controls.Add(this.buttonApply);
             this.groupBoxProxyDestinations.Controls.Add(this.pictureBoxGreen);
             this.groupBoxProxyDestinations.Controls.Add(this.pictureBoxRed);
             this.groupBoxProxyDestinations.Controls.Add(this.pictureBoxYellow);
@@ -368,6 +370,18 @@ namespace StreamSplitter
             this.groupBoxProxyDestinations.TabIndex = 2;
             this.groupBoxProxyDestinations.TabStop = false;
             this.groupBoxProxyDestinations.Text = "Proxy Destination(s)";
+            // 
+            // buttonApply
+            // 
+            this.buttonApply.Enabled = false;
+            this.buttonApply.Location = new System.Drawing.Point(86, 181);
+            this.buttonApply.Name = "buttonApply";
+            this.buttonApply.Size = new System.Drawing.Size(75, 23);
+            this.buttonApply.TabIndex = 3;
+            this.buttonApply.Text = "Apply";
+            this.toolTip.SetToolTip(this.buttonApply, "Apply changes for this proxy connection...");
+            this.buttonApply.UseVisualStyleBackColor = true;
+            this.buttonApply.Click += new System.EventHandler(this.buttonApply_Click);
             // 
             // pictureBoxGreen
             // 
@@ -423,7 +437,7 @@ namespace StreamSplitter
             // checkBoxEnabled
             // 
             this.checkBoxEnabled.AutoSize = true;
-            this.checkBoxEnabled.Location = new System.Drawing.Point(97, 186);
+            this.checkBoxEnabled.Location = new System.Drawing.Point(7, 183);
             this.checkBoxEnabled.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBoxEnabled.Name = "checkBoxEnabled";
             this.checkBoxEnabled.Size = new System.Drawing.Size(68, 17);
@@ -713,5 +727,10 @@ namespace StreamSplitter
         private System.Windows.Forms.TextBox textBoxName;
         private StreamSplitter.TransparentPanel transparentPanel;
         private System.Windows.Forms.ToolTip toolTip;
+
+        /// <summary>
+        /// Button control used to apply changes to service.
+        /// </summary>
+        public System.Windows.Forms.Button buttonApply;
     }
 }

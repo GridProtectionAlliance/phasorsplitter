@@ -25,6 +25,7 @@ using GSF;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Soap;
@@ -63,6 +64,14 @@ namespace StreamSplitter
         /// This event will only be raised if the proxy connection is associated with an editor control.
         /// </remarks>
         public event EventHandler<EventArgs<ProxyConnection>> ConfigurationChanged;
+
+        /// <summary>
+        /// Sends notification that the <see cref="ProxyConnection"/> has requested that changes should be applied.
+        /// </summary>
+        /// <remarks>
+        /// This event will only be raised if the proxy connection is associated with an editor control.
+        /// </remarks>
+        public event EventHandler<EventArgs<ProxyConnection>> ApplyChanges;
 
         /// <summary>
         /// Sends notification that the <see cref="ProxyConnection"/> enabled state has changed.
@@ -109,6 +118,41 @@ namespace StreamSplitter
 
         #endregion
 
+        #region [ Properties ]
+
+        /// <summary>
+        /// Gets or sets <see cref="ProxyConnection"/> based on <paramref name="id"/> index.
+        /// </summary>
+        /// <param name="id">ID of <see cref="ProxyConnection"/> to get or set.</param>
+        /// <returns>The <see cref="ProxyConnection"/> based on <paramref name="id"/> index.</returns>
+        public ProxyConnection this[Guid id]
+        {
+            get
+            {
+                return this.FirstOrDefault(connection => connection.ID == id);
+            }
+            set
+            {
+                ProxyConnection connection = this[id];
+
+                if ((object)connection == null)
+                {
+                    Add(value);
+                }
+                else
+                {
+                    int index = IndexOf(connection);
+
+                    if (index > -1)
+                        this[index] = value;
+                    else
+                        Add(value);
+                }
+            }
+        }
+
+        #endregion
+
         #region [ Methods ]
 
         /// <summary>
@@ -144,6 +188,7 @@ namespace StreamSplitter
             {
                 editorControl.GotFocus += editorControl_GotFocus;
                 editorControl.ConfigurationChanged += editorControl_ConfigurationChanged;
+                editorControl.ApplyChanges += editorControl_ApplyChanges;
                 editorControl.EnabledStateChanged += editorControl_EnabledStateChanged;
             }
 
@@ -170,6 +215,7 @@ namespace StreamSplitter
                 {
                     editorControl.GotFocus -= editorControl_GotFocus;
                     editorControl.ConfigurationChanged -= editorControl_ConfigurationChanged;
+                    editorControl.ApplyChanges -= editorControl_ApplyChanges;
                     editorControl.EnabledStateChanged -= editorControl_EnabledStateChanged;
                 }
 
@@ -199,6 +245,16 @@ namespace StreamSplitter
         {
             if ((object)ConfigurationChanged != null)
                 ConfigurationChanged(this, new EventArgs<ProxyConnection>(connection));
+        }
+
+        /// <summary>
+        /// Raises the <see cref="ApplyChanges"/> event.
+        /// </summary>
+        /// <param name="connection"><see cref="ProxyConnection"/> object that has requested that changes be applied.</param>
+        protected virtual void OnApplyChanges(ProxyConnection connection)
+        {
+            if ((object)ApplyChanges != null)
+                ApplyChanges(this, new EventArgs<ProxyConnection>(connection));
         }
 
         /// <summary>
@@ -245,6 +301,7 @@ namespace StreamSplitter
                     {
                         editorControl.GotFocus += editorControl_GotFocus;
                         editorControl.ConfigurationChanged += editorControl_ConfigurationChanged;
+                        editorControl.ApplyChanges += editorControl_ApplyChanges;
                         editorControl.EnabledStateChanged += editorControl_EnabledStateChanged;
                     }
                 }
@@ -266,6 +323,14 @@ namespace StreamSplitter
 
             if ((object)editorControl != null)
                 OnConfigurationChanged(editorControl.ProxyConnection);
+        }
+
+        private void editorControl_ApplyChanges(object sender, EventArgs e)
+        {
+            ProxyConnectionEditor editorControl = sender as ProxyConnectionEditor;
+
+            if ((object)editorControl != null)
+                OnApplyChanges(editorControl.ProxyConnection);
         }
 
         private void editorControl_EnabledStateChanged(object sender, EventArgs<bool> e)

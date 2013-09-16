@@ -99,12 +99,12 @@ namespace StreamSplitter
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelState = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelVersion = new System.Windows.Forms.ToolStripStatusLabel();
             this.flowLayoutPanelProxyConnections = new System.Windows.Forms.FlowLayoutPanel();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.toolTipEx = new StreamSplitter.ToolTipEx(this.components);
-            this.toolStripStatusLabelVersion = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator)).BeginInit();
             this.bindingNavigator.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).BeginInit();
@@ -399,9 +399,8 @@ namespace StreamSplitter
             this.toolStripStatusLabelStatus.Name = "toolStripStatusLabelStatus";
             this.toolStripStatusLabelStatus.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripStatusLabelStatus.Padding = new System.Windows.Forms.Padding(0, 0, 5, 0);
-            this.toolStripStatusLabelStatus.Size = new System.Drawing.Size(545, 19);
+            this.toolStripStatusLabelStatus.Size = new System.Drawing.Size(514, 19);
             this.toolStripStatusLabelStatus.Spring = true;
-            this.toolStripStatusLabelStatus.Text = "...";
             this.toolStripStatusLabelStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // toolStripStatusLabelState
@@ -412,6 +411,12 @@ namespace StreamSplitter
             this.toolStripStatusLabelState.Name = "toolStripStatusLabelState";
             this.toolStripStatusLabelState.Size = new System.Drawing.Size(165, 19);
             this.toolStripStatusLabelState.Text = "Disconnected from Service";
+            // 
+            // toolStripStatusLabelVersion
+            // 
+            this.toolStripStatusLabelVersion.Name = "toolStripStatusLabelVersion";
+            this.toolStripStatusLabelVersion.Size = new System.Drawing.Size(31, 19);
+            this.toolStripStatusLabelVersion.Text = "0.0.0";
             // 
             // flowLayoutPanelProxyConnections
             // 
@@ -455,12 +460,6 @@ namespace StreamSplitter
             this.toolTipEx.OwnerDraw = true;
             this.toolTipEx.ReshowDelay = 2;
             this.toolTipEx.ShowAlways = true;
-            // 
-            // toolStripStatusLabelVersion
-            // 
-            this.toolStripStatusLabelVersion.Name = "toolStripStatusLabelVersion";
-            this.toolStripStatusLabelVersion.Size = new System.Drawing.Size(31, 19);
-            this.toolStripStatusLabelVersion.Text = "0.0.0";
             // 
             // StreamSplitterManager
             // 

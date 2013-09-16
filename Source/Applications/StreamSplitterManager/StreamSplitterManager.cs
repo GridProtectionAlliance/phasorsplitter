@@ -70,7 +70,7 @@ namespace StreamSplitter
         #region [ Members ]
 
         // Constants
-        private const int MaximumToolTipSize = 2048;
+        private const int MaximumToolTipSize = 1500;
 
         // Fields
         private string m_configurationFileName;
@@ -139,6 +139,7 @@ namespace StreamSplitter
                     // Detach from events on existing proxy connection collection
                     m_proxyConnections.GotFocus -= m_proxyConnections_GotFocus;
                     m_proxyConnections.EnabledStateChanged -= m_proxyConnections_EnabledStateChanged;
+                    m_proxyConnections.ApplyChanges -= m_proxyConnections_ApplyChanges;
                     m_proxyConnections.ConfigurationChanged -= m_proxyConnections_ConfigurationChanged;
                     m_proxyConnections.RemovingItem -= m_proxyConnections_RemovingItem;
 
@@ -157,6 +158,7 @@ namespace StreamSplitter
                     // Attach to events on new proxy connection collection
                     m_proxyConnections.GotFocus += m_proxyConnections_GotFocus;
                     m_proxyConnections.EnabledStateChanged += m_proxyConnections_EnabledStateChanged;
+                    m_proxyConnections.ApplyChanges += m_proxyConnections_ApplyChanges;
                     m_proxyConnections.ConfigurationChanged += m_proxyConnections_ConfigurationChanged;
                     m_proxyConnections.RemovingItem += m_proxyConnections_RemovingItem;
 
@@ -419,13 +421,13 @@ namespace StreamSplitter
 
             string currentToolTip = Invoke((Func<string>)(() => toolTipEx.GetToolTip(statusStrip))) as string;
 
-            if (currentToolTip == "...")
+            if (string.IsNullOrWhiteSpace(currentToolTip))
             {
-                Invoke((Action)(() => toolTipEx.SetToolTip(statusStrip, status)));
+                Invoke((Action)(() => toolTipEx.SetToolTip(statusStrip, ToolTipEx.WordWrapStatus(status))));
                 return;
             }
 
-            currentToolTip += status;
+            currentToolTip += ToolTipEx.WordWrapStatus(status);
 
             // Truncate from the left to maintain maximum tool-tip size
             if (currentToolTip.Length > MaximumToolTipSize)
@@ -472,9 +474,16 @@ namespace StreamSplitter
             ConfigurationSaved = false;
         }
 
+        private void m_proxyConnections_ApplyChanges(object sender, EventArgs<ProxyConnection> e)
+        {
+            if ((object)m_serviceConnection != null && (object)e != null && (object)e.Argument != null)
+                m_serviceConnection.SendCommand("UploadConnection", e.Argument);
+        }
+
         private void m_proxyConnections_EnabledStateChanged(object sender, EventArgs<ProxyConnection, bool> e)
         {
-            // TODO: Decide what to do here...
+            if ((object)m_serviceConnection != null && (object)e != null && (object)e.Argument1 != null)
+                m_serviceConnection.SendCommand("UploadConnection", e.Argument1);
         }
 
         private void m_proxyConnections_RemovingItem(object sender, EventArgs<ProxyConnection, bool> e)
@@ -518,7 +527,6 @@ namespace StreamSplitter
             {
                 m_configurationFileName = saveFileDialog.FileName;
                 SaveConfiguration();
-                UpdateFormTitle();
             }
         }
 
@@ -537,13 +545,19 @@ namespace StreamSplitter
 
         private void toolStripButtonUploadConfig_Click(object sender, EventArgs e)
         {
+            // Null proxy connections is not valid, however, a count of zero might be
             if ((object)m_proxyConnections == null)
             {
                 MessageBox.Show("Cannot upload configuration, no proxy connections are currently defined.", Tag.ToNonNullString(Text), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            if (SaveConfiguration(true, "Current configuration must be saved before you upload it. Do you want to save changes to the current configuration?") == SaveState.Saved)
+            if (m_proxyConnections.Count == 0)
+            {
+                if ((object)m_serviceConnection != null && MessageBox.Show(string.Format("WARNING: You are about to upload an empty configuration as the running service configuration.\r\n\r\nAre you sure you want to upload an empty configuration and clear the running service configuration?"), Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    m_serviceConnection.SendCommand("UploadConfig", ProxyConnectionCollection.SerializeConfiguration(m_proxyConnections));
+            }
+            else if (SaveConfiguration(true, "Current configuration must be saved before you upload it. Do you want to save changes to the current configuration?") == SaveState.Saved)
             {
                 if ((object)m_serviceConnection != null && MessageBox.Show(string.Format("Are you sure you want to upload the current local configuration and make it the running service configuration?"), Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     m_serviceConnection.SendCommand("UploadConfig", ProxyConnectionCollection.SerializeConfiguration(m_proxyConnections));
@@ -602,9 +616,9 @@ namespace StreamSplitter
                 BeginInvoke((Action)(() => toolStripButtonUploadConfig.Enabled = connected));
                 BeginInvoke((Action)(() => toolStripButtonRestartService.Enabled = connected));
 
-                if (!connected && (object)m_proxyConnections != null)
+                // Apply changes to proxy connection editors based on service connectivity state
+                if ((object)m_proxyConnections != null)
                 {
-                    // Reset all connection indication bubbles to gray when disconnected
                     lock (m_proxyConnections)
                     {
                         foreach (ProxyConnection proxyConnection in m_proxyConnections)
@@ -612,7 +626,14 @@ namespace StreamSplitter
                             ProxyConnectionEditor editorControl = proxyConnection.ProxyConnectionEditor;
 
                             if ((object)editorControl != null)
-                                BeginInvoke((Action)(() => editorControl.ConnectionState = ConnectionState.Disabled));
+                            {
+                                // Reset all connection indication bubbles to gray when disconnected
+                                if (!connected)
+                                    BeginInvoke((Action)(() => editorControl.ConnectionState = ConnectionState.Disabled));
+
+                                // The apply button should only be enabled when service is connected
+                                BeginInvoke((Action)(() => editorControl.buttonApply.Enabled = connected));
+                            }
                         }
                     }
                 }
@@ -770,6 +791,8 @@ namespace StreamSplitter
 
             if ((object)proxyConnection != null)
                 Invoke((Action<ProxyConnectionEditor>)SelectProxyConnectionEditorControl, proxyConnection.ProxyConnectionEditor);
+
+            Invoke((Action)Activate);
         }
 
         private void UpdateFormTitle()

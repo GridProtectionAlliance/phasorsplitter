@@ -21,6 +21,8 @@
 //
 //******************************************************************************************************
 
+using GSF;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -105,6 +107,33 @@ namespace StreamSplitter
                 newArgs.DrawBorder();
                 newArgs.DrawText(TextFormatFlags.TextBoxControl);
             }
+        }
+
+        #endregion
+
+        #region [ Static ]
+
+        // Static Methods
+
+        /// <summary>
+        /// Word wrap status lines at 80 characters.
+        /// </summary>
+        /// <param name="status">Status to be wrapped.</param>
+        /// <returns>Wrapped status.</returns>
+        public static string WordWrapStatus(string status)
+        {
+            if (string.IsNullOrEmpty(status))
+                return string.Empty;
+
+            string[] lines = status.Split(new[] { "\r\n" }, StringSplitOptions.None);
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string[] segments = lines[i].GetSegments(80);
+                lines[i] = string.Join("\r\n", segments);
+            }
+
+            return string.Join("\r\n", lines);
         }
 
         #endregion

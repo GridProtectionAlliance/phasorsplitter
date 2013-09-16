@@ -54,6 +54,11 @@ namespace StreamSplitter
         public event EventHandler ConfigurationChanged;
 
         /// <summary>
+        /// Sends notification that user wants to apply changes.
+        /// </summary>
+        public event EventHandler ApplyChanges;
+
+        /// <summary>
         /// Sends notification that the enabled state has changed.
         /// </summary>
         public event EventHandler<EventArgs<bool>> EnabledStateChanged;
@@ -588,6 +593,11 @@ namespace StreamSplitter
             }
         }
 
+        private void buttonApply_Click(object sender, EventArgs e)
+        {
+            OnApplyChanges();
+        }
+
         // Add / remove UDP destinations
 
         private void AddDestinationClient()
@@ -715,6 +725,15 @@ namespace StreamSplitter
         {
             if ((object)ConfigurationChanged != null)
                 ConfigurationChanged(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Raise the <see cref="ApplyChanges"/> event.
+        /// </summary>
+        protected virtual void OnApplyChanges()
+        {
+            if ((object)ApplyChanges != null)
+                ApplyChanges(this, EventArgs.Empty);
         }
 
         /// <summary>

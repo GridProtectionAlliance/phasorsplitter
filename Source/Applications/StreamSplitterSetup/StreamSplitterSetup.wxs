@@ -21,6 +21,12 @@
     <Icon Id="StreamSplitterConsole.ico.exe" SourceFile="$(var.StreamSplitterConsole.TargetPath)" />
     <Icon Id="StreamSplitterManager.ico.exe" SourceFile="$(var.StreamSplitterManager.TargetPath)" />
 
+    <!-- Define Variables Related to .s3config File Association -->
+    <?define ApplicationName = "Synchrophasor Stream Splitter" ?>
+    <?define ApplicationDescription = "Synchrophasor Stream Splitter Management Tool" ?>
+    <?define S3ConfigDescription = "Synchrophasor Stream Splitter Configuration File" ?>
+    <?define S3ConfigExplorerMenu = "Edit with Stream Splitter Manager" ?>
+
     <!-- Custom Actions -->
     <Property Id="SERVICENAME" Value="$(var.StreamSplitter.TargetName)" />
     <Binary Id="InstallerActions" SourceFile="$(var.SolutionDir)\Dependencies\GSF\GSF.InstallerActions.CA.dll" />
@@ -68,6 +74,37 @@
       <Component Id="StreamSplitterManager">
         <File Id="StreamSplitterManager.exe" Name="$(var.StreamSplitterManager.TargetFileName)" Source="$(var.StreamSplitterManager.TargetPath)" />
         <Shortcut Id="StreamSplitterManagerStartMenuShortcut" Name="StreamSplitter Manager" Icon="StreamSplitterManager.ico.exe" Description="Manager application for the StreamSplitter service." WorkingDirectory="INSTALLFOLDER" Directory="ApplicationProgramsFolder" Advertise="yes" />
+
+        <!-- Capabilities keys for Vista/7/8 "Set Program Access and Defaults" -->
+        <RegistryValue Root="HKLM" Key="SOFTWARE\StreamSplitter\Capabilities" Name="ApplicationDescription" Value="$(var.ApplicationDescription)" Type="string" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\StreamSplitter\Capabilities" Name="ApplicationIcon" Value="[APPLICATIONFOLDER]StreamSplitterManager.exe,0" Type="string" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\StreamSplitter\Capabilities" Name="ApplicationName" Value="$(var.ApplicationName)" Type="string" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\StreamSplitter\Capabilities\DefaultIcon" Value="[APPLICATIONFOLDER]StreamSplitterManager.exe,0" Type="string" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\StreamSplitter\Capabilities\FileAssociations" Name=".s3config" Value="StreamSplitter.Document" Type="string" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\StreamSplitter\Capabilities\MIMEAssociations" Name="application/s3config" Value="StreamSplitter.Document" Type="string" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\StreamSplitter\Capabilities\shell\Open\command" Value="&quot;[APPLICATIONFOLDER]StreamSplitterManager.exe&quot; &quot;%1&quot;" Type="string" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\RegisteredApplications" Name="StreamSplitter" Value="SOFTWARE\StreamSplitter\Capabilities" Type="string" />
+
+        <!-- App Paths to support Start,Run -> "StreamSplitterManager" -->
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\StreamSplitterManager.exe" Value="[!StreamSplitterManager.exe]" Type="string" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\StreamSplitterManager.exe" Name="Path" Value="[APPLICATIONFOLDER]" Type="string" />
+
+        <!-- Extend to the "open with" list + Win7 jump menu pinning  -->
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Classes\Applications\StreamSplitterManager.exe\SupportedTypes" Name=".s3config" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Classes\Applications\StreamSplitterManager.exe\shell\open" Name="FriendlyAppName" Value="$(var.ApplicationName)" Type="string" />
+
+        <!-- StreamSplitter.Document ProgID -->
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Classes\StreamSplitter.Document" Name="FriendlyTypeName" Value="$(var.S3ConfigDescription)" Type="string" />
+        <ProgId Id="StreamSplitter.Document" Description="$(var.S3ConfigDescription)" Icon="StreamSplitterManager.ico.exe" Advertise="yes">
+          <Extension Id="s3config">
+            <Verb Id="open" Command="$(var.S3ConfigExplorerMenu)" Argument="&quot;%1&quot;" />
+            <MIME Advertise="yes" ContentType="application/s3config" Default="yes" />
+          </Extension>
+        </ProgId>
+
+        <!-- Optional: add an 'Edit with S3Config' to 'right click' even when not associated -->
+        <!-- RegistryValue Root="HKLM" Key="SOFTWARE\Classes\SystemFileAssociations\.s3config\shell\edit.StreamSplitterManager.exe" Value="$(var.S3ConfigExplorerMenu)" Type="string" / -->
+        <!-- RegistryValue Root="HKLM" Key="SOFTWARE\Classes\SystemFileAssociations\.s3config\shell\edit.StreamSplitterManager.exe\command" Value="&quot;[APPLICATIONFOLDER]StreamSplitterManager.exe&quot; &quot;%1&quot;" Type="string" / -->
       </Component>
       <Component Id="StreamSplitterConfig">
         <File Id="StreamSplitter.exe.config" Name="$(var.StreamSplitter.TargetFileName).config" Source="$(var.StreamSplitter.TargetPath).config" />

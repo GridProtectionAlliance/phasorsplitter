@@ -118,7 +118,7 @@ namespace StreamSplitter
             // Create data stream monitoring timer
             m_dataStreamMonitor = new Timer();
             m_dataStreamMonitor.Elapsed += m_dataStreamMonitor_Elapsed;
-            m_dataStreamMonitor.Interval = 5000.0D;
+            m_dataStreamMonitor.Interval = 10000.0D;
             m_dataStreamMonitor.AutoReset = true;
             m_dataStreamMonitor.Enabled = false;
 

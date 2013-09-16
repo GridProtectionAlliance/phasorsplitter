@@ -189,6 +189,7 @@ namespace StreamSplitter
             m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("ReloadConfig", "Reloads the current configuration", ReloadConfigurationHandler));
             m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("DownloadConfig", "Provides the current configuration to requester", DownloadConfigurationHandler));
             m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("UploadConfig", "Deserializes and loads received configuration", UploadConfigurationHandler));
+            m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("UploadConnection", "Applies received proxy connection to running configuration", UploadConnectionHandler));
 
             LoadCurrentConfiguration();
         }
@@ -678,6 +679,100 @@ namespace StreamSplitter
                 else
                 {
                     const string message = "No configuration was uploaded - could not apply new configuration.";
+                    DisplayStatusMessage(message, UpdateType.Warning);
+                    SendResponse(requestInfo, false, message);
+                }
+            }
+        }
+
+        // Apply the received proxy connection to the running configuration
+        private void UploadConnectionHandler(ClientRequestInfo requestInfo)
+        {
+            if (requestInfo.Request.Arguments.ContainsHelpRequest)
+            {
+                StringBuilder helpMessage = new StringBuilder();
+
+                helpMessage.Append("Applies received proxy connection to running configuration.");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Usage:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       UploadConnection [Options]");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Options:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       -?".PadRight(20));
+                helpMessage.Append("Displays this help message");
+
+                DisplayResponseMessage(requestInfo, helpMessage.ToString());
+            }
+            else
+            {
+                if (requestInfo.Request.Attachments.Count > 0)
+                {
+                    try
+                    {
+                        // Attempt to deserialize received connection
+                        ProxyConnection receivedConfiguration = requestInfo.Request.Attachments[0] as ProxyConnection;
+
+                        if ((object)receivedConfiguration == null)
+                        {
+                            const string message = "Uploaded proxy connection was empty - could not apply new connection.";
+                            DisplayStatusMessage(message, UpdateType.Warning);
+                            SendResponse(requestInfo, false, message);
+                        }
+                        else
+                        {
+                            string appliedStyle;
+
+                            lock (m_streamSplitters)
+                            {
+                                StreamProxy splitter = m_streamSplitters.Find(s => s.ID == receivedConfiguration.ID);
+
+                                if ((object)splitter != null)
+                                {
+                                    // Update existing stream proxy
+                                    splitter.ProxyConnection = receivedConfiguration;
+                                    m_currentConfiguration[receivedConfiguration.ID] = receivedConfiguration;
+                                    appliedStyle = "to existing stream proxy";
+                                }
+                                else
+                                {
+                                    // Create new stream proxy
+                                    splitter = new StreamProxy(receivedConfiguration);
+
+                                    splitter.StatusMessage += splitter_StatusMessage;
+                                    splitter.ProcessException += splitter_ProcessException;
+
+                                    m_streamSplitters.Add(splitter);
+                                    m_serviceHelper.ServiceComponents.Add(splitter);
+                                    m_currentConfiguration.Add(receivedConfiguration);
+                                    appliedStyle = "as a new stream proxy";
+                                }
+                            }
+
+                            // Backup existing service configuration
+                            BackupConfiguration();
+
+                            // Save updated service configuration
+                            ProxyConnectionCollection.SaveConfiguration(m_currentConfiguration, FilePath.GetAbsolutePath(ConfigurationFileName));
+
+                            SendResponse(requestInfo, true);
+                            DisplayStatusMessage("Uploaded connection applied {0}.", UpdateType.Information, appliedStyle);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        string message = string.Format("Failed to apply new proxy connection due to exception: {0}", ex.Message);
+                        DisplayStatusMessage(message, UpdateType.Warning);
+                        SendResponse(requestInfo, false, message);
+                        m_serviceHelper.ErrorLogger.Log(ex);
+                    }
+                }
+                else
+                {
+                    const string message = "No proxy connection was uploaded - could not apply new connection.";
                     DisplayStatusMessage(message, UpdateType.Warning);
                     SendResponse(requestInfo, false, message);
                 }
