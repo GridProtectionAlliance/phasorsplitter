@@ -21,12 +21,6 @@
 //
 //******************************************************************************************************
 
-using GSF;
-using GSF.Configuration;
-using GSF.IO;
-using GSF.Reflection;
-using GSF.ServiceProcess;
-using GSF.Windows.Forms;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,6 +29,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using GSF;
+using GSF.Configuration;
+using GSF.IO;
+using GSF.Reflection;
+using GSF.ServiceProcess;
+using GSF.Windows.Forms;
 using Timer = System.Timers.Timer;
 
 namespace StreamSplitter
@@ -171,10 +171,6 @@ namespace StreamSplitter
         // Gets or sets flag that establishes is configuration is saved
         private bool ConfigurationSaved
         {
-            get
-            {
-                return m_configurationSaved;
-            }
             set
             {
                 m_configurationSaved = value;
@@ -223,13 +219,11 @@ namespace StreamSplitter
 
         private void flowLayoutPanelProxyConnections_MouseWheel(object sender, MouseEventArgs e)
         {
-            Debug.WriteLine(flowLayoutPanelProxyConnections.VerticalScroll.Value);
             flowLayoutPanelProxyConnections.Refresh();
         }
 
         private void flowLayoutPanelProxyConnections_Scroll(object sender, ScrollEventArgs e)
         {
-            Debug.WriteLine(flowLayoutPanelProxyConnections.VerticalScroll.Value);
             flowLayoutPanelProxyConnections.Refresh();
         }
 
@@ -310,7 +304,7 @@ namespace StreamSplitter
                 return SaveState.Saved;
 
             if (string.IsNullOrWhiteSpace(verificationMessage))
-                verificationMessage = "Do you want to save changes to the current configuration?";
+                verificationMessage = "Do you want to save the local configuration?";
 
             // Make sure configuration needs to be saved - user can choose to skip the save (i.e., discard changes)
             if (verify && MessageBox.Show(string.Format(verificationMessage), Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
@@ -763,19 +757,26 @@ namespace StreamSplitter
             {
                 ProxyConnections = state as ProxyConnectionCollection;
 
-                if ((object)m_proxyConnections != null && m_proxyConnections.Count > 0)
+                if ((object)m_proxyConnections != null)
                 {
-                    // Establish an editing user control for each proxy connection
-                    foreach (ProxyConnection connection in m_proxyConnections)
+                    if (m_proxyConnections.Count > 0)
                     {
-                        // Editing-control creation happens after proxy connection exists and is in the binding list,
-                        // so we depend on the PropertyChanged event to attach to needed control events
-                        AddProxyConnectionEditorControl(connection);
+                        // Establish an editing user control for each proxy connection
+                        foreach (ProxyConnection connection in m_proxyConnections)
+                        {
+                            // Editing-control creation happens after proxy connection exists and is in the binding list,
+                            // so we depend on the PropertyChanged event to attach to needed control events
+                            AddProxyConnectionEditorControl(connection);
+                        }
+
+                        ConfigurationSaved = false;
+
+                        ThreadPool.QueueUserWorkItem(PostProxyConnectionsLoad);
                     }
-
-                    ConfigurationSaved = false;
-
-                    ThreadPool.QueueUserWorkItem(PostProxyConnectionsLoad);
+                    else
+                    {
+                        MessageBox.Show("The service has no running configuration, click the \"+\" tool bar button to create a new proxy connection.", Tag.ToNonNullString(Text), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
 
                 // Mark new configuration as unsaved
