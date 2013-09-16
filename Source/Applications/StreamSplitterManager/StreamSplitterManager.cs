@@ -364,6 +364,7 @@ namespace StreamSplitter
             };
 
             flowLayoutPanelProxyConnections.Controls.Add(editorControl);
+            editorControl.buttonApply.Enabled = m_lastConnectedState;
             bindingSource.MoveLast();
 
             ConfigurationSaved = false;
