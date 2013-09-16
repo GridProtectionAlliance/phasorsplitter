@@ -122,7 +122,7 @@
 
       <!-- Libraries -->
       <Component Id="StreamSplitterLibrary">
-        <File Id="StreamSplitter.dll" Name="$(var.StreamSplitterLibrary.TargetFileName)" Source="$(var.StreamSplitterLibrary.TargetPath)" />
+        <File Id="StreamSplitterLibrary.dll" Name="$(var.StreamSplitterLibrary.TargetFileName)" Source="$(var.StreamSplitterLibrary.TargetPath)" />
       </Component>
       
       <!-- DotNetZip Dependencies -->
