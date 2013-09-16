@@ -6,14 +6,30 @@
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
-    <Feature Id="ProductFeature" Title="StreamSplitter" Level="1" ConfigurableDirectory="INSTALLFOLDER">
-      <ComponentGroupRef Id="ProductComponents" />
+    <Feature Id="AllProducts" Title="All Products" Level="1" Display="expand" ConfigurableDirectory="INSTALLFOLDER" Description="All Synchrophasor Stream Splitter Components">
+      <Feature Id="StreamSplitterFeature" Title="Stream Splitter Service" Description="Synchrophasor Stream Splitter Service Application">
+        <ComponentRef Id="StreamSplitter" />
+        <ComponentRef Id="StreamSplitterConfig" />
+      </Feature>
+
+      <Feature Id="StreamSplitterToolsFeature" Title="Stream Splitter Tools" Description="Synchrophasor Stream Splitter Tools">
+        <Feature Id="StreamSplitterManagerFeature" Title="Manager" Description="Synchrophasor Stream Splitter Management Tool">
+          <ComponentRef Id="StreamSplitterManager" />
+          <ComponentRef Id="StreamSplitterManagerConfig" />
+        </Feature>
+        <Feature Id="StreamSplitterConsoleFeature" Title="Console" Description="Synchrophasor Stream Splitter Remote Console Tool">
+          <ComponentRef Id="StreamSplitterConsole" />
+          <ComponentRef Id="StreamSplitterConsoleConfig" />
+        </Feature>
+      </Feature>
+
+      <ComponentGroupRef Id="Dependencies" />
+      <ComponentRef Id="Cleanup" />
     </Feature>
 
     <!-- User Interface -->
-    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_FeatureTree" />
     <UIRef Id="WixUI_ErrorProgressText" />
-    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
     <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\StreamSplitterSetupBanner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\StreamSplitterSetupDialog.bmp" />
     <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\INSTALL_LICENSE.rtf" />
@@ -120,11 +136,20 @@
         <File Id="StreamSplitterManager.exe.config" Name="$(var.StreamSplitterManager.TargetFileName).config" Source="$(var.StreamSplitterManager.TargetPath).config" />
       </Component>
 
+      <!-- Cleanup -->
+      <Component Id="Cleanup" Guid="{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}">
+        <CreateFolder />
+        <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+        <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="Dependencies" Directory="INSTALLFOLDER">
       <!-- Libraries -->
       <Component Id="StreamSplitterLibrary">
         <File Id="StreamSplitterLibrary.dll" Name="$(var.StreamSplitterLibrary.TargetFileName)" Source="$(var.StreamSplitterLibrary.TargetPath)" />
       </Component>
-      
+
       <!-- DotNetZip Dependencies -->
       <Component Id="Ionic.Zlib">
         <File Id="Ionic.Zlib.dll" Name="Ionic.Zlib.dll" Source="$(var.SolutionDir)\Dependencies\DotNetZip\Ionic.Zlib.dll" />
@@ -157,13 +182,6 @@
       </Component>
       <Component Id="GSF.Windows">
         <File Id="GSF.Windows.dll" Name="GSF.Windows.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Windows.dll" />
-      </Component>
-
-      <!-- Cleanup -->
-      <Component Id="Cleanup" Guid="{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}">
-        <CreateFolder />
-        <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
-        <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
       </Component>
     </ComponentGroup>
   </Fragment>
