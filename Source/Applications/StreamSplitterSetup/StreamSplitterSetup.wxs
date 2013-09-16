@@ -18,8 +18,12 @@
     <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\StreamSplitterSetupDialog.bmp" />
     <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\INSTALL_LICENSE.rtf" />
 
+    <Icon Id="StreamSplitter.ico.exe" SourceFile="$(var.StreamSplitter.TargetPath)" />
     <Icon Id="StreamSplitterConsole.ico.exe" SourceFile="$(var.StreamSplitterConsole.TargetPath)" />
     <Icon Id="StreamSplitterManager.ico.exe" SourceFile="$(var.StreamSplitterManager.TargetPath)" />
+
+    <!-- Add/Remove Programs Icon -->
+    <Property Id="ARPPRODUCTICON" Value="StreamSplitter.ico.exe" />
 
     <!-- Define Variables Related to .s3config File Association -->
     <?define ApplicationName = "Synchrophasor Stream Splitter" ?>
