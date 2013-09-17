@@ -21,11 +21,6 @@
 //
 //******************************************************************************************************
 
-using GSF;
-using GSF.Communication;
-using GSF.Parsing;
-using GSF.PhasorProtocols;
-using GSF.Units;
 using System;
 using System.Collections.Concurrent;
 using System.Net;
@@ -33,6 +28,11 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Timers;
+using GSF;
+using GSF.Communication;
+using GSF.Parsing;
+using GSF.PhasorProtocols;
+using GSF.Units;
 using Timer = System.Timers.Timer;
 
 namespace StreamSplitter
@@ -825,7 +825,7 @@ namespace StreamSplitter
                         commandFrame = new GSF.PhasorProtocols.IeeeC37_118.CommandFrame(commandBuffer, 0, length);
                         break;
                     case PhasorProtocol.Ieee1344:
-                        commandFrame = new GSF.PhasorProtocols.IeeeC37_118.CommandFrame(commandBuffer, 0, length);
+                        commandFrame = new GSF.PhasorProtocols.Ieee1344.CommandFrame(commandBuffer, 0, length);
                         break;
                     case PhasorProtocol.SelFastMessage:
                         commandFrame = new GSF.PhasorProtocols.SelFastMessage.CommandFrame(commandBuffer, 0, length);
