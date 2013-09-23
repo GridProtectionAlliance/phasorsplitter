@@ -21,17 +21,15 @@
 //
 //******************************************************************************************************
 
-using GSF;
-using GSF.Communication;
-using GSF.PhasorProtocols;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using System.Timers;
 using System.Windows.Forms;
-using Timer = System.Timers.Timer;
+using GSF;
+using GSF.Communication;
+using GSF.PhasorProtocols;
 
 namespace StreamSplitter
 {
@@ -68,7 +66,7 @@ namespace StreamSplitter
         private readonly List<TextBox> m_udpDestinations;
         private ProxyConnection m_proxyConnection;
         private volatile bool m_updatingConnectionString;
-        private Timer m_paintTimer;
+        private bool m_transparentPanelEnabled;
         private Guid m_id;
 
         #endregion
@@ -99,12 +97,7 @@ namespace StreamSplitter
             transparentPanel.Left = 0;
             transparentPanel.Width = Width;
             transparentPanel.Height = Height;
-
-            m_paintTimer = new Timer();
-            m_paintTimer.Elapsed += m_paintTimer_Elapsed;
-            m_paintTimer.Interval = 10;
-            m_paintTimer.AutoReset = false;
-            m_paintTimer.Enabled = false;
+            transparentPanel.Visible = false;
 
             RegisterControls();
         }
@@ -112,6 +105,18 @@ namespace StreamSplitter
         #endregion
 
         #region [ Properties ]
+
+        /// <summary>
+        /// Sets a flag that determines if transparent panel should be enabled for use.
+        /// </summary>
+        public bool TransparentPanelEnabled
+        {
+            set
+            {
+                m_transparentPanelEnabled = value;
+                transparentPanel.Visible = (value && !Selected);
+            }
+        }
 
         /// <summary>
         /// Gets or sets selected state for <see cref="ProxyConnectionEditor"/>.
@@ -146,7 +151,7 @@ namespace StreamSplitter
                         BorderStyle = BorderStyle.None;
                         groupBoxName.Font = normal;
 
-                        transparentPanel.Visible = true;
+                        transparentPanel.Visible = m_transparentPanelEnabled;
                     }
                 }
             }
@@ -318,9 +323,6 @@ namespace StreamSplitter
                 control.GotFocus += control_GotFocus;
                 control.Click += control_GotFocus;
 
-                if (!(control is TransparentPanel))
-                    control.Paint += control_Paint;
-
                 if (control.HasChildren)
                     RegisterControls(control.Controls);
             }
@@ -329,25 +331,6 @@ namespace StreamSplitter
         private void control_GotFocus(object sender, EventArgs e)
         {
             OnGotFocus(e);
-        }
-
-        private void control_Paint(object sender, PaintEventArgs e)
-        {
-            if ((object)m_paintTimer != null && !m_paintTimer.Enabled && Selected)
-                m_paintTimer.Enabled = true;
-        }
-
-        private void m_paintTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                Invoke((Action)transparentPanel.Invalidate);
-            }
-            catch
-            {
-                // Since this is on a delay timer, this can fail if control is disposed
-                // then the invalidation is requested...
-            }
         }
 
         // Handle connection string manipulations

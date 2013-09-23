@@ -92,7 +92,7 @@ namespace StreamSplitter
             this.bindingNavigatorMoveLastItem = new System.Windows.Forms.ToolStripButton();
             this.bindingNavigatorSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButtonReconnect = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonConnectTo = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonRestartService = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButtonGPA = new System.Windows.Forms.ToolStripButton();
@@ -139,7 +139,7 @@ namespace StreamSplitter
             this.bindingNavigatorAddNewItem,
             this.bindingNavigatorDeleteItem,
             this.toolStripSeparator3,
-            this.toolStripButtonReconnect,
+            this.toolStripButtonConnectTo,
             this.toolStripButtonRestartService,
             this.toolStripSeparator4,
             this.toolStripButtonGPA});
@@ -187,6 +187,8 @@ namespace StreamSplitter
             this.bindingNavigatorDeleteItem.Size = new System.Drawing.Size(23, 22);
             this.bindingNavigatorDeleteItem.Text = "D&elete Selected Proxy Connection";
             this.bindingNavigatorDeleteItem.ToolTipText = "Delete Selected Proxy Connection";
+            this.bindingNavigatorDeleteItem.MouseEnter += new System.EventHandler(this.bindingNavigatorDeleteItem_MouseEnter);
+            this.bindingNavigatorDeleteItem.MouseLeave += new System.EventHandler(this.bindingNavigatorDeleteItem_MouseLeave);
             // 
             // toolStripButtonNewConfig
             // 
@@ -300,7 +302,7 @@ namespace StreamSplitter
             this.bindingNavigatorPositionItem.AccessibleName = "Position";
             this.bindingNavigatorPositionItem.AutoSize = false;
             this.bindingNavigatorPositionItem.Name = "bindingNavigatorPositionItem";
-            this.bindingNavigatorPositionItem.Size = new System.Drawing.Size(35, 23);
+            this.bindingNavigatorPositionItem.Size = new System.Drawing.Size(30, 23);
             this.bindingNavigatorPositionItem.Text = "0";
             this.bindingNavigatorPositionItem.ToolTipText = "Current Proxy Connection";
             // 
@@ -341,16 +343,16 @@ namespace StreamSplitter
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
-            // toolStripButtonReconnect
+            // toolStripButtonConnectTo
             // 
-            this.toolStripButtonReconnect.AutoToolTip = false;
-            this.toolStripButtonReconnect.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonReconnect.Image")));
-            this.toolStripButtonReconnect.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonReconnect.Name = "toolStripButtonReconnect";
-            this.toolStripButtonReconnect.Size = new System.Drawing.Size(83, 22);
-            this.toolStripButtonReconnect.Text = "Re&connect";
-            this.toolStripButtonReconnect.ToolTipText = "Reconnect to Service";
-            this.toolStripButtonReconnect.Click += new System.EventHandler(this.toolStripButtonReconnect_Click);
+            this.toolStripButtonConnectTo.AutoToolTip = false;
+            this.toolStripButtonConnectTo.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonConnectTo.Image")));
+            this.toolStripButtonConnectTo.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonConnectTo.Name = "toolStripButtonConnectTo";
+            this.toolStripButtonConnectTo.Size = new System.Drawing.Size(89, 22);
+            this.toolStripButtonConnectTo.Text = "&Connect To";
+            this.toolStripButtonConnectTo.ToolTipText = "Connect to Service";
+            this.toolStripButtonConnectTo.Click += new System.EventHandler(this.toolStripButtonConnectTo_Click);
             // 
             // toolStripButtonRestartService
             // 
@@ -399,7 +401,7 @@ namespace StreamSplitter
             this.toolStripStatusLabelStatus.Name = "toolStripStatusLabelStatus";
             this.toolStripStatusLabelStatus.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripStatusLabelStatus.Padding = new System.Windows.Forms.Padding(0, 0, 5, 0);
-            this.toolStripStatusLabelStatus.Size = new System.Drawing.Size(514, 19);
+            this.toolStripStatusLabelStatus.Size = new System.Drawing.Size(545, 19);
             this.toolStripStatusLabelStatus.Spring = true;
             this.toolStripStatusLabelStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -428,7 +430,6 @@ namespace StreamSplitter
             this.flowLayoutPanelProxyConnections.Name = "flowLayoutPanelProxyConnections";
             this.flowLayoutPanelProxyConnections.Size = new System.Drawing.Size(761, 379);
             this.flowLayoutPanelProxyConnections.TabIndex = 3;
-            this.flowLayoutPanelProxyConnections.Scroll += new System.Windows.Forms.ScrollEventHandler(this.flowLayoutPanelProxyConnections_Scroll);
             // 
             // openFileDialog
             // 
@@ -508,7 +509,7 @@ namespace StreamSplitter
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelProxyConnections;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton toolStripButtonReconnect;
+        private System.Windows.Forms.ToolStripButton toolStripButtonConnectTo;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelStatus;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelState;
         private StreamSplitter.ToolTipEx toolTipEx;

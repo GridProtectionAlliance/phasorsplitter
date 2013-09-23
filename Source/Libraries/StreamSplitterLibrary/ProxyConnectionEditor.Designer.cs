@@ -45,13 +45,6 @@ namespace StreamSplitter
                     m_frameParser.Dispose();
                     m_frameParser = null;
                 }
-
-                if ((object)m_paintTimer != null)
-                {
-                    m_paintTimer.Elapsed -= m_paintTimer_Elapsed;
-                    m_paintTimer.Dispose();
-                    m_paintTimer = null;
-                }
             }
 
             base.Dispose(disposing);

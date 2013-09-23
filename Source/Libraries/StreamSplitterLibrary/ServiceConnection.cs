@@ -21,11 +21,11 @@
 //
 //******************************************************************************************************
 
+using System;
+using System.Threading;
 using GSF;
 using GSF.Communication;
 using GSF.ServiceProcess;
-using System;
-using System.Threading;
 
 namespace StreamSplitter
 {
@@ -74,7 +74,7 @@ namespace StreamSplitter
             m_remotingClient.ConnectionEstablished += m_remotingClient_ConnectionEstablished;
             m_remotingClient.ConnectionException += m_remotingClient_ConnectionException;
             m_remotingClient.ConnectionTerminated += m_remotingClient_ConnectionTerminated;
-            m_remotingClient.ConnectionString = "Server=localhost:8890";
+            m_remotingClient.ConnectionString = "server=localhost:8890";
             m_remotingClient.SettingsCategory = "RemotingClient";
             m_remotingClient.AllowDualStackSocket = true;
             m_remotingClient.IntegratedSecurity = false;
@@ -137,6 +137,25 @@ namespace StreamSplitter
             {
                 if ((object)m_remotingClient != null)
                     m_remotingClient.MaxConnectionAttempts = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the connection string for the service connection used to attempt to connect to the service.
+        /// </summary>
+        public string ConnectionString
+        {
+            get
+            {
+                if ((object)m_remotingClient != null)
+                    return m_remotingClient.ConnectionString;
+
+                return null;
+            }
+            set
+            {
+                if ((object)m_remotingClient != null)
+                    m_remotingClient.ConnectionString = value;
             }
         }
 

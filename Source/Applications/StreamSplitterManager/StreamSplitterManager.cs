@@ -105,9 +105,6 @@ namespace StreamSplitter
             m_refreshProxyStatusTimer.Interval = 2000;
             m_refreshProxyStatusTimer.AutoReset = true;
 
-            // Attach to mouse wheel event
-            flowLayoutPanelProxyConnections.MouseWheel += flowLayoutPanelProxyConnections_MouseWheel;
-
             // Update version
             toolStripStatusLabelVersion.Text = AssemblyInfo.EntryAssembly.Version.ToString(3);
 
@@ -213,18 +210,6 @@ namespace StreamSplitter
 
             if ((object)currentItem != null && (object)currentItem.ProxyConnectionEditor != null)
                 SelectProxyConnectionEditorControl(currentItem.ProxyConnectionEditor);
-
-            flowLayoutPanelProxyConnections.Refresh();
-        }
-
-        private void flowLayoutPanelProxyConnections_MouseWheel(object sender, MouseEventArgs e)
-        {
-            flowLayoutPanelProxyConnections.Refresh();
-        }
-
-        private void flowLayoutPanelProxyConnections_Scroll(object sender, ScrollEventArgs e)
-        {
-            flowLayoutPanelProxyConnections.Refresh();
         }
 
         // Create a new configuration
@@ -563,10 +548,36 @@ namespace StreamSplitter
             }
         }
 
-        private void toolStripButtonReconnect_Click(object sender, EventArgs e)
+        private void toolStripButtonConnectTo_Click(object sender, EventArgs e)
         {
-            if ((object)m_serviceConnection != null)
-                m_serviceConnection.ConnectAsync();
+            using (ConnectTo dialog = new ConnectTo())
+            {
+                Dictionary<string, string> settings = m_serviceConnection.ConnectionString.ToNonNullString().ParseKeyValuePairs();
+                string serverAddressPort, serverInterface;
+
+                if (settings.TryGetValue("server", out serverAddressPort) && !string.IsNullOrWhiteSpace(serverAddressPort))
+                    dialog.textBoxServerConnection.Text = serverAddressPort;
+
+                if (!settings.TryGetValue("interface", out serverInterface) || string.IsNullOrWhiteSpace(serverInterface))
+                    serverInterface = "0.0.0.0";
+
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    if ((object)m_serviceConnection != null)
+                    {
+                        // Apply updated service connection string
+                        if (!string.IsNullOrWhiteSpace(dialog.textBoxServerConnection.Text))
+                        {
+                            string connectionString = "server=" + dialog.textBoxServerConnection.Text + "; interface=" + serverInterface;
+                            ThreadPool.QueueUserWorkItem(ConnectToService, connectionString);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Reconnect canceled - service connection is unavailable.", Tag.ToNonNullString(Text), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            }
         }
 
         private void toolStripButtonRestartService_Click(object sender, EventArgs e)
@@ -590,6 +601,25 @@ namespace StreamSplitter
             };
 
             process.Start();
+        }
+
+        private void bindingNavigatorDeleteItem_MouseEnter(object sender, EventArgs e)
+        {
+            // Make sure it is obvious which item is currently selected when hovering over the Delete button
+            if ((object)m_proxyConnections != null)
+            {
+                m_proxyConnections.TransparentPanelEnabled = true;
+                flowLayoutPanelProxyConnections.Refresh();
+            }
+        }
+
+        private void bindingNavigatorDeleteItem_MouseLeave(object sender, EventArgs e)
+        {
+            if ((object)m_proxyConnections != null)
+            {
+                m_proxyConnections.TransparentPanelEnabled = false;
+                flowLayoutPanelProxyConnections.Refresh();
+            }
         }
 
         private void m_serviceConnection_ConnectionState(object sender, EventArgs<bool> e)
@@ -795,6 +825,21 @@ namespace StreamSplitter
                 Invoke((Action<ProxyConnectionEditor>)SelectProxyConnectionEditorControl, proxyConnection.ProxyConnectionEditor);
 
             Invoke((Action)Activate);
+        }
+
+        private void ConnectToService(object state)
+        {
+            string connectionString = state as string;
+
+            if (!string.IsNullOrWhiteSpace(connectionString))
+            {
+                // Update connection string
+                m_serviceConnection.ConnectionString = connectionString;
+
+                // Restart connection cycle
+                m_serviceConnection.ConnectAsync();
+            }
+
         }
 
         private void UpdateFormTitle()

@@ -21,7 +21,6 @@
 //
 //******************************************************************************************************
 
-using GSF;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -29,6 +28,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Soap;
+using GSF;
 
 namespace StreamSplitter
 {
@@ -147,6 +147,25 @@ namespace StreamSplitter
                         this[index] = value;
                     else
                         Add(value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets a flag that determines if transparent panels should be enabled for use on <see cref="ProxyConnectionEditor"/> controls.
+        /// </summary>
+        public bool TransparentPanelEnabled
+        {
+            set
+            {
+                ProxyConnectionEditor editorControl;
+
+                foreach (ProxyConnection connection in this)
+                {
+                    editorControl = connection.ProxyConnectionEditor;
+
+                    if ((object)editorControl != null)
+                        editorControl.TransparentPanelEnabled = value;
                 }
             }
         }
