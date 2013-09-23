@@ -165,7 +165,7 @@ namespace StreamSplitter
             }
         }
 
-        // Gets or sets flag that establishes is configuration is saved
+        // Sets flag that establishes if configuration is saved
         private bool ConfigurationSaved
         {
             set
@@ -831,7 +831,7 @@ namespace StreamSplitter
         {
             string connectionString = state as string;
 
-            if (!string.IsNullOrWhiteSpace(connectionString))
+            if (!string.IsNullOrWhiteSpace(connectionString) && (object)m_serviceConnection != null)
             {
                 // Update connection string
                 m_serviceConnection.ConnectionString = connectionString;
@@ -839,7 +839,6 @@ namespace StreamSplitter
                 // Restart connection cycle
                 m_serviceConnection.ConnectAsync();
             }
-
         }
 
         private void UpdateFormTitle()

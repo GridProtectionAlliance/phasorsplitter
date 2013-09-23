@@ -1359,7 +1359,7 @@
             <param name="buffer">Buffer image on which to append checksum.</param>
             <param name="startIndex">Index into <paramref name="buffer"/> where checksum should be appended.</param>
             <remarks>
-            Default implementation encodes checksum in big-endian order and expects buffer size large enough to accomodate
+            Default implementation encodes checksum in big-endian order and expects buffer size large enough to accommodate
             2-byte checksum representation. Override method if protocol expectations are different.
             </remarks>
         </member>
@@ -1515,7 +1515,7 @@
         </member>
         <member name="P:GSF.PhasorProtocols.ChannelFrameBase`1.LastSortedMeasurement">
             <summary>
-            Gets ot sets reference to last <see cref="T:GSF.TimeSeries.IMeasurement"/> that was sorted into this <see cref="T:GSF.PhasorProtocols.ChannelFrameBase`1"/>.
+            Gets or sets reference to last <see cref="T:GSF.TimeSeries.IMeasurement"/> that was sorted into this <see cref="T:GSF.PhasorProtocols.ChannelFrameBase`1"/>.
             </summary>
             <remarks>
             This value is used to help monitor slow moving measurements that are being sorted into the <see cref="T:GSF.PhasorProtocols.ChannelFrameBase`1"/>.
@@ -1546,6 +1546,11 @@
             <remarks>
             This property is overridden to include a checksum in the image.
             </remarks>
+        </member>
+        <member name="P:GSF.PhasorProtocols.ChannelFrameBase`1.TrustHeaderLength">
+            <summary>
+            Gets or sets flag that determines if header lengths should be trusted over parsed byte count.
+            </summary>
         </member>
         <member name="P:GSF.PhasorProtocols.ChannelFrameBase`1.BodyLength">
             <summary>
@@ -4602,6 +4607,25 @@
             <returns>New <see cref="T:GSF.PhasorProtocols.IChannelValue`1"/> object.</returns>
             <typeparam name="TDefinition">Specific <see cref="T:GSF.PhasorProtocols.IChannelDefinition"/> type that the <see cref="T:GSF.PhasorProtocols.IChannelValue`1"/> references.</typeparam>
             <typeparam name="TValue">Specific <see cref="T:GSF.PhasorProtocols.IChannelValue`1"/> type that the <see cref="T:GSF.PhasorProtocols.CreateNewValueFunction`2"/> creates.</typeparam>
+        </member>
+        <member name="T:GSF.PhasorProtocols.IeeeC37_118.DataFrameParsingState">
+            <summary>
+            Represents the IEEE C37.118 protocol implementation of the parsing state used by a <see cref="T:GSF.PhasorProtocols.IeeeC37_118.DataFrame"/>.
+            </summary>
+        </member>
+        <member name="M:GSF.PhasorProtocols.IeeeC37_118.DataFrameParsingState.#ctor(System.Int32,GSF.PhasorProtocols.IConfigurationFrame,GSF.PhasorProtocols.CreateNewCellFunction{GSF.PhasorProtocols.IDataCell},System.Boolean)">
+            <summary>
+            Creates a new <see cref="T:GSF.PhasorProtocols.IeeeC37_118.DataFrameParsingState"/> from specified parameters.
+            </summary>
+            <param name="parsedBinaryLength">Binary length of the <see cref="T:GSF.PhasorProtocols.IDataFrame"/> being parsed.</param>
+            <param name="configurationFrame">Reference to the <see cref="T:GSF.PhasorProtocols.IConfigurationFrame"/> associated with the <see cref="T:GSF.PhasorProtocols.IDataFrame"/> being parsed.</param>
+            <param name="createNewCellFunction">Reference to delegate to create new <see cref="T:GSF.PhasorProtocols.IDataCell"/> instances.</param>
+            <param name="trustHeaderLength">Determines if length defined in common frame header should be trusted over parsed byte count.</param>
+        </member>
+        <member name="P:GSF.PhasorProtocols.IeeeC37_118.DataFrameParsingState.TrustHeaderLength">
+            <summary>
+            Gets or sets flag that determines if length defined in common frame header should be trusted over parsed byte count.
+            </summary>
         </member>
         <member name="T:GSF.PhasorProtocols.SourceChannel">
             <summary>
@@ -14688,6 +14712,11 @@
             Gets or sets current <see cref="T:GSF.PhasorProtocols.IeeeC37_118.CommonFrameHeader"/>.
             </summary>
         </member>
+        <member name="P:GSF.PhasorProtocols.IeeeC37_118.DataFrame.State">
+            <summary>
+            Gets or sets the parsing state for the this <see cref="T:GSF.PhasorProtocols.IeeeC37_118.DataFrame"/>.
+            </summary>
+        </member>
         <member name="P:GSF.PhasorProtocols.IeeeC37_118.DataFrame.Version">
             <summary>
             Gets the IEEE C37.118 protocol version of this <see cref="T:GSF.PhasorProtocols.IeeeC37_118.DataFrame"/> as specified by the associated <see cref="P:GSF.PhasorProtocols.IeeeC37_118.DataFrame.ConfigurationFrame"/>.
@@ -14998,6 +15027,11 @@
         <member name="P:GSF.PhasorProtocols.IeeeC37_118.FrameParser.DraftRevision">
             <summary>
             Gets or sets the <see cref="T:GSF.PhasorProtocols.IeeeC37_118.DraftRevision"/> of this <see cref="T:GSF.PhasorProtocols.IeeeC37_118.FrameParser"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.PhasorProtocols.IeeeC37_118.FrameParser.TrustHeaderLength">
+            <summary>
+            Gets or sets flag that determines if header lengths should be trusted over parsed byte count.
             </summary>
         </member>
         <member name="P:GSF.PhasorProtocols.IeeeC37_118.FrameParser.Timebase">
