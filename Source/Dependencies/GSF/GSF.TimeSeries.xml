@@ -1826,6 +1826,36 @@
             Returns the total number of frames in the <see cref="T:GSF.TimeSeries.FrameQueue"/>.
             </summary>
         </member>
+        <member name="T:GSF.TimeSeries.IDevice">
+            <summary>
+            Represents a device that acts as a source of <see cref="T:GSF.TimeSeries.IMeasurement"/>s.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.IDevice.DataQualityErrors">
+            <summary>
+            Gets or sets total data quality errors of this <see cref="T:GSF.TimeSeries.IDevice"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.IDevice.TimeQualityErrors">
+            <summary>
+            Gets or sets total time quality errors of this <see cref="T:GSF.TimeSeries.IDevice"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.IDevice.DeviceErrors">
+            <summary>
+            Gets or sets total device errors of this <see cref="T:GSF.TimeSeries.IDevice"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.IDevice.MeasurementsReceived">
+            <summary>
+            Gets or sets total measurements received for this <see cref="T:GSF.TimeSeries.IDevice"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.IDevice.MeasurementsExpected">
+            <summary>
+            Gets or sets total measurements expected to have been received for this <see cref="T:GSF.TimeSeries.IDevice"/>.
+            </summary>
+        </member>
         <member name="T:GSF.TimeSeries.MeasurementValueFilterFunction">
             <summary>
             Method signature for function used to apply a value filter over a sequence of <see cref="T:GSF.TimeSeries.IMeasurement"/> values.
@@ -5885,6 +5915,330 @@
             Gets or sets function used to handle exceptions.
             </summary>
         </member>
+        <member name="T:GSF.TimeSeries.DataQualityReportingProcess">
+            <summary>
+            Represents the process that generates reports for the time-series service.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.#ctor">
+            <summary>
+            Creates a new instance of the <see cref="T:GSF.TimeSeries.DataQualityReportingProcess"/> class.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.GetReportsList">
+            <summary>
+            Returns the list of reports that are available from the report location.
+            </summary>
+            <returns>The list of generated reports.</returns>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.GetPendingReportsList">
+            <summary>
+            Returns the list of reports which are in the queue but are yet to be generated.
+            </summary>
+            <returns>The list of pending reports.</returns>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.GenerateReport(System.DateTime)">
+            <summary>
+            Queues up a report to be generated on a separate thread.
+            </summary>
+            <param name="reportDate">The date of the report to be generated.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.CleanReportLocation">
+            <summary>
+            Deletes reports from the <see cref="P:GSF.TimeSeries.DataQualityReportingProcess.ReportLocation"/> that have
+            been idle for the length of the <see cref="P:GSF.TimeSeries.DataQualityReportingProcess.IdleReportLifetime"/>.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.LoadSettings">
+            <summary>
+            Loads saved settings from the config file.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.SaveSettings">
+            <summary>
+            Saves settings to the config file.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.Execute">
+            <summary>
+            Executes the reporting process to generate the report.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.GetArguments(System.DateTime)">
+            <summary>
+            Gets the command line arguments for the reporting process.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.IsReportFileName(System.String)">
+            <summary>
+            Determines whether the given path is a path to a report, based on the file name.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.DataQualityReportingProcess.GetProcessOwner(System.Int32)">
+            <summary>
+            Determines who is the owner of the given process.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.PersistSettings">
+            <summary>
+            Determines whether the object settings are to be persisted to the config file.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.SettingsCategory">
+            <summary>
+            Gets or sets the category name under which the object settings are persisted in the config file.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.ArchiveFilePath">
+            <summary>
+            Gets or sets the path to the archive file to which
+            the statistics required for reporting are archived.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.ReportLocation">
+            <summary>
+            Gets or sets the directory to which reports will be written.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.Title">
+            <summary>
+            Gets or sets the title to be displayed on reports.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.Company">
+            <summary>
+            Gets or sets the name of the company to be displayed on reports.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.Level4Threshold">
+            <summary>
+            Gets or sets the minimum percentage of measurements received from devices in level 4.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.Level3Threshold">
+            <summary>
+            Gets or sets the minimum percentage of measurements received from devices in level 3.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.Level4Alias">
+            <summary>
+            Gets or sets the alias for the level 4 category.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.Level3Alias">
+            <summary>
+            Gets or sets the alias for the level 3 category.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.DataQualityReportingProcess.IdleReportLifetime">
+            <summary>
+            Gets or sets the minimum lifetime of a report
+            since the last time it was accessed, in days.
+            </summary>
+        </member>
+        <member name="T:GSF.TimeSeries.ServiceClientBase">
+            <summary>
+            Represents a client that can remotely access the time-series framework service host.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.#ctor">
+            <summary>
+            Creates a new instance of the <see cref="T:GSF.TimeSeries.ServiceClientBase"/> class.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.Finalize">
+            <summary>
+            Releases the unmanaged resources before the <see cref="T:GSF.TimeSeries.ServiceClientBase"/> object is reclaimed by <see cref="T:System.GC"/>.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.Initialize">
+            <summary>
+            Initializes the remoting client, client helper, and error logger.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.Start(System.String[])">
+            <summary>
+            Handles service start event.
+            </summary>
+            <param name="args">Service start arguments.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.Dispose">
+            <summary>
+            Releases all the resources used by the <see cref="T:GSF.TimeSeries.ServiceClientBase"/> object.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.Dispose(System.Boolean)">
+            <summary>
+            Releases the unmanaged resources used by the <see cref="T:GSF.TimeSeries.ServiceClientBase"/> object and optionally releases the managed resources.
+            </summary>
+            <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.ClientHelper_AuthenticationSuccess(System.Object,System.EventArgs)">
+            <summary>
+            Client helper service update reception handler.
+            </summary>
+            <param name="sender">Sending object.</param>
+            <param name="e">Event argument containing update type and associated message data.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.ClientHelper_ReceivedServiceUpdate(System.Object,GSF.EventArgs{GSF.UpdateType,System.String})">
+            <summary>
+            Client helper service update reception handler.
+            </summary>
+            <param name="sender">Sending object.</param>
+            <param name="e">Event argument containing update type and associated message data.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.ClientHelper_ReceivedServiceResponse(System.Object,GSF.EventArgs{GSF.ServiceProcess.ServiceResponse})">
+            <summary>
+            Client helper service response reception handler.
+            </summary>
+            <param name="sender">Sending object.</param>
+            <param name="e">Event argument containing the service response.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.ClientHelper_TelnetSessionEstablished(System.Object,System.EventArgs)">
+            <summary>
+            Client helper telnet session established handler.
+            </summary>
+            <param name="sender">Sending object.</param>
+            <param name="e">Event arguments, if any.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceClientBase.ClientHelper_TelnetSessionTerminated(System.Object,System.EventArgs)">
+            <summary>
+            Client helper telnet session terminated handler.
+            </summary>
+            <param name="sender">Sending object.</param>
+            <param name="e">Event arguments, if any.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatistics.GetDeviceStatistic_DataQualityErrors(System.Object,System.String)">
+            <summary>
+            Calculates number of data quaility errors reported by device during last reporting interval.
+            </summary>
+            <param name="source">Source Device.</param>
+            <param name="arguments">Any needed arguments for statistic calculation.</param>
+            <returns>Data Quality Errors Statistic.</returns>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatistics.GetDeviceStatistic_TimeQualityErrors(System.Object,System.String)">
+            <summary>
+            Calculates number of time quality errors reported by device during last reporting interval.
+            </summary>
+            <param name="source">Source Device.</param>
+            <param name="arguments">Any needed arguments for statistic calculation.</param>
+            <returns>Time Quality Errors Statistic.</returns>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatistics.GetDeviceStatistic_DeviceErrors(System.Object,System.String)">
+            <summary>
+            Calculates number of device errors reported by device during last reporting interval.
+            </summary>
+            <param name="source">Source Device.</param>
+            <param name="arguments">Any needed arguments for statistic calculation.</param>
+            <returns>Device Errors Statistic.</returns>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatistics.GetDeviceStatistic_MeasurementsReceived(System.Object,System.String)">
+            <summary>
+            Calculates number of measurements received from device during last reporting interval.
+            </summary>
+            <param name="source">Source Device.</param>
+            <param name="arguments">Any needed arguments for statistic calculation.</param>
+            <returns>Measurements Received Statistic.</returns>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatistics.GetDeviceStatistic_MeasurementsExpected(System.Object,System.String)">
+            <summary>
+            Calculates expected number of measurements received from device during last reporting interval.
+            </summary>
+            <param name="source">Source Device.</param>
+            <param name="arguments">Any needed arguments for statistic calculation.</param>
+            <returns>Measurements Expected Statistic.</returns>
+        </member>
+        <member name="T:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1">
+            <summary>
+            Helper class for calculating device statistics.
+            </summary>
+            <typeparam name="T">The type of the devices whose statistics are to be calculated.</typeparam>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.#ctor(`0)">
+            <summary>
+            Creates a new instance of the <see cref="T:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1"/> class.
+            </summary>
+            <param name="device">The device whose statistics are to be calculated using this helper.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.AddToMeasurementsReceived(System.Int32)">
+            <summary>
+            Increases the count of the number of measurements received from the device.
+            </summary>
+            <param name="count">The number of measurements received from the device since the last time this method was called.</param>
+            <remarks>
+            Call this each time measurements have been received by the device in order
+            to properly track the <see cref="P:GSF.TimeSeries.IDevice.MeasurementsReceived"/> statistic.
+            </remarks>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.Update">
+            <summary>
+            Updates the statistics for the number of measurements received and the number
+            of measurements expected in the <see cref="T:GSF.TimeSeries.IDevice"/> wrapped by this helper.
+            </summary>
+            <remarks>
+            Call this periodically, preferrably on a slow timer (e.g., once per second),
+            in order to update the <see cref="P:GSF.TimeSeries.IDevice.MeasurementsReceived"/> and
+            <see cref="P:GSF.TimeSeries.IDevice.MeasurementsExpected"/> statistics.
+            </remarks>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.Update(System.Int64)">
+            <summary>
+            Updates the statistics for the number of measurements received and the number
+            of measurements expected in the <see cref="T:GSF.TimeSeries.IDevice"/> wrapped by this helper.
+            </summary>
+            <param name="nowTicks">The current time, in ticks.</param>
+            <remarks>
+            Call this periodically, preferrably on a slow timer (e.g., once per second),
+            in order to update the <see cref="P:GSF.TimeSeries.IDevice.MeasurementsReceived"/> and
+            <see cref="P:GSF.TimeSeries.IDevice.MeasurementsExpected"/> statistics. This method is preferred
+            when tracking statistics for multiple <see cref="T:GSF.TimeSeries.IDevice"/>s to reduce the number
+            of calls to <see cref="P:System.DateTime.UtcNow"/>.
+            </remarks>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.Reset">
+            <summary>
+            Resets the member variables used to track
+            statistics for the device wrapped by this helper.
+            </summary>
+            <remarks>
+            Call this when the connection to a device has been
+            reset to mark a starting point for statistics gathering.
+            Since the <see cref="M:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.Update(System.Int64)"/> method keeps track
+            of the time it was last called, it is necessary to call
+            this method during long periods of downtime where Update
+            was not being called in order to avoid momentary, unexpectedly
+            large values to be calculated for measurements expected.
+            </remarks>
+        </member>
+        <member name="M:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.Reset(System.Int64)">
+            <summary>
+            Resets the member variables used to track
+            statistics for the device wrapped by this helper.
+            </summary>
+            <param name="nowTicks">The current time, in ticks.</param>
+            <remarks>
+            Call this when the connection to a device has been
+            reset to mark a starting point for statistics gathering.
+            Since the <see cref="M:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.Update(System.Int64)"/> method keeps track
+            of the time it was last called, it is necessary to call
+            this method during long periods of downtime where Update
+            was not being called in order to avoid momentary, unexpectedly
+            large values to be calculated for measurements expected.
+            This method is preferred when tracking statistics for multiple
+            <see cref="T:GSF.TimeSeries.IDevice"/>s to reduce the number of calls to
+            <see cref="P:System.DateTime.UtcNow"/>.
+            </remarks>
+        </member>
+        <member name="P:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.Device">
+            <summary>
+            Gets the device whose statistics are being calculated using this helper.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.Statistics.DeviceStatisticsHelper`1.ExpectedMeasurementsPerSecond">
+            <summary>
+            Gets or sets the number of measurements expected to be received from the device per second.
+            </summary>
+        </member>
         <member name="T:GSF.TimeSeries.Statistics.StatisticCalculationFunction">
             <summary>
             Method signature for function used to calculate a statistic for a given object.
@@ -6116,6 +6470,12 @@
             <summary>
             Data operation to validate and ensure there is a record
             in the ConfigurationEntity table for ActiveMeasurements.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.TimeSeriesStartupOperations.ValidateAccountsAndGroups(System.Data.IDbConnection,System.String)">
+            <summary>
+            Data operation to validate accounts and groups to ensure
+            that account names and group names are converted to SIDs.
             </summary>
         </member>
         <member name="M:GSF.TimeSeries.TimeSeriesStartupOperations.ValidateDataPublishers(System.Data.IDbConnection,System.String)">
@@ -6852,6 +7212,16 @@
             Default value for <see cref="P:GSF.TimeSeries.Transport.DataPublisher.AllowMetadataRefresh"/>.
             </summary>
         </member>
+        <member name="F:GSF.TimeSeries.Transport.DataPublisher.DefaultAllowNaNValueFilter">
+            <summary>
+            Default value for <see cref="P:GSF.TimeSeries.Transport.DataPublisher.AllowNaNValueFilter"/>.
+            </summary>
+        </member>
+        <member name="F:GSF.TimeSeries.Transport.DataPublisher.DefaultForceNaNValueFilter">
+            <summary>
+            Default value for <see cref="P:GSF.TimeSeries.Transport.DataPublisher.ForceNaNValueFilter"/>.
+            </summary>
+        </member>
         <member name="F:GSF.TimeSeries.Transport.DataPublisher.DefaultUseBaseTimeOffsets">
             <summary>
             Default value for <see cref="P:GSF.TimeSeries.Transport.DataPublisher.UseBaseTimeOffsets"/>.
@@ -7163,6 +7533,16 @@
             Gets or sets flag that indicates if this publisher will allow synchronized subscriptions when requested by subscribers.
             </summary>
         </member>
+        <member name="P:GSF.TimeSeries.Transport.DataPublisher.AllowNaNValueFilter">
+            <summary>
+            Gets or sets flag that indicates if this publisher will allow filtering of data which is not a number.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.Transport.DataPublisher.ForceNaNValueFilter">
+            <summary>
+            Gets or sets flag that indicates if this publisher will force filtering of data which is not a number.
+            </summary>
+        </member>
         <member name="P:GSF.TimeSeries.Transport.DataPublisher.UseBaseTimeOffsets">
             <summary>
             Gets or sets flag that determines whether to use base time offsets to decrease the size of compact measurements.
@@ -7302,6 +7682,11 @@
         <member name="F:GSF.TimeSeries.Transport.DataSubscriber.DefaultMetadataSynchronizationTimeout">
             <summary>
             Defines the default value for the <see cref="P:GSF.TimeSeries.Transport.DataSubscriber.MetadataSynchronizationTimeout"/> property.
+            </summary>
+        </member>
+        <member name="F:GSF.TimeSeries.Transport.DataSubscriber.DefaultUseTransactionForMetadata">
+            <summary>
+            Defines the default value for the <see cref="P:GSF.TimeSeries.Transport.DataSubscriber.UseTransactionForMetadata"/> property.
             </summary>
         </member>
         <member name="M:GSF.TimeSeries.Transport.DataSubscriber.#ctor">
@@ -7587,7 +7972,7 @@
         </member>
         <member name="M:GSF.TimeSeries.Transport.DataSubscriber.RefreshMetadata">
             <summary>
-            Initiate a metadata refresh.
+            Initiate a meta-data refresh.
             </summary>
         </member>
         <member name="M:GSF.TimeSeries.Transport.DataSubscriber.SynchronizeMetadata(System.Data.DataSet)">
@@ -7641,11 +8026,10 @@
             <param name="length">Length of response message.</param>
             <returns>Decoded response string.</returns>
         </member>
-        <member name="M:GSF.TimeSeries.Transport.DataSubscriber.SynchronizeMetadata(System.Object)">
+        <member name="M:GSF.TimeSeries.Transport.DataSubscriber.SynchronizeMetadata">
             <summary>
             Handles meta-data synchronization to local system.
             </summary>
-            <param name="state"><see cref="T:System.Data.DataSet"/> meta-data collection passed into state parameter.</param>
             <remarks>
             This function should only be initiated from call to <see cref="M:GSF.TimeSeries.Transport.DataSubscriber.SynchronizeMetadata(System.Data.DataSet)"/> to make
             sure only one meta-data synchronization happens at once. Users can override this method to customize
@@ -7776,8 +8160,8 @@
         <member name="P:GSF.TimeSeries.Transport.DataSubscriber.AutoSynchronizeMetadata">
             <summary>
             Gets or sets flag that determines if <see cref="T:GSF.TimeSeries.Transport.DataSubscriber"/> should
-            automatically request metadata synchronization and synchronize publisher
-            metadata with its own database configuration.
+            automatically request meta-data synchronization and synchronize publisher
+            meta-data with its own database configuration.
             </summary>
         </member>
         <member name="P:GSF.TimeSeries.Transport.DataSubscriber.MetadataFilters">
@@ -7821,7 +8205,7 @@
         </member>
         <member name="P:GSF.TimeSeries.Transport.DataSubscriber.CompressMetadata">
             <summary>
-            Gets or sets the operational mode flag to compress metadata.
+            Gets or sets the operational mode flag to compress meta-data.
             </summary>
         </member>
         <member name="P:GSF.TimeSeries.Transport.DataSubscriber.CompressSignalIndexCache">
@@ -7836,12 +8220,12 @@
         </member>
         <member name="P:GSF.TimeSeries.Transport.DataSubscriber.ReceiveInternalMetadata">
             <summary>
-            Gets or sets the operational mode flag to receive internal metadata.
+            Gets or sets the operational mode flag to receive internal meta-data.
             </summary>
         </member>
         <member name="P:GSF.TimeSeries.Transport.DataSubscriber.ReceiveExternalMetadata">
             <summary>
-            Gets or sets the operational mode flag to receive external metadata.
+            Gets or sets the operational mode flag to receive external meta-data.
             </summary>
         </member>
         <member name="P:GSF.TimeSeries.Transport.DataSubscriber.UseCommonSerializationFormat">
@@ -7886,7 +8270,17 @@
         </member>
         <member name="P:GSF.TimeSeries.Transport.DataSubscriber.MetadataSynchronizationTimeout">
             <summary>
-            Gets or sets the timeout used when executing database queries during metadata synchronization.
+            Gets or sets the timeout used when executing database queries during meta-data synchronization.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.Transport.DataSubscriber.UseTransactionForMetadata">
+            <summary>
+            Gets or sets flag that determines if meta-data synchronization should be performed within a transaction.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.Transport.DataSubscriber.DataSource">
+            <summary>
+            Gets or sets <see cref="T:System.Data.DataSet"/> based data source available to this <see cref="T:GSF.TimeSeries.Transport.DataSubscriber"/>.
             </summary>
         </member>
         <member name="P:GSF.TimeSeries.Transport.DataSubscriber.Status">
@@ -7965,6 +8359,16 @@
             </summary>
             <param name="frame"><see cref="T:GSF.TimeSeries.IFrame"/> of measurements with the same timestamp that arrived within <see cref="P:GSF.TimeSeries.ConcentratorBase.LagTime"/> that are ready for processing.</param>
             <param name="index">Index of <see cref="T:GSF.TimeSeries.IFrame"/> within a second ranging from zero to <c><see cref="P:GSF.TimeSeries.ConcentratorBase.FramesPerSecond"/> - 1</c>.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.Transport.DataSubscriber.SubscribedDevice.Finalize">
+            <summary>
+            Releases the unmanaged resources before the <see cref="T:GSF.TimeSeries.Transport.DataSubscriber.SubscribedDevice"/> object is reclaimed by <see cref="T:System.GC"/>.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.Transport.DataSubscriber.SubscribedDevice.Dispose">
+            <summary>
+            Releases all the resources used by the <see cref="T:GSF.TimeSeries.Transport.DataSubscriber.SubscribedDevice"/> object.
+            </summary>
         </member>
         <member name="T:GSF.TimeSeries.DebugHostBase">
             <summary>
@@ -8101,67 +8505,6 @@
             Gets the length of the <see cref="T:GSF.TimeSeries.Transport.SerializableMeasurement"/>.
             </summary>
         </member>
-        <member name="T:GSF.TimeSeries.ServiceClientBase">
-            <summary>
-            Represents a client that can remotely access the time-series framework service host.
-            </summary>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceClientBase.#ctor">
-            <summary>
-            Creates a new instance of the <see cref="T:GSF.TimeSeries.ServiceClientBase"/> class.
-            </summary>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceClientBase.Start(System.String[])">
-            <summary>
-            Handles service start event.
-            </summary>
-            <param name="args">Service start arguments.</param>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceClientBase.ClientHelper_ReceivedServiceUpdate(System.Object,GSF.EventArgs{GSF.UpdateType,System.String})">
-            <summary>
-            Client helper service update reception handler.
-            </summary>
-            <param name="sender">Sending object.</param>
-            <param name="e">Event argument containing update type and associated message data.</param>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceClientBase.ClientHelper_ReceivedServiceResponse(System.Object,GSF.EventArgs{GSF.ServiceProcess.ServiceResponse})">
-            <summary>
-            Client helper service response reception handler.
-            </summary>
-            <param name="sender">Sending object.</param>
-            <param name="e">Event argument containing the service response.</param>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceClientBase.ClientHelper_TelnetSessionEstablished(System.Object,System.EventArgs)">
-            <summary>
-            Client helper telnet session established handler.
-            </summary>
-            <param name="sender">Sending object.</param>
-            <param name="e">Event arguments, if any.</param>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceClientBase.ClientHelper_TelnetSessionTerminated(System.Object,System.EventArgs)">
-            <summary>
-            Client helper telnet session terminated handler.
-            </summary>
-            <param name="sender">Sending object.</param>
-            <param name="e">Event arguments, if any.</param>
-        </member>
-        <member name="F:GSF.TimeSeries.ServiceClientBase.components">
-            <summary>
-            Required designer variable.
-            </summary>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceClientBase.Dispose(System.Boolean)">
-            <summary> 
-            Clean up any resources being used.
-            </summary>
-            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceClientBase.InitializeComponent">
-            <summary>
-            Required method for Designer support - do not modify
-            the contents of this method with the code editor.
-            </summary>
-        </member>
         <member name="T:GSF.TimeSeries.ConfigurationType">
             <summary>
             Configuration data source type enumeration.
@@ -8244,6 +8587,11 @@
             Time-series framework uses this handler to un-wire events and dispose of system objects.
             </remarks>
         </member>
+        <member name="M:GSF.TimeSeries.ServiceHostBase.InitializeServiceHelper">
+            <summary>
+            Initializes the service helper.
+            </summary>
+        </member>
         <member name="M:GSF.TimeSeries.ServiceHostBase.CacheCurrentConfiguration(System.Data.DataSet)">
             <summary>
             Caches the current system configuration.
@@ -8252,6 +8600,38 @@
             <remarks>
             This method allows caching of the current system configuration so it can be used if primary configuration source is unavailable.
             </remarks>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceHostBase.Dispose(System.Boolean)">
+            <summary>
+            Releases the unmanaged resources used by the <see cref="T:GSF.TimeSeries.ServiceHostBase"/> object and optionally releases the managed resources.
+            </summary>
+            <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceHostBase.OnStart(System.String[])">
+            <summary>
+            Handles service start event.
+            </summary>
+            <param name="args">Service startup arguments, if any.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceHostBase.OnStop">
+            <summary>
+            Handles service stop event.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceHostBase.OnPause">
+            <summary>
+            Handles service pause event.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceHostBase.OnContinue">
+            <summary>
+            Handles service continue event.
+            </summary>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceHostBase.OnShutdown">
+            <summary>
+            Handles service shut down event.
+            </summary>
         </member>
         <member name="M:GSF.TimeSeries.ServiceHostBase.m_iaonSession_StatusMessage(System.Object,GSF.EventArgs{System.String,GSF.UpdateType})">
             <summary>
@@ -8300,6 +8680,13 @@
         <member name="M:GSF.TimeSeries.ServiceHostBase.StatusExportProcessHandler(System.String,System.Object[])">
             <summary>
             Event handler for scheduled adapter status export.
+            </summary>
+            <param name="name">Scheduled event name.</param>
+            <param name="parameters">Scheduled event parameters.</param>
+        </member>
+        <member name="M:GSF.TimeSeries.ServiceHostBase.ReportingProcessHandler(System.String,System.Object[])">
+            <summary>
+            Event handler for scheduled reporting services.
             </summary>
             <param name="name">Scheduled event name.</param>
             <param name="parameters">Scheduled event parameters.</param>
@@ -8466,42 +8853,10 @@
             <param name="type"><see cref="T:GSF.UpdateType"/> of message to send.</param>
             <param name="args">Arguments of the formatted status message.</param>
         </member>
-        <member name="M:GSF.TimeSeries.ServiceHostBase.OnStart(System.String[])">
-            <summary>
-            Handles service start event.
-            </summary>
-            <param name="args">Service startup arguments, if any.</param>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceHostBase.OnStop">
-            <summary>
-            Handles service stop event.
-            </summary>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceHostBase.OnPause">
-            <summary>
-            Handles service pause event.
-            </summary>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceHostBase.OnContinue">
-            <summary>
-            Handles service continue event.
-            </summary>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceHostBase.OnShutdown">
-            <summary>
-            Handles service shut down event.
-            </summary>
-        </member>
         <member name="F:GSF.TimeSeries.ServiceHostBase.components">
             <summary> 
             Required designer variable.
             </summary>
-        </member>
-        <member name="M:GSF.TimeSeries.ServiceHostBase.Dispose(System.Boolean)">
-            <summary>
-            Clean up any resources being used.
-            </summary>
-            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         </member>
         <member name="M:GSF.TimeSeries.ServiceHostBase.InitializeComponent">
             <summary> 
@@ -9080,6 +9435,37 @@
             Gets the length of the binary image.
             </summary>
         </member>
+        <member name="T:GSF.TimeSeries.Transport.SourceDevice">
+            <summary>
+            Represents a device which acts as a source for
+            measurements provided to a <see cref="T:GSF.TimeSeries.Transport.DataSubscriber"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.Transport.SourceDevice.DataQualityErrors">
+            <summary>
+            Gets or sets total data quality errors of this <see cref="T:GSF.TimeSeries.Transport.SourceDevice"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.Transport.SourceDevice.TimeQualityErrors">
+            <summary>
+            Gets or sets total time quality errors of this <see cref="T:GSF.TimeSeries.Transport.SourceDevice"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.Transport.SourceDevice.DeviceErrors">
+            <summary>
+            Gets or sets total device errors of this <see cref="T:GSF.TimeSeries.Transport.SourceDevice"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.Transport.SourceDevice.MeasurementsReceived">
+            <summary>
+            Gets or sets total measurements received for this <see cref="T:GSF.TimeSeries.Transport.SourceDevice"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.TimeSeries.Transport.SourceDevice.MeasurementsExpected">
+            <summary>
+            Gets or sets total measurements expected to have been received for this <see cref="T:GSF.TimeSeries.Transport.SourceDevice"/>.
+            </summary>
+        </member>
         <member name="T:GSF.TimeSeries.Transport.SubscriptionInfo">
             <summary>
             Configuration object for data subscriptions.
@@ -9151,6 +9537,12 @@
             This flag determines the size of the timestamps transmitted as part of
             the compact measurement format when the server is using base time offsets.
             </remarks>
+        </member>
+        <member name="P:GSF.TimeSeries.Transport.SubscriptionInfo.RequestNaNValueFilter">
+            <summary>
+            Gets or sets the flag that determines whether to request that measurements
+            sent to the subscriber should be filtered by the publisher prior to sending them.
+            </summary>
         </member>
         <member name="P:GSF.TimeSeries.Transport.SubscriptionInfo.StartTime">
             <summary>

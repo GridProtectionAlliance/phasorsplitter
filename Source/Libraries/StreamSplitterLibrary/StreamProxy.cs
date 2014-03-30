@@ -819,19 +819,19 @@ namespace StreamSplitter
                 // Attempt to interpret data received from a client as a command frame
                 switch (m_frameParser.PhasorProtocol)
                 {
-                    case PhasorProtocol.IeeeC37_118V2:
-                    case PhasorProtocol.IeeeC37_118V1:
-                    case PhasorProtocol.IeeeC37_118D6:
-                        commandFrame = new GSF.PhasorProtocols.IeeeC37_118.CommandFrame(commandBuffer, 0, length);
+                    case PhasorProtocol.IEEEC37_118V2:
+                    case PhasorProtocol.IEEEC37_118V1:
+                    case PhasorProtocol.IEEEC37_118D6:
+                        commandFrame = new GSF.PhasorProtocols.IEEEC37_118.CommandFrame(commandBuffer, 0, length);
                         break;
-                    case PhasorProtocol.Ieee1344:
-                        commandFrame = new GSF.PhasorProtocols.Ieee1344.CommandFrame(commandBuffer, 0, length);
+                    case PhasorProtocol.IEEE1344:
+                        commandFrame = new GSF.PhasorProtocols.IEEE1344.CommandFrame(commandBuffer, 0, length);
                         break;
                     case PhasorProtocol.SelFastMessage:
                         commandFrame = new GSF.PhasorProtocols.SelFastMessage.CommandFrame(commandBuffer, 0, length);
                         break;
-                    case PhasorProtocol.Iec61850_90_5:
-                        commandFrame = new GSF.PhasorProtocols.Iec61850_90_5.CommandFrame(commandBuffer, 0, length);
+                    case PhasorProtocol.IEC61850_90_5:
+                        commandFrame = new GSF.PhasorProtocols.IEC61850_90_5.CommandFrame(commandBuffer, 0, length);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(string.Format("Protocol \"{0}\" does not support commands.", m_frameParser.PhasorProtocol));

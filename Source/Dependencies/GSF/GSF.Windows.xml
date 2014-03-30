@@ -567,5 +567,272 @@
             Contains classes and extension functions related to .NET Windows-based platforms such as Windows Forms and WPF.
             </summary>
         </member>
+        <member name="T:GSF.Windows.ResourceAccessiblityMode">
+            <summary>
+            Defines an enumeration of secure resource accessibility modes.
+            </summary>
+        </member>
+        <member name="F:GSF.Windows.ResourceAccessiblityMode.Configurable">
+            <summary>
+            Resource security is controlled via configuration.
+            </summary>
+        </member>
+        <member name="F:GSF.Windows.ResourceAccessiblityMode.AlwaysIncluded">
+            <summary>
+            Resource is always secured.
+            </summary>
+        </member>
+        <member name="F:GSF.Windows.ResourceAccessiblityMode.AlwaysExcluded">
+            <summary>
+            Resource is never secured.
+            </summary>
+        </member>
+        <member name="T:GSF.Windows.SecureWindow">
+            <summary>
+            Represents a WPF window secured using role-based security.
+            </summary>
+            <example>
+            Required config file entries:
+            <code>
+            <![CDATA[
+            <?xml version="1.0"?>
+            <configuration>
+              <configSections>
+                <section name="categorizedSettings" type="GSF.Configuration.CategorizedSettingsSection, GSF.Core" />
+              </configSections>
+              <categorizedSettings>
+                <securityProvider>
+                  <add name="ApplicationName" value="" description="Name of the application being secured as defined in the backend security datastore."
+                    encrypted="false" />
+                  <add name="ConnectionString" value="" description="Connection string to be used for connection to the backend security datastore."
+                    encrypted="false" />
+                  <add name="ProviderType" value="GSF.Security.LdapSecurityProvider, GSF.Security"
+                    description="The type to be used for enforcing security." encrypted="false" />
+                  <add name="IncludedResources" value="*Window*=*" description="Semicolon delimited list of resources to be secured along with role names."
+                    encrypted="false" />
+                  <add name="ExcludedResources" value="" description="Semicolon delimited list of resources to be excluded from being secured."
+                    encrypted="false" />
+                  <add name="NotificationSmtpServer" value="localhost" description="SMTP server to be used for sending out email notification messages."
+                    encrypted="false" />
+                  <add name="NotificationSenderEmail" value="sender@company.com" description="Email address of the sender of email notification messages." 
+                    encrypted="false" />
+                </securityProvider>
+                <activeDirectory>
+                  <add name="PrivilegedDomain" value="" description="Domain of privileged domain user account."
+                    encrypted="false" />
+                  <add name="PrivilegedUserName" value="" description="Username of privileged domain user account."
+                    encrypted="false" />
+                  <add name="PrivilegedPassword" value="" description="Password of privileged domain user account."
+                    encrypted="true" />
+                </activeDirectory>
+              </categorizedSettings>
+            </configuration>
+            ]]>
+            </code>
+            XAML to be used for the WPF window that inherits from <see cref="T:GSF.Windows.SecureWindow"/>:
+            <code>
+            <![CDATA[
+            <src:SecureWindow x:Class="SecureWpfApplication.Window1"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                xmlns:src="clr-namespace:GSF.Windows;assembly=GSF.Windows"
+                Title="Window1" Height="300" Width="300">
+                <Grid>
+            
+                </Grid>
+            </src:SecureWindow>
+            ]]>
+            </code>
+            </example>
+            <seealso cref="T:GSF.Security.ISecurityProvider"/>
+        </member>
+        <member name="M:GSF.Windows.SecureWindow.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:GSF.Windows.SecureWindow"/> class.
+            </summary>
+        </member>
+        <member name="M:GSF.Windows.SecureWindow.GetResourceName">
+            <summary>
+            Gets the name of resource being accessed.
+            </summary>
+            <returns>Name of the resource being accessed.</returns>
+        </member>
+        <member name="F:GSF.Windows.SecureWindow.ForceLoginDisplayProperty">
+            <summary>
+            Identifies the <see cref="P:GSF.Windows.SecureWindow.ForceLoginDisplay"/> dependency property.
+            </summary>
+            <returns>identifier for the <see cref="P:GSF.Windows.SecureWindow.ForceLoginDisplay"/> dependency property.</returns>
+        </member>
+        <member name="F:GSF.Windows.SecureWindow.ResourceAccessiblityProperty">
+            <summary>
+            Identifies the <see cref="P:GSF.Windows.SecureWindow.ResourceAccessiblity"/> dependency property.
+            </summary>
+            <returns>identifier for the <see cref="P:GSF.Windows.SecureWindow.ResourceAccessiblity"/> dependency property.</returns>
+        </member>
+        <member name="F:GSF.Windows.SecureWindow.IncludedRolesProperty">
+            <summary>
+            Identifies the <see cref="P:GSF.Windows.SecureWindow.IncludedRoles"/> dependency property.
+            </summary>
+            <returns>identifier for the <see cref="P:GSF.Windows.SecureWindow.IncludedRoles"/> dependency property.</returns>
+        </member>
+        <member name="P:GSF.Windows.SecureWindow.ForceLoginDisplay">
+            <summary>
+            Gets or sets flags to force login display.
+            </summary>
+        </member>
+        <member name="P:GSF.Windows.SecureWindow.ResourceAccessiblity">
+            <summary>
+            Gets or sets window's secure <see cref="T:GSF.Windows.ResourceAccessiblityMode"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.Windows.SecureWindow.IncludedRoles">
+            <summary>
+            Gets or sets applicable roles when <see cref="P:GSF.Windows.SecureWindow.ResourceAccessiblity"/> == <see cref="F:GSF.Windows.ResourceAccessiblityMode.AlwaysIncluded"/>.
+            </summary>
+        </member>
+        <member name="T:GSF.Windows.DisplayType">
+            <summary>
+            Enumerable list of portlets to be displayed on the screen.
+            </summary>
+        </member>
+        <member name="F:GSF.Windows.DisplayType.Login">
+            <summary>
+            Login screen.
+            </summary>
+        </member>
+        <member name="F:GSF.Windows.DisplayType.AccessDenied">
+            <summary>
+            Access Denied screen.
+            </summary>
+        </member>
+        <member name="F:GSF.Windows.DisplayType.ChangePassword">
+            <summary>
+            Change Password screen.
+            </summary>
+        </member>
+        <member name="T:GSF.Windows.SecurityPortal">
+            <summary>
+            Represents a WPF window used to request user credentials and other security related information.
+            </summary>
+            <summary>
+            SecurityPortal
+            </summary>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.#ctor(GSF.Windows.DisplayType)">
+            <summary>
+            Initializes a new WPF window.
+            </summary>
+            <param name="displayType">Type of the message received from security API which is used to decide controls to be displayed on the screen.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.ManageScreenVisualization">
+            <summary>
+            Displays requested screen section based on received request.
+            </summary>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.DisplayErrorMessage(System.String)">
+            <summary>
+            Displays error message.
+            </summary>
+            <param name="message">Error message to display.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.ClearErrorMessage">
+            <summary>
+            Clears error message.
+            </summary>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.Window_Closed(System.Object,System.EventArgs)">
+            <summary>
+            Handles window closed.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.Window_MouseDown(System.Object,System.Windows.Input.MouseButtonEventArgs)">
+            <summary>
+            Handles mouse down event anywhere on the screen so user can click and drag this window around.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.ButtonLogin_Click(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Logins the user.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.ButtonChange_Click(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Attempts to change user's password.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.ButtonExit_Click(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Exits window.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.ButtonOK_Click(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Closes window.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.ButtonForgotPasswordLink_Click(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Displays help for the user on how to reset password.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.ButtonChangePasswordLink_Click(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Navigates users to Change Password screen.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.ButtonLoginLink_Click(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Navigates users back to Login screen.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.TextBox_TextChanged(System.Object,System.Windows.Controls.TextChangedEventArgs)">
+            <summary>
+            Keeps the user names on the separate sections synchronized and clears error messages when text changes.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.PasswordBox_PasswordChanged(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            Clears error messages when text changes.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.TextBox_GotFocus(System.Object,System.Windows.RoutedEventArgs)">
+            <summary>
+            We make sure all text boxes "select-all" when they receive focus.
+            </summary>
+            <param name="sender">Source of this event.</param>
+            <param name="e">Arguments of this event.</param>
+        </member>
+        <member name="M:GSF.Windows.SecurityPortal.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="P:GSF.Windows.SecurityPortal.ProviderFailure">
+            <summary>
+            Gets or sets flag that indicates if there was a failure during provider initialization.
+            </summary>
+        </member>
     </members>
 </doc>

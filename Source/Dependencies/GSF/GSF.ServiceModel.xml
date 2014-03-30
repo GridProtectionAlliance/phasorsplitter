@@ -89,7 +89,7 @@
             Gets or sets a semicolon delimited list of URIs where the web service can be accessed.
             </summary>
         </member>
-        <member name="P:GSF.ServiceModel.ISelfHostingService.Contract">
+        <member name="P:GSF.ServiceModel.ISelfHostingService.ContractInterface">
             <summary>
             Gets or sets the <see cref="P:System.Type.FullName"/> of the contract interface implemented by the web service.
             </summary>
@@ -511,7 +511,7 @@
             for a list of supported URI formats.
             </remarks>
         </member>
-        <member name="P:GSF.ServiceModel.SelfHostingService.Contract">
+        <member name="P:GSF.ServiceModel.SelfHostingService.ContractInterface">
             <summary>
             Gets or sets the <see cref="P:System.Type.FullName"/> of the contract interface implemented by the web service.
             </summary>
@@ -545,6 +545,16 @@
             <remarks>
             To allow all domains just set this property to "*".
             </remarks>
+        </member>
+        <member name="P:GSF.ServiceModel.SelfHostingService.WindowsAuthentication">
+            <summary>
+            Gets or sets a boolean value that indicates whether Windows Authentication is to be enabled.
+            </summary>
+        </member>
+        <member name="P:GSF.ServiceModel.SelfHostingService.ServiceEnabled">
+            <summary>
+            Gets or sets a boolean value that indicates whether the web service is to be enabled at startup.
+            </summary>
         </member>
         <member name="P:GSF.ServiceModel.SelfHostingService.ServiceHost">
             <summary>
