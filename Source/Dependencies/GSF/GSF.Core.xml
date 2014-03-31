@@ -3765,12 +3765,6 @@
             </summary>
             <param name="items">The items to be queued.</param>
         </member>
-        <member name="M:GSF.Collections.AsyncDoubleBufferedQueue`1.Dequeue">
-            <summary>
-            Dequeues a collection of items from the async double-buffered queue.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="E:GSF.Collections.AsyncDoubleBufferedQueue`1.ProcessException">
             <summary>
             Event that is raised if an exception is encountered while attempting to processing an item in the <see cref="T:GSF.Collections.AsyncDoubleBufferedQueue`1"/>.
@@ -3795,26 +3789,11 @@
             Creates a new <see cref="T:GSF.Collections.AsyncQueue`1"/>.
             </summary>
         </member>
-        <member name="M:GSF.Collections.AsyncQueue`1.GetEnumerator">
-            <summary>
-            Returns an enumerator that iterates through the <see cref="T:GSF.Collections.AsyncQueue`1"/>.
-            </summary>
-            <returns>An enumerator for the contents of the <see cref="T:GSF.Collections.AsyncQueue`1"/>.</returns>
-        </member>
         <member name="M:GSF.Collections.AsyncQueue`1.Enqueue(`0)">
             <summary>
             Enqueues an item for processing.
             </summary>
             <param name="item">Item to be queued for processing.</param>
-        </member>
-        <member name="M:GSF.Collections.AsyncQueue`1.OnProcessException(System.Exception)">
-            <summary>
-            Raises the base class <see cref="E:GSF.Collections.AsyncQueue`1.ProcessException"/> event.
-            </summary>
-            <remarks>
-            Derived classes cannot raise events of their base classes, so we expose event wrapper methods to accomodate as needed.
-            </remarks>
-            <param name="ex"><see cref="T:System.Exception"/> to be passed to ProcessException.</param>
         </member>
         <member name="E:GSF.Collections.AsyncQueue`1.ProcessException">
             <summary>
@@ -3824,26 +3803,20 @@
             Processing will not stop for any exceptions thrown by user processing function, but exceptions will be exposed through this event.
             </remarks>
         </member>
-        <member name="P:GSF.Collections.AsyncQueue`1.ProcessItemFunction">
-            <summary>
-            Gets or sets item processing function.
-            </summary>
-        </member>
         <member name="P:GSF.Collections.AsyncQueue`1.Count">
             <summary>
             Gets the total number of items currently in the queue.
+            </summary>
+        </member>
+        <member name="P:GSF.Collections.AsyncQueue`1.ProcessItemFunction">
+            <summary>
+            Gets or sets item processing function.
             </summary>
         </member>
         <member name="P:GSF.Collections.AsyncQueue`1.Enabled">
             <summary>
             Gets or sets flag that enables or disables processing.
             </summary>
-        </member>
-        <member name="T:GSF.Collections.AsyncQueue`1.ProcessItemFunctionSignature">
-            <summary>
-            Defines an item processing function for the <see cref="T:GSF.Collections.AsyncQueue`1"/>.
-            </summary>
-            <param name="item">Item to be processed.</param>
         </member>
         <member name="T:GSF.Collections.CollectionExtensions">
             <summary>
@@ -4433,15 +4406,6 @@
             or no items if none have been enqueued since last dequeue.
             </returns>
         </member>
-        <member name="M:GSF.Collections.DoubleBufferedQueue`1.OnProcessException(System.Exception)">
-            <summary>
-            Raises the base class <see cref="E:GSF.Collections.DoubleBufferedQueue`1.ProcessException"/> event.
-            </summary>
-            <remarks>
-            Derived classes cannot raise events of their base classes, so we expose event wrapper methods to accomodate as needed.
-            </remarks>
-            <param name="ex"><see cref="T:System.Exception"/> to be passed to ProcessException.</param>
-        </member>
         <member name="E:GSF.Collections.DoubleBufferedQueue`1.ProcessException">
             <summary>
             Event that is raised if an exception is encountered while attempting to processing an item in the <see cref="T:GSF.Collections.AsyncQueue`1"/>.
@@ -4454,12 +4418,6 @@
             <summary>
             Gets or sets item processing function.
             </summary>
-        </member>
-        <member name="T:GSF.Collections.DoubleBufferedQueue`1.ProcessItemsFunctionSignature">
-            <summary>
-            Defines an item processing function for the <see cref="T:GSF.Collections.AsyncQueue`1"/>.
-            </summary>
-            <param name="items">Items to be processed.</param>
         </member>
         <member name="T:GSF.Collections.ProcessDictionary`2">
             <summary>
@@ -13729,95 +13687,6 @@
             Contains classes used to simplify and standardize access to information about a domain user retrieved from Active Directory.
             </summary>
         </member>
-        <member name="T:GSF.Identity.UserAccountControl">
-            <summary>
-            Provides facilities for enabling and disabling User Account Control (UAC), determining elevation and virtualization status, and launching a process under elevated credentials.
-            </summary>
-        </member>
-        <member name="M:GSF.Identity.UserAccountControl.CreateProcessAsAdmin(System.String,System.String)">
-            <summary>
-            Creates a process under the elevated token, regardless of UAC settings or the manifest associated with that process.
-            </summary>
-            <param name="fileName">The path to the executable file.</param>
-            <param name="arguments">The command-line arguments to pass to the process.</param>
-            <returns>A <see cref="T:System.Diagnostics.Process"/> object representing the newly created process.</returns>
-        </member>
-        <member name="M:GSF.Identity.UserAccountControl.CreateProcessAsStandardUser(System.String,System.String)">
-            <summary>
-            Creates a process under the standard user if the current process is elevated.  The identity of the standard user is
-            determined by retrieving the user token of the currently running Explorer (shell) process.
-            </summary>
-            <param name="fileName">The path to the executable file.</param>
-            <param name="arguments">The command-line arguments to pass to the process.</param>
-            <returns>A <see cref="T:System.Diagnostics.Process"/> object representing the newly created process.</returns>
-            <remarks>
-            <para>
-            This method requires administrative privileges. An exception will be thrown if the current user is not elevated.
-            </para>
-            <para>
-            This is an especially useful function if you are trying to shell an application from an installation program. With UAC
-            enabled, an application spawned from a setup program will be the "NT AUTHORITY\SYSTEM" user - not the local user that
-            executed the installer; this can wreak havoc if the spawned application needs to authenticate the local user.
-            </para>
-            </remarks>
-        </member>
-        <member name="M:GSF.Identity.UserAccountControl.DisableUac">
-            <summary>
-            Disables User Account Control by changing the LUA registry key. The changes do not have effect until the system is restarted.
-            </summary>
-        </member>
-        <member name="M:GSF.Identity.UserAccountControl.DisableUacAndRestartWindows">
-            <summary>
-            Disables User Account Control and restarts the system.
-            </summary>
-        </member>
-        <member name="M:GSF.Identity.UserAccountControl.EnableUac">
-            <summary>
-            Enables User Account Control by changing the LUA registry key. The changes do not have effect until the system is restarted.
-            </summary>
-        </member>
-        <member name="M:GSF.Identity.UserAccountControl.EnableUacAndRestartWindows">
-            <summary>
-            Enables User Account Control and restarts the system.
-            </summary>
-        </member>
-        <member name="P:GSF.Identity.UserAccountControl.IsUserAdmin">
-            <summary>
-            Returns <c>true</c> if the current user has administrator privileges.
-            </summary>
-            <remarks>
-            If UAC is on, then this property will return <c>true</c> even if the current process is not running elevated.
-            If UAC is off, then this property will return <c>true</c> if the user is part of the built-in <i>Administrators</i> group.
-            </remarks>
-        </member>
-        <member name="P:GSF.Identity.UserAccountControl.IsUacEnabled">
-            <summary>
-            Returns <c>true</c> if User Account Control (UAC) is enabled on this machine.
-            </summary>
-            <remarks>
-            This value is obtained by checking the LUA registry key. It is possible that the user has not restarted the machine after
-            enabling/disabling UAC. In that case, the value of the registry key does not reflect the true state of affairs.
-            </remarks>
-        </member>
-        <member name="P:GSF.Identity.UserAccountControl.IsCurrentProcessVirtualized">
-            <summary>
-            Returns <c>true</c> if the current process is using UAC virtualization.
-            </summary>
-            <remarks>
-            Under UAC virtualization, file system and registry accesses to specific locations performed by an application are redirected to
-            provide backwards compatibility. 64-bit applications or applications that have an associated manifest do not enjoy UAC virtualization
-            because they are assumed to be compatible with Vista and UAC.
-            </remarks>
-        </member>
-        <member name="P:GSF.Identity.UserAccountControl.IsCurrentProcessElevated">
-            <summary>
-             Returns <c>true</c> if the current process is elevated, i.e. if the process went through an elevation consent phase.
-             </summary>
-             <remarks>
-             This property will return <c>false</c> if UAC is disabled and the process is running as admin.  It only determines whether the process
-             went through the elevation procedure.
-             </remarks>
-        </member>
         <member name="T:GSF.Identity.UserInfo">
              <summary>
              Represents information about a domain user retrieved from Active Directory.
@@ -15693,741 +15562,6 @@
             Gets the length of serialized <see cref="T:GSF.Interop.VBArrayDescriptor"/>.
             </summary>
         </member>
-        <member name="T:GSF.Interop.WindowsApi">
-            <summary>
-            Defines common Windows API constants, enumerations, structures and functions.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LOGON32_PROVIDER_DEFAULT">
-            <summary>
-            Use the standard logon provider for the system. The default security provider is NTLM. 
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LOGON32_LOGON_INTERACTIVE">
-            <summary>
-            This logon type is intended for users who will be interactively using the computer, such as a user being logged on by a terminal server, 
-            remote shell, or similar process. This logon type has the additional expense of caching logon information for disconnected operations; 
-            therefore, it is inappropriate for some client/server applications, such as a mail server. 
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LOGON32_LOGON_NETWORK">
-            <summary>
-            This logon type is intended for high performance servers to authenticate plaintext passwords. The LogonUserEx function does not cache
-            credentials for this logon type. 
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SECURITY_IMPERSONATION">
-            <summary>
-            Impersonate a client at the impersonation level.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ERROR_ACCESS_DENIED">
-            <summary>
-            Access is denied.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.InitiateSystemShutdownEx(System.String,System.String,System.UInt32,System.Boolean,System.Boolean,GSF.Interop.WindowsApi.ShutdownReason)">
-            <summary>
-            Win32 InitiateSystemShutdownEx function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.GetShellWindow">
-            <summary>
-            Win32 GetShellWindow function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.GetWindowThreadProcessId(System.IntPtr,System.UInt32@)">
-            <summary>
-            Win32 GetWindowThreadProcessId function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.OpenSCManager(System.String,System.String,System.Int32)">
-            <summary>
-            Win32 OpenSCManager function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.OpenService(System.IntPtr,System.String,System.Int32)">
-            <summary>
-            Win32 OpenService function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.LockServiceDatabase(System.IntPtr)">
-            <summary>
-            Win32 LockServiceDatabase function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.ChangeServiceConfig2(System.IntPtr,System.Int32,System.IntPtr)">
-            <summary>
-            Win32 ChangeServiceConfig2 function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.ChangeServiceConfig2(System.IntPtr,System.Int32,GSF.Interop.WindowsApi.SERVICE_DESCRIPTION@)">
-            <summary>
-            Win32 ChangeServiceConfig2 function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.ChangeServiceConfig2(System.IntPtr,System.Int32,GSF.Interop.WindowsApi.SERVICE_FAILURE_ACTIONS_FLAG@)">
-            <summary>
-            Win32 ChangeServiceConfig2 function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.CloseServiceHandle(System.IntPtr)">
-            <summary>
-            Win32 CloseServiceHandle function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.UnlockServiceDatabase(System.IntPtr)">
-            <summary>
-            Win32 UnlockServiceDatabase function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.LookupAccountName(System.String,System.String,System.IntPtr,System.Int32@,System.Text.StringBuilder,System.Int32@,System.Int32@)">
-            <summary>
-            Win32 LookupAccountName function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.LsaOpenPolicy(GSF.Interop.WindowsApi.LSA_UNICODE_STRING@,GSF.Interop.WindowsApi.LSA_OBJECT_ATTRIBUTES@,System.Int32,System.IntPtr@)">
-            <summary>
-            Win32 LsaOpenPolicy function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.LsaAddAccountRights(System.IntPtr,System.IntPtr,GSF.Interop.WindowsApi.LSA_UNICODE_STRING[],System.UInt32)">
-            <summary>
-            Win32 LsaAddAccountRights function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.LsaClose(System.IntPtr)">
-            <summary>
-            Win32 LsaClose function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.FreeSid(System.IntPtr)">
-            <summary>
-            Win32 FreeSid function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.GetLastError">
-            <summary>
-            Win32 GetLastError function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.GetTokenInformation(System.IntPtr,GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS,System.UInt32@,System.UInt32,System.UInt32@)">
-            <summary>
-            Win32 GetTokenInformation function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.GetTokenInformation(System.IntPtr,GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS,GSF.Interop.WindowsApi.TOKEN_ELEVATION_TYPE@,System.UInt32,System.UInt32@)">
-            <summary>
-            Win32 GetTokenInformation function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.LogonUser(System.String,System.String,System.String,System.Int32,System.Int32,System.IntPtr@)">
-            <summary>
-            Win32 LogonUser function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.CreateProcessWithTokenW(System.IntPtr,GSF.Interop.WindowsApi.LogonFlags,System.String,System.String,GSF.Interop.WindowsApi.CreationFlags,System.IntPtr,System.String,GSF.Interop.WindowsApi.STARTUPINFO@,GSF.Interop.WindowsApi.PROCESS_INFORMATION@)">
-            <summary>
-            Win32 CreateProcessWithTokenW function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.DuplicateToken(System.IntPtr,System.Int32,System.IntPtr@)">
-            <summary>
-            Win32 DuplicateToken function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.DuplicateTokenEx(System.IntPtr,System.UInt32,GSF.Interop.WindowsApi.SECURITY_ATTRIBUTES@,GSF.Interop.WindowsApi.SECURITY_IMPERSONATION_LEVEL,GSF.Interop.WindowsApi.TOKEN_TYPE,System.IntPtr@)">
-            <summary>
-            Win32 DuplicateTokenEx function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.DuplicateTokenEx(System.IntPtr,System.UInt32,System.IntPtr,GSF.Interop.WindowsApi.SECURITY_IMPERSONATION_LEVEL,GSF.Interop.WindowsApi.TOKEN_TYPE,System.IntPtr@)">
-            <summary>
-            Win32 DuplicateTokenEx function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.AdjustTokenPrivileges(System.IntPtr,System.Boolean,GSF.Interop.WindowsApi.TOKEN_PRIVILEGES@,System.Int32,System.IntPtr,System.Int32@)">
-            <summary>
-            Win32 AdjustTokenPrivileges function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.LookupPrivilegeValue(System.String,System.String,System.Int64@)">
-            <summary>
-            Win32 LookupPrivilegeValue function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.OpenProcessToken(System.IntPtr,System.UInt32,System.IntPtr@)">
-            <summary>
-            Win32 OpenProcessToken function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.OpenProcess(GSF.Interop.WindowsApi.ProcessAccessTypes,System.Boolean,System.UInt32)">
-            <summary>
-            Win32 OpenProcess function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.GetCurrentProcess">
-            <summary>
-            Win32 GetCurrentProcess function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.CloseHandle(System.IntPtr)">
-            <summary>
-            Win32 CloseHandle function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.FormatMessage(System.Int32,System.IntPtr@,System.Int32,System.Int32,System.String@,System.Int32,System.IntPtr@)">
-            <summary>
-            Win32 FormatMessage function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.CryptFindOIDInfo(System.Int32,System.String,System.UInt32)">
-            <summary>
-            Win32 CryptFindOIDInfo function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.CryptRegisterOIDInfo(System.IntPtr,System.Int32)">
-            <summary>
-            Win32 CryptRegisterOIDInfo function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.CryptUnregisterOIDInfo(System.IntPtr)">
-            <summary>
-            Win32 CryptUnregisterOIDInfo function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.IsWow64Process(System.IntPtr,System.Boolean@)">
-            <summary>
-            Win32 IsWow64Process function.
-            </summary>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.GetErrorMessage(System.Int32)">
-            <summary>
-            Formats and returns a .NET string containing the Windows API level error message corresponding to the specified error code.
-            </summary>
-            <param name="errorCode">An <see cref="T:System.Int32"/> value corresponding to the specified error code.</param>
-            <returns>A formatted error message corresponding to the specified error code.</returns>
-        </member>
-        <member name="M:GSF.Interop.WindowsApi.GetLastErrorMessage">
-            <summary>
-            Formats and returns a .NET string containing the Windows API level error message from the last Win32 call.
-            </summary>
-            <returns>A formatted error message corresponding to the last Win32 call error code.</returns>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS">
-            <summary>
-            Win32 TOKEN_INFORMATION_CLASS enumeration.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenUser">
-            <summary>
-            The buffer receives a TOKEN_USER structure that contains the user account of the token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenGroups">
-            <summary>
-            The buffer receives a TOKEN_GROUPS structure that contains the group accounts associated with the token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenPrivileges">
-            <summary>
-            The buffer receives a TOKEN_PRIVILEGES structure that contains the privileges of the token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenOwner">
-            <summary>
-            The buffer receives a TOKEN_OWNER structure that contains the default owner security identifier (SID) for newly created objects.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenPrimaryGroup">
-            <summary>
-            The buffer receives a TOKEN_PRIMARY_GROUP structure that contains the default primary group SID for newly created objects.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenDefaultDacl">
-            <summary>
-            The buffer receives a TOKEN_DEFAULT_DACL structure that contains the default DACL for newly created objects.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenSource">
-            <summary>
-            The buffer receives a TOKEN_SOURCE structure that contains the source of the token. TOKEN_QUERY_SOURCE access is needed to retrieve this information.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenType">
-            <summary>
-            The buffer receives a TOKEN_TYPE value that indicates whether the token is a primary or impersonation token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenImpersonationLevel">
-            <summary>
-            The buffer receives a SECURITY_IMPERSONATION_LEVEL value that indicates the impersonation level of the token. If the access token is not an impersonation token, the function fails.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenStatistics">
-            <summary>
-            The buffer receives a TOKEN_STATISTICS structure that contains various token statistics.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenRestrictedSids">
-            <summary>
-            The buffer receives a TOKEN_GROUPS structure that contains the list of restricting SIDs in a restricted token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenSessionId">
-            <summary>
-            The buffer receives a DWORD value that indicates the Terminal Services session identifier that is associated with the token. 
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenGroupsAndPrivileges">
-            <summary>
-            The buffer receives a TOKEN_GROUPS_AND_PRIVILEGES structure that contains the user SID, the group accounts, the restricted SIDs, and the authentication ID associated with the token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenSessionReference">
-            <summary>
-            Reserved.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenSandBoxInert">
-            <summary>
-            The buffer receives a DWORD value that is nonzero if the token includes the SANDBOX_INERT flag.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenAuditPolicy">
-            <summary>
-            Reserved.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenOrigin">
-            <summary>
-            The buffer receives a TOKEN_ORIGIN value. 
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenElevationType">
-            <summary>
-            The buffer receives a TOKEN_ELEVATION_TYPE value that specifies the elevation level of the token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenLinkedToken">
-            <summary>
-            The buffer receives a TOKEN_LINKED_TOKEN structure that contains a handle to another token that is linked to this token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenElevation">
-            <summary>
-            The buffer receives a TOKEN_ELEVATION structure that specifies whether the token is elevated.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenHasRestrictions">
-            <summary>
-            The buffer receives a DWORD value that is nonzero if the token has ever been filtered.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenAccessInformation">
-            <summary>
-            The buffer receives a TOKEN_ACCESS_INFORMATION structure that specifies security information contained in the token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenVirtualizationAllowed">
-            <summary>
-            The buffer receives a DWORD value that is nonzero if virtualization is allowed for the token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenVirtualizationEnabled">
-            <summary>
-            The buffer receives a DWORD value that is nonzero if virtualization is enabled for the token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenIntegrityLevel">
-            <summary>
-            The buffer receives a TOKEN_MANDATORY_LABEL structure that specifies the token's integrity level. 
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenUIAccess">
-            <summary>
-            The buffer receives a DWORD value that is nonzero if the token has the UIAccess flag set.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenMandatoryPolicy">
-            <summary>
-            The buffer receives a TOKEN_MANDATORY_POLICY structure that specifies the token's mandatory integrity policy.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.TokenLogonSid">
-            <summary>
-            The buffer receives the token's logon security identifier (SID).
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_INFORMATION_CLASS.MaxTokenInfoClass">
-            <summary>
-            The maximum value for this enumeration
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.ProcessAccessTypes">
-            <summary>
-            Win32 ProcessAccessTypes enumeration.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_TERMINATE">
-            <summary
-            >Enables usage of the process handle in the TerminateProcess function to terminate the process.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_CREATE_THREAD">
-            <summary>
-            Enables usage of the process handle in the CreateRemoteThread function to create a thread in the process.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_SET_SESSIONID">
-            <summary>
-            Sets the session ID.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_VM_OPERATION">
-            <summary>
-            Enables usage of the process handle in the VirtualProtectEx and WriteProcessMemory functions to modify the virtual memory of the process.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_VM_READ">
-            <summary>
-            Enables usage of the process handle in the ReadProcessMemory function to read from the virtual memory of the process.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_VM_WRITE">
-            <summary>
-            Enables usage of the process handle in the WriteProcessMemory function to write to the virtual memory of the process.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_DUP_HANDLE">
-            <summary>
-            Enables usage of the process handle as either the source or target process in the DuplicateHandle function to duplicate a handle.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_CREATE_PROCESS">
-            <summary>
-            Creates a process.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_SET_QUOTA">
-            <summary>
-            Sets quota.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_SET_INFORMATION">
-            <summary>
-            Enables usage of the process handle in the SetPriorityClass function to set the priority class of the process.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_QUERY_INFORMATION">
-            <summary>
-            Enables usage of the process handle in the GetExitCodeProcess and GetPriorityClass functions to read information from the process object.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.STANDARD_RIGHTS_REQUIRED">
-            <summary>
-            Standard rights required.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.SYNCHRONIZE">
-            <summary>
-            Enables usage of the process handle in any of the wait functions to wait for the process to terminate.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.ProcessAccessTypes.PROCESS_ALL_ACCESS">
-            <summary>
-            Specifies all possible access flags for the process object.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.ShutdownReason">
-            <summary>
-            Win32 ShutdownReason enumeration.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.SECURITY_IMPERSONATION_LEVEL">
-            <summary>
-            Win32 SECURITY_IMPERSONATION_LEVEL enumeration.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.TOKEN_TYPE">
-            <summary>
-            Win32 TOKEN_TYPE enumeration.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.TOKEN_ELEVATION_TYPE">
-            <summary>
-            Win32 TOKEN_ELEVATION_TYPE enumeration.
-            </summary>
-            <remarks>
-            Enumeration indicates the elevation type of token being queried by the GetTokenInformation function or set by the SetTokenInformation function.
-            </remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_ELEVATION_TYPE.TokenElevationTypeDefault">
-            <summary>
-            The token does not have a linked token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_ELEVATION_TYPE.TokenElevationTypeFull">
-            <summary>
-            The token is an elevated token.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_ELEVATION_TYPE.TokenElevationTypeLimited">
-            <summary>
-            The token is a limited token.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.SC_ACTION_TYPE">
-            <summary>
-            Win32 SC_ACTION_TYPE enumeration.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SC_ACTION_TYPE.SC_ACTION_NONE">
-            <summary>
-            No action.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SC_ACTION_TYPE.SC_ACTION_RESTART">
-            <summary>
-            Restart the service.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SC_ACTION_TYPE.SC_ACTION_REBOOT">
-            <summary>
-            Reboot the computer.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SC_ACTION_TYPE.SC_ACTION_RUN_COMMAND">
-            <summary>
-            Run a command.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.CreationFlags">
-            <summary>
-            Win32 CreationFlags enumeration.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.LogonFlags">
-            <summary>
-            Win32 LogonFlags enumeration.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LogonFlags.WithProfile">
-            <summary>
-            Log on, then load the user's profile in the HKEY_USERS registry key. The function
-            returns after the profile has been loaded. Loading the profile can be time-consuming,
-            so it is best to use this value only if you must access the information in the 
-            HKEY_CURRENT_USER registry key. 
-            NOTE: Windows Server 2003: The profile is unloaded after the new process has been
-            terminated, regardless of whether it has created child processes.
-            </summary>
-            <remarks>See LOGON_WITH_PROFILE</remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LogonFlags.NetCredentialsOnly">
-            <summary>
-            Log on, but use the specified credentials on the network only. The new process uses the
-            same token as the caller, but the system creates a new logon session within LSA, and
-            the process uses the specified credentials as the default credentials.
-            This value can be used to create a process that uses a different set of credentials
-            locally than it does remotely. This is useful in inter-domain scenarios where there is
-            no trust relationship.
-            The system does not validate the specified credentials. Therefore, the process can start,
-            but it may not have access to network resources.
-            </summary>
-            <remarks>See LOGON_NETCREDENTIALS_ONLY</remarks>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.PROCESS_INFORMATION">
-            <summary>
-            Win32 PROCESS_INFORMATION structure.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.STARTUPINFO">
-            <summary>
-            Win32 STARTUPINFO structure.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.SERVICE_DESCRIPTION">
-            <summary>
-            Win32 SERVICE_DESCRIPTION structure.
-            </summary>
-            <remarks>
-            <para>
-            A description of NULL indicates no service description exists. The service description is NULL when the service is created.
-            </para>
-            <para>
-            The description is simply a comment that explains the purpose of the service. For example, for the DHCP service,
-            you could use the description "Provides internet addresses for computer on your network."
-            </para>
-            </remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SERVICE_DESCRIPTION.lpDescription">
-            <summary>
-            The description of the service.
-            </summary>
-            <remarks>
-            If this member is NULL, the description remains unchanged. If this value is an empty string (""), the current description is deleted.
-            </remarks>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.SC_ACTION">
-            <summary>
-            Win32 SC_ACTION structure.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SC_ACTION.Type">
-            <summary>
-            The <see cref="T:GSF.Interop.WindowsApi.SC_ACTION_TYPE"/> to be performed. 
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SC_ACTION.Delay">
-            <summary>
-            The time to wait before performing the specified action, in milliseconds.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.SERVICE_FAILURE_ACTIONS">
-            <summary>
-            Win32 SERVICE_FAILURE_ACTIONS structure.
-            </summary>
-            <remarks>
-            Represents the action the service controller should take on each failure of a service. A service is considered failed
-            when it terminates without reporting a status of SERVICE_STOPPED to the service controller.
-            </remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SERVICE_FAILURE_ACTIONS.dwResetPeriod">
-            <summary>
-            The time after which to reset the failure count to zero if there are no failures, in seconds. Specify INFINITE to indicate that this value should never be reset.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SERVICE_FAILURE_ACTIONS.lpRebootMsg">
-            <summary>
-            The message to be broadcast to server users before rebooting in response to the SC_ACTION_REBOOT service controller action. 
-            </summary>
-            <remarks>
-            If this value is NULL, the reboot message is unchanged. If the value is an empty string (""), the reboot message is deleted and no message is broadcast.
-            </remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SERVICE_FAILURE_ACTIONS.lpCommand">
-            <summary>
-            The command line of the process for the CreateProcess function to execute in response to the SC_ACTION_RUN_COMMAND service controller action. This process runs under the same account as the service. 
-            </summary>
-            <remarks>
-            If this value is NULL, the command is unchanged. If the value is an empty string (""), the command is deleted and no program is run when the service fails.
-            </remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SERVICE_FAILURE_ACTIONS.cActions">
-            <summary>
-            The number of elements in the lpsaActions array. 
-            </summary>
-            <remarks>
-            If this value is 0, but lpsaActions is not NULL, the reset period and array of failure actions are deleted. 
-            </remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SERVICE_FAILURE_ACTIONS.lpsaActions">
-            <summary>
-            A pointer to an array of SC_ACTION structures. 
-            </summary>
-            <remarks>
-            If this value is NULL, the cActions and dwResetPeriod members are ignored. 
-            </remarks>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.SERVICE_FAILURE_ACTIONS_FLAG">
-            <summary>
-            Win32 SERVICE_FAILURE_ACTIONS_FLAG structure.
-            </summary>
-            <remarks>
-            Contains the failure actions flag setting of a service. This setting determines when failure actions are to be executed.
-            </remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.SERVICE_FAILURE_ACTIONS_FLAG.bFailureAction">
-            <summary>
-            If this member is TRUE and the service has configured failure actions, the failure actions are queued if the service process 
-            terminates without reporting a status of SERVICE_STOPPED or if it enters the SERVICE_STOPPED state but the dwWin32ExitCode member
-            of the SERVICE_STATUS structure is not ERROR_SUCCESS (0). If this member is FALSE and the service has configured failure actions,
-            the failure actions are queued only if the service terminates without reporting a status of SERVICE_STOPPED.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.LsaAccess">
-            <summary>
-            LSA API policy access enumeration.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.LSA_OBJECT_ATTRIBUTES">
-            <summary>
-            Win32 LSA_OBJECT_ATTRIBUTES structure.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.LSA_UNICODE_STRING">
-            <summary>
-            Win32 LSA_UNICODE_STRING structure.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LSA_UNICODE_STRING.Length">
-            <summary>
-            Specifies the length of the string.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LSA_UNICODE_STRING.MaximumLength">
-            <summary>
-            Specifies the maximum length of the string.
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LSA_UNICODE_STRING.Buffer">
-            <summary>
-            Pointer to string data.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.LUID_AND_ATTRIBUTES">
-            <summary>
-            Win32 LUID_AND_ATTRIBUTES structure.
-            </summary>
-            <remarks>
-            An LUID_AND_ATTRIBUTES structure can represent an LUID whose attributes change frequently, 
-            such as when the LUID is used to represent privileges in the PRIVILEGE_SET structure. 
-            Privileges are represented by LUIDs and have attributes indicating whether they are currently enabled or disabled. 
-            </remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LUID_AND_ATTRIBUTES.Luid">
-            <summary>
-            Specifies an LUID value. 
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.LUID_AND_ATTRIBUTES.Attributes">
-            <summary>
-            Specifies attributes of the LUID. This value contains up to 32 one-bit flags. Its meaning is dependent on the definition and use of the LUID.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.TOKEN_PRIVILEGES">
-            <summary>
-            Win32 TOKEN_PRIVILEGES structure.
-            </summary>
-            <remarks>
-            The TOKEN_PRIVILEGES structure contains information about a set of privileges for an access token. 
-            </remarks>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_PRIVILEGES.PrivilegeCount">
-            <summary>
-            This must be set to the number of entries in the Privileges array. 
-            </summary>
-        </member>
-        <member name="F:GSF.Interop.WindowsApi.TOKEN_PRIVILEGES.Privileges">
-            <summary>
-            Specifies an array of LUID_AND_ATTRIBUTES structures. Each structure contains the LUID and attributes of a privilege.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.SECURITY_ATTRIBUTES">
-            <summary>
-            Win32 SECURITY_ATTRIBUTES structure.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.CRYPTOAPI_BLOB">
-            <summary>
-            Win32 CRYPTOAPI_BLOB structure.
-            </summary>
-        </member>
-        <member name="T:GSF.Interop.WindowsApi.CRYPT_OID_INFO">
-            <summary>
-            Win32 CRYPT_OID_INFO class.
-            </summary>
-        </member>
         <member name="T:GSF.BufferPool">
             <summary>
             Represents a common buffer pool that can be used by an application.
@@ -17845,28 +16979,6 @@
             <summary>
             Contains File and Path manipulation methods.
             </summary>
-        </member>
-        <member name="M:GSF.IO.FilePath.ConnectToNetworkShare(System.String,System.String,System.String,System.String)">
-            <summary>
-            Connects to a network share with the specified user's credentials.
-            </summary>
-            <param name="sharename">UNC share name to connect to.</param>
-            <param name="username">Username to use for connection.</param>
-            <param name="password">Password to use for connection.</param>
-            <param name="domain">Domain name to use for connection. Specify the computer name for local system accounts.</param>
-        </member>
-        <member name="M:GSF.IO.FilePath.DisconnectFromNetworkShare(System.String)">
-            <summary>
-            Disconnects the specified network share.
-            </summary>
-            <param name="sharename">UNC share name to disconnect from.</param>
-        </member>
-        <member name="M:GSF.IO.FilePath.DisconnectFromNetworkShare(System.String,System.Boolean)">
-            <summary>
-            Disconnects the specified network share.
-            </summary>
-            <param name="sharename">UNC share name to disconnect from.</param>
-            <param name="force"><c>true</c> to force a disconnect; otherwise <c>false</c>.</param>
         </member>
         <member name="M:GSF.IO.FilePath.IsFilePatternMatch(System.String[],System.String,System.Boolean)">
             <summary>
@@ -25188,6 +24300,12 @@
             Does nothing if the operation is already running.
             </summary>
         </member>
+        <member name="P:GSF.Threading.ISynchronizedOperation.IsRunning">
+            <summary>
+            Gets a value to indicate whether the synchronized
+            operation is currently executing its action.
+            </summary>
+        </member>
         <member name="T:GSF.Threading.LongSynchronizedOperation">
             <summary>
             Represents a long-running synchronized operation
@@ -25295,6 +24413,12 @@
              </code>
              </remarks>
         </member>
+        <member name="P:GSF.Threading.SynchronizedOperationBase.IsRunning">
+            <summary>
+            Gets a value to indicate whether the synchronized
+            operation is currently executing its action.
+            </summary>
+        </member>
         <member name="M:GSF.Threading.LongSynchronizedOperation.#ctor(System.Action)">
             <summary>
             Creates a new instance of the <see cref="T:GSF.Threading.LongSynchronizedOperation"/> class.
@@ -25374,14 +24498,6 @@
             Initializes a new instance of the ManagedThread class, specifying a delegate that allows an object to be passed to the thread when the thread is started.
             </summary>
             <param name="callback">A <see cref="T:System.Threading.ParameterizedThreadStart"/> object.</param>
-        </member>
-        <member name="M:GSF.Threading.ManagedThread.#ctor(System.Threading.ContextCallback,System.Threading.ExecutionContext)">
-            <summary>
-            Initializes a new instance of the ManagedThread class, specifying a delegate that allows an object to be passed to the thread when the thread is started
-            and allowing the user to specify an alternate execution context for the thread.
-            </summary>
-            <param name="callback">A <see cref="T:System.Threading.ContextCallback"/> delgate to execute.</param>
-            <param name="ctx">An <see cref="T:System.Threading.ExecutionContext"/>.</param>
         </member>
         <member name="M:GSF.Threading.ManagedThread.Abort">
             <summary>
