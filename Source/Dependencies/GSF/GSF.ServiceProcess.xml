@@ -438,6 +438,31 @@
             Gets or sets the <see cref="T:System.DateTime"/> when the <see cref="P:GSF.ServiceProcess.ClientRequestInfo.Request"/> was received from the <see cref="P:GSF.ServiceProcess.ClientRequestInfo.Sender"/>.
             </summary>
         </member>
+        <member name="T:GSF.ServiceProcess.IServiceMonitor">
+            <summary>
+            Interface for an adapter that monitors the health of a service.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.IServiceMonitor.HandleServiceHeartbeat">
+            <summary>
+            Handles notifications from the service that occur
+            on an interval to indicate that the service is
+            still running.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.IServiceMonitor.HandleServiceError(System.Exception)">
+            <summary>
+            Handles messages received by the service
+            whenever the service encounters an error.
+            </summary>
+            <param name="ex">The exception received from the service.</param>
+        </member>
+        <member name="M:GSF.ServiceProcess.IServiceMonitor.HandleClientMessage(System.String[])">
+            <summary>
+            Handles messages sent by a client.
+            </summary>
+            <param name="args">Arguments provided by the client.</param>
+        </member>
         <member name="T:GSF.ServiceProcess.NamespaceDoc">
             <summary>
             Contains classes used to simplify and standardize development and operation of Windows services that are remotely manageable.
@@ -1052,6 +1077,152 @@
             <summary>
             Gets the descriptive status of the <see cref="T:GSF.ServiceProcess.ServiceHelper"/>.
             </summary>
+        </member>
+        <member name="T:GSF.ServiceProcess.RecoverAction">
+            <summary>
+            Defines the recover action to be performed upon service failure.
+            </summary>
+            <remarks>
+            Enum values correspond to Win32 equivalents.
+            </remarks>
+        </member>
+        <member name="F:GSF.ServiceProcess.RecoverAction.None">
+            <summary>
+            No action.
+            </summary>
+        </member>
+        <member name="F:GSF.ServiceProcess.RecoverAction.Restart">
+            <summary>
+            Restart the service.
+            </summary>
+        </member>
+        <member name="F:GSF.ServiceProcess.RecoverAction.Reboot">
+            <summary>
+            Reboot the computer.
+            </summary>
+        </member>
+        <member name="F:GSF.ServiceProcess.RecoverAction.RunCommand">
+            <summary>
+            Run a command.
+            </summary>
+        </member>
+        <member name="T:GSF.ServiceProcess.ServiceInstallerEx">
+            <summary>
+            Defines an extended service installer class that can define service failure actions at install time.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceInstallerEx.#ctor">
+            <summary>
+            Creates a new <see cref="T:GSF.ServiceProcess.ServiceInstallerEx"/>.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceInstallerEx.DefineRecoverAction(GSF.ServiceProcess.RecoverAction,System.Int32)">
+            <summary>
+            Defines a new recover action to be performed upon service failure.
+            </summary>
+            <param name="recoverAction"><see cref="T:GSF.ServiceProcess.RecoverAction"/> to execute upon service failure.</param>
+            <param name="delay">The time to wait before performing the specified <paramref name="recoverAction"/>, in milliseconds.</param>
+        </member>
+        <member name="P:GSF.ServiceProcess.ServiceInstallerEx.FailResetPeriod">
+            <summary>
+            Sets the time after which to reset the failure count to zero if there are no failures, in seconds.
+            Specify <see cref="F:System.Threading.Timeout.Infinite"/> to indicate that this value should never be reset.
+            </summary>
+        </member>
+        <member name="P:GSF.ServiceProcess.ServiceInstallerEx.FailRebootMessage">
+            <summary>
+            Sets the service fail reboot message.
+            </summary>
+        </member>
+        <member name="P:GSF.ServiceProcess.ServiceInstallerEx.FailRunCommand">
+            <summary>
+            Sets the service fail run command.
+            </summary>
+        </member>
+        <member name="P:GSF.ServiceProcess.ServiceInstallerEx.ExecuteActionsOnNonCrashErrors">
+            <summary>
+            Sets flag that determines when failure actions are to be executed.
+            </summary>
+            <remarks>
+            <para>
+            If this member is <c>true</c> and the service has configured failure actions, the failure actions are queued if the service process
+            terminates without reporting a status of SERVICE_STOPPED or if it enters the SERVICE_STOPPED state but the exit code returned in the
+            SERVICE_STATUS structure is not ERROR_SUCCESS (0).
+            </para>
+            <para>
+            If this member is <c>false</c> and the service has configured failure actions, the failure actions are queued only if the service
+            terminates without reporting a status of SERVICE_STOPPED.
+            </para>
+            <para>
+            This setting is ignored unless the service has configured failure actions.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:GSF.ServiceProcess.ServiceInstallerEx.StartOnInstall">
+            <summary>
+            Sets the boolean value to configure the service to start after it is installed.
+            </summary>
+        </member>
+        <member name="P:GSF.ServiceProcess.ServiceInstallerEx.StartTimeout">
+            <summary>
+            Sets the service start timeout in milliseconds.
+            </summary>
+        </member>
+        <member name="T:GSF.ServiceProcess.ErrorHandlerException">
+            <summary>
+            A special exception thrown by error handlers.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.ErrorHandlerException.#ctor">
+            <summary>
+            Creates a new instance of the <see cref="T:GSF.ServiceProcess.ErrorHandlerException"/> class.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.ErrorHandlerException.#ctor(System.String)">
+            <summary>
+            Creates a new instance of the <see cref="T:GSF.ServiceProcess.ErrorHandlerException"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+        </member>
+        <member name="M:GSF.ServiceProcess.ErrorHandlerException.#ctor(System.String,System.Exception)">
+            <summary>
+            Creates a new instance of the <see cref="T:GSF.ServiceProcess.ErrorHandlerException"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="innerException">The exception that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
+        </member>
+        <member name="T:GSF.ServiceProcess.ServiceMonitors">
+            <summary>
+            Adapter loader that loads implementations of <see cref="T:GSF.ServiceProcess.IServiceMonitor"/>
+            and delegates messages to the enabled monitors.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceMonitors.HandleServiceHeartbeat">
+            <summary>
+            Handles notifications from the service that occur
+            on an interval to indicate that the service is
+            still running.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceMonitors.HandleServiceError(System.Exception)">
+            <summary>
+            Handles messages received by the service
+            whenever the service encounters an error.
+            </summary>
+            <param name="ex">The exception received from the service.</param>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceMonitors.HandleClientMessage(System.String[])">
+            <summary>
+            Handles messages sent by a client.
+            </summary>
+            <param name="args">Arguments provided by the client.</param>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceMonitors.ExecuteAdapterOperation(GSF.ServiceProcess.IServiceMonitor,System.Object)">
+            <summary>
+            Executes an operation on the <paramref name="adapter"/> with the given <paramref name="data"/>.
+            </summary>
+            <param name="adapter">Adapter on which an operation is to be executed.</param>
+            <param name="data">The operation to be executed.</param>
         </member>
         <member name="T:GSF.ServiceProcess.ServiceProcessState">
             <summary>

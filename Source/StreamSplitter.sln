@@ -46,6 +46,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GSF", "GSF", "{9907A455-D34
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WiX", "WiX", "{59B1811E-D12D-417C-AA12-22CFC2297FA9}"
 	ProjectSection(SolutionItems) = preProject
+		Dependencies\WiX\WixNetFxExtension.dll = Dependencies\WiX\WixNetFxExtension.dll
 		Dependencies\WiX\WixUIExtension.dll = Dependencies\WiX\WixUIExtension.dll
 	EndProjectSection
 EndProject

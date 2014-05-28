@@ -106,6 +106,10 @@ namespace StreamSplitter
             // Create new synchrophasor data source parser
             m_frameParser = new MultiProtocolFrameParser();
 
+            // We are not here to validate/use data, just here to proxy it along...
+            m_frameParser.CheckSumValidationFrameTypes = CheckSumValidationFrameTypes.NoFrames;
+            m_frameParser.AutoStartDataParsingSequence = true;
+
             m_frameParser.ConnectionAttempt += m_frameParser_ConnectionAttempt;
             m_frameParser.ConnectionEstablished += m_frameParser_ConnectionEstablished;
             m_frameParser.ConnectionException += m_frameParser_ConnectionException;
@@ -579,7 +583,11 @@ namespace StreamSplitter
             if (Enabled)
                 Stop();
 
-            // Start multi-protocol frame parser - once connected, publication channel will start
+            // Start publication server
+            if ((object)m_publishChannel != null)
+                m_publishChannel.Start();
+
+            // Start multi-protocol frame parser
             if ((object)m_frameParser != null)
                 m_frameParser.Start();
 
@@ -880,7 +888,7 @@ namespace StreamSplitter
         // Redistribute received data.
         private void m_frameParser_ReceivedFrameBufferImage(object sender, EventArgs<FundamentalFrameType, byte[], int, int> e)
         {
-            if ((object)m_publishChannel == null || m_publishChannel.CurrentState != ServerState.Running)
+            if ((object)m_publishChannel == null)
                 return;
 
             byte[] image;
@@ -890,8 +898,8 @@ namespace StreamSplitter
             if (e.Argument1 == FundamentalFrameType.ConfigurationFrame)
                 m_receivedConfigurationFrames++;
 
-            // As soon as we start receiving data frames, we change proxy connection status to "Connected" instead of "ConnectedNoData"
-            if (m_streamProxyStatus.ConnectionState == ConnectionState.ConnectedNoData && e.Argument1 == FundamentalFrameType.DataFrame)
+            // As soon as we start receiving data frames and a config frame exists, we change proxy connection status to "Connected" instead of "ConnectedNoData"
+            if (m_streamProxyStatus.ConnectionState == ConnectionState.ConnectedNoData && e.Argument1 == FundamentalFrameType.DataFrame && (object)m_configurationFrame != null)
                 m_streamProxyStatus.ConnectionState = ConnectionState.Connected;
 
             // Send the configuration frame at the top of each minute if publication channel is UDP and source is not auto-sending configuration frames
@@ -938,11 +946,8 @@ namespace StreamSplitter
 
         private void m_frameParser_ReceivedConfigurationFrame(object sender, EventArgs<IConfigurationFrame> e)
         {
+            // Cache latest configuration frame that was received
             m_configurationFrame = e.Argument;
-
-            // Start publication server, if it's not running, as soon as we have a configuration frame
-            if (m_publishChannel.CurrentState == ServerState.NotRunning)
-                m_publishChannel.Start();
         }
 
         private void m_frameParser_ParsingException(object sender, EventArgs<Exception> e)

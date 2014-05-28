@@ -65,6 +65,10 @@
     <Reference Include="GSF.ServiceProcess">
       <HintPath>..\..\Dependencies\GSF\GSF.ServiceProcess.dll</HintPath>
     </Reference>
+    <Reference Include="GSF.TimeSeries, Version=2.0.187.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Dependencies\GSF\GSF.TimeSeries.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.ServiceProcess" />

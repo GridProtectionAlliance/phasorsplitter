@@ -21,12 +21,6 @@
 //
 //******************************************************************************************************
 
-using GSF;
-using GSF.Communication;
-using GSF.IO;
-using GSF.ServiceProcess;
-using GSF.Units;
-using Microsoft.Win32;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -39,6 +33,12 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using GSF;
+using GSF.Communication;
+using GSF.IO;
+using GSF.ServiceProcess;
+using GSF.Units;
+using Microsoft.Win32;
 
 namespace StreamSplitter
 {
@@ -171,7 +171,7 @@ namespace StreamSplitter
                 Environment.MachineName,
                 Environment.OSVersion.VersionString,
                 Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", null).ToNonNullString("<Unavailable>"),
-                SI2.ToScaledIECString(Environment.WorkingSet, 3, "B"),
+                SI2.ToScaledString(Environment.WorkingSet, 3, "B", SI2.IECSymbols),
                 IntPtr.Size * 8,
                 Environment.ProcessorCount,
                 GCSettings.IsServerGC,

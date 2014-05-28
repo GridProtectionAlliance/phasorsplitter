@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="{BBF8A5A4-842A-437F-8664-80E142E49C23}" Name="StreamSplitter" Language="1033" Version="!(bind.FileVersion.StreamSplitter.exe)" Manufacturer="Grid Protection Alliance" UpgradeCode="7E475E71-0956-4FB9-81A7-543C3D8A4C21">
+  <Product Id="*" Name="StreamSplitter" Language="1033" Version="!(bind.FileVersion.StreamSplitter.exe)" Manufacturer="Grid Protection Alliance" UpgradeCode="7E475E71-0956-4FB9-81A7-543C3D8A4C21">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <PropertyRef Id="NETFRAMEWORK45"/>
+
+    <Condition Message='This setup requires Microsoft .NET Framework 4.5 or greater - this will need to be installed before installation can continue.'>
+      <![CDATA[Installed OR NETFRAMEWORK45]]>
+    </Condition>
+
+    <MajorUpgrade Schedule="afterInstallInitialize" DowngradeErrorMessage="A newer version of [ProductName] is already installed. Setup will now exit." />
     <MediaTemplate EmbedCab="yes" />
 
     <Feature Id="AllProducts" Title="All Products" Level="1" Display="expand" ConfigurableDirectory="INSTALLFOLDER" Description="All Synchrophasor Stream Splitter Components">
