@@ -161,7 +161,7 @@
         </member>
         <member name="M:GSF.ServiceProcess.ClientHelper.TryParseActionableResponse(GSF.ServiceProcess.ServiceResponse,System.String@,System.Boolean@)">
             <summary>
-            Attempts to parse an actionable reponse sent from the service.
+            Attempts to parse an actionable response sent from the service.
             </summary>
             <param name="serviceResponse"><see cref="T:GSF.ServiceProcess.ServiceResponse"/> to test for actionable response.</param>
             <param name="sourceCommand">Command that invoked <paramref name="serviceResponse"/>.</param>
@@ -229,6 +229,11 @@
             </summary>
             <exception cref="T:System.ArgumentNullException">The value being specified is a null string.</exception>
         </member>
+        <member name="P:GSF.ServiceProcess.ClientHelper.SerializationFormat">
+            <summary>
+            Gets or sets a value that indicates the desired message <see cref="T:GSF.SerializationFormat"/> for interaction with <see cref="T:GSF.ServiceProcess.ServiceHelper"/>.
+            </summary>
+        </member>
         <member name="P:GSF.ServiceProcess.ClientHelper.PersistSettings">
             <summary>
             Gets or sets a boolean value that indicates whether the settings of <see cref="T:GSF.ServiceProcess.ClientHelper"/> are to be saved to the config file.
@@ -269,11 +274,26 @@
             </summary>
             <param name="parent">An <see cref="T:GSF.ServiceProcess.ClientHelper"/> object.</param>
         </member>
+        <member name="M:GSF.ServiceProcess.ClientInfo.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Creates a new <see cref="T:GSF.ServiceProcess.ClientInfo"/> from serialization parameters.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with populated with data.</param>
+            <param name="context">The source <see cref="T:System.Runtime.Serialization.StreamingContext"/> for this deserialization.</param>
+        </member>
         <member name="M:GSF.ServiceProcess.ClientInfo.SetClientUser(System.Security.Principal.IPrincipal)">
             <summary>
             Updates the <see cref="P:GSF.ServiceProcess.ClientInfo.ClientUser"/>.
             </summary>
             <param name="user">New <see cref="T:System.Security.Principal.IPrincipal"/> object to be assigned to <see cref="P:GSF.ServiceProcess.ClientInfo.ClientUser"/>.</param>
+        </member>
+        <member name="M:GSF.ServiceProcess.ClientInfo.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with the data needed to serialize the target object.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> to populate with data.</param>
+            <param name="context">The destination (see <see cref="T:System.Runtime.Serialization.StreamingContext"/>) for this serialization.</param>
+            <exception cref="T:System.Security.SecurityException">The caller does not have the required permission.</exception>
         </member>
         <member name="P:GSF.ServiceProcess.ClientInfo.ClientID">
             <summary>
@@ -335,11 +355,26 @@
             <param name="command">Command text for the <see cref="T:GSF.ServiceProcess.ClientRequest"/>.</param>
             <param name="arguments"><see cref="P:GSF.ServiceProcess.ClientRequest.Arguments"/> for the <paramref name="command"/>.</param>
         </member>
+        <member name="M:GSF.ServiceProcess.ClientRequest.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Creates a new <see cref="T:GSF.ServiceProcess.ClientRequest"/> from serialization parameters.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with populated with data.</param>
+            <param name="context">The source <see cref="T:System.Runtime.Serialization.StreamingContext"/> for this deserialization.</param>
+        </member>
         <member name="M:GSF.ServiceProcess.ClientRequest.ToString">
             <summary>
             Returns the <see cref="T:System.String"/> that represents the <see cref="T:GSF.ServiceProcess.ClientRequest"/>.
             </summary>
             <returns>A <see cref="T:System.String"/> that represents the <see cref="T:GSF.ServiceProcess.ClientRequest"/>.</returns>
+        </member>
+        <member name="M:GSF.ServiceProcess.ClientRequest.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with the data needed to serialize the target object.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> to populate with data.</param>
+            <param name="context">The destination (see <see cref="T:System.Runtime.Serialization.StreamingContext"/>) for this serialization.</param>
+            <exception cref="T:System.Security.SecurityException">The caller does not have the required permission.</exception>
         </member>
         <member name="M:GSF.ServiceProcess.ClientRequest.Parse(System.String)">
             <summary>
@@ -551,6 +586,11 @@
         <member name="F:GSF.ServiceProcess.ServiceHelper.DefaultSecureRemoteInteractions">
             <summary>
             Specifies the default value for the <see cref="P:GSF.ServiceProcess.ServiceHelper.SecureRemoteInteractions"/> property.
+            </summary>
+        </member>
+        <member name="F:GSF.ServiceProcess.ServiceHelper.DefaultSerializationFormat">
+            <summary>
+            Specifies the default value for the <see cref="P:GSF.ServiceProcess.ServiceHelper.SerializationFormat"/> property.
             </summary>
         </member>
         <member name="F:GSF.ServiceProcess.ServiceHelper.DefaultPersistSettings">
@@ -815,6 +855,12 @@
             <param name="handlerCommand">Request type whose <see cref="T:GSF.ServiceProcess.ClientRequestHandler"/> object is to be retrieved.</param>
             <returns><see cref="T:GSF.ServiceProcess.ClientRequestHandler"/> object if found; otherwise null.</returns>
         </member>
+        <member name="M:GSF.ServiceProcess.ServiceHelper.LogException(System.Exception)">
+            <summary>
+            Log exception to <see cref="P:GSF.ServiceProcess.ServiceHelper.ErrorLogger"/>.
+            </summary>
+            <param name="ex">Exception to log.</param>
+        </member>
         <member name="M:GSF.ServiceProcess.ServiceHelper.OnServiceStarting(System.String[])">
             <summary>
             Raises the <see cref="E:GSF.ServiceProcess.ServiceHelper.ServiceStarting"/> event.
@@ -874,6 +920,22 @@
             </summary>
             <param name="processName">Name of the <see cref="T:GSF.ServiceProcess.ServiceProcess"/> whose state changed.</param>
             <param name="processState">New <see cref="T:GSF.ServiceProcess.ServiceProcessState"/> of the <see cref="T:GSF.ServiceProcess.ServiceProcess"/>.</param>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceHelper.OnUpdatedStatus(System.String,GSF.UpdateType)">
+            <summary>
+            Raises the <see cref="E:GSF.ServiceProcess.ServiceHelper.UpdatedStatus"/> event with the updated status message.
+            </summary>
+            <param name="status">Updated status message.</param>
+            <param name="type"><see cref="T:GSF.UpdateType"/> of status message.</param>
+            <remarks>
+            This overload combines string.Format and SendStatusMessage for convenience.
+            </remarks>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceHelper.OnLoggedException(System.Exception)">
+            <summary>
+            Raises <see cref="E:GSF.ServiceProcess.ServiceHelper.LoggedException"/> event with logged exception.
+            </summary>
+            <param name="ex">Logged <see cref="T:System.Exception"/>.</param>
         </member>
         <member name="M:GSF.ServiceProcess.ServiceHelper.Dispose(System.Boolean)">
             <summary>
@@ -944,6 +1006,23 @@
             <see cref="F:GSF.EventArgs`2.Argument2"/> is the <see cref="P:GSF.ServiceProcess.ServiceProcess.CurrentState"/>
             </remarks>
         </member>
+        <member name="E:GSF.ServiceProcess.ServiceHelper.UpdatedStatus">
+            <summary>
+            Provides notification of when status messages were sent to consumer(s).
+            </summary>
+            <remarks>
+            <see cref="F:GSF.EventArgs`2.Argument1"/> is the status message sent to consumer(s).<br/>
+            <see cref="F:GSF.EventArgs`2.Argument2"/> is the message <see cref="T:GSF.UpdateType"/>.
+            </remarks>
+        </member>
+        <member name="E:GSF.ServiceProcess.ServiceHelper.LoggedException">
+            <summary>
+            Provides notification of when there is an exception logged.
+            </summary>
+            <remarks>
+            <see cref="F:GSF.EventArgs`1.Argument"/> is the exception that was logged.
+            </remarks>
+        </member>
         <member name="P:GSF.ServiceProcess.ServiceHelper.LogStatusUpdates">
             <summary>
             Gets or sets a boolean value that indicates whether messages sent using <see cref="M:GSF.ServiceProcess.ServiceHelper.UpdateStatus(GSF.UpdateType,System.String,System.Object[])"/> 
@@ -991,6 +1070,11 @@
         <member name="P:GSF.ServiceProcess.ServiceHelper.SecureRemoteInteractions">
             <summary>
             Gets or sets a boolean value that indicates whether <see cref="T:GSF.ServiceProcess.ServiceHelper"/> will secure remote interactions from <see cref="T:GSF.ServiceProcess.ClientHelper"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.ServiceProcess.ServiceHelper.SerializationFormat">
+            <summary>
+            Gets or sets a value that indicates the desired message <see cref="T:GSF.SerializationFormat"/> for interaction with <see cref="T:GSF.ServiceProcess.ClientHelper"/>.
             </summary>
         </member>
         <member name="P:GSF.ServiceProcess.ServiceHelper.PersistSettings">
@@ -1167,6 +1251,43 @@
             <summary>
             Sets the service start timeout in milliseconds.
             </summary>
+        </member>
+        <member name="T:GSF.ServiceProcess.ServiceMonitorBase">
+            <summary>
+            Base class for service monitors.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceMonitorBase.HandleServiceHeartbeat">
+            <summary>
+            Handles notifications from the service that occur
+            on an interval to indicate that the service is
+            still running.
+            </summary>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceMonitorBase.HandleServiceError(System.Exception)">
+            <summary>
+            Handles messages received by the service
+            whenever the service encounters an error.
+            </summary>
+            <param name="ex">The error received from the service.</param>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceMonitorBase.HandleClientMessage(System.String[])">
+            <summary>
+            Handles messages sent by a client.
+            </summary>
+            <param name="args">Arguments provided by the client.</param>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceMonitorBase.LoadSettings">
+            <summary>
+            Loads saved <see cref="T:GSF.ServiceProcess.ServiceMonitorBase"/> settings from the config file if the <see cref="P:GSF.Adapters.Adapter.PersistSettings"/> property is set to true.
+            </summary>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException"><see cref="P:GSF.Adapters.Adapter.SettingsCategory"/> has a value of null or empty string.</exception>
+        </member>
+        <member name="M:GSF.ServiceProcess.ServiceMonitorBase.SaveSettings">
+            <summary>
+            Saves <see cref="T:GSF.ServiceProcess.ServiceMonitorBase"/> settings to the config file if the <see cref="P:GSF.Adapters.Adapter.PersistSettings"/> property is set to true.
+            </summary>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException"><see cref="P:GSF.Adapters.Adapter.SettingsCategory"/> has a value of null or empty string.</exception>
         </member>
         <member name="T:GSF.ServiceProcess.ErrorHandlerException">
             <summary>
@@ -1363,6 +1484,13 @@
             <seealso cref="T:GSF.ServiceProcess.ClientHelper"/>
             <seealso cref="T:GSF.ServiceProcess.ClientRequest"/>
         </member>
+        <member name="M:GSF.ServiceProcess.ServiceResponse.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Creates a new <see cref="T:GSF.ServiceProcess.ClientRequest"/> from serialization parameters.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with populated with data.</param>
+            <param name="context">The source <see cref="T:System.Runtime.Serialization.StreamingContext"/> for this deserialization.</param>
+        </member>
         <member name="M:GSF.ServiceProcess.ServiceResponse.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:GSF.ServiceProcess.ServiceResponse"/> class.
@@ -1381,6 +1509,14 @@
             <param name="type">Type of the <see cref="T:GSF.ServiceProcess.ServiceResponse"/> in plain-text.</param>
             <param name="message">Message associated with the <see cref="T:GSF.ServiceProcess.ServiceResponse"/>.</param>
         </member>
+        <member name="M:GSF.ServiceProcess.ServiceResponse.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with the data needed to serialize the target object.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> to populate with data.</param>
+            <param name="context">The destination (see <see cref="T:System.Runtime.Serialization.StreamingContext"/>) for this serialization.</param>
+            <exception cref="T:System.Security.SecurityException">The caller does not have the required permission.</exception>
+        </member>
         <member name="P:GSF.ServiceProcess.ServiceResponse.Type">
             <summary>
             Gets or sets the plain-text type of the <see cref="T:GSF.ServiceProcess.ServiceResponse"/>.
@@ -1389,7 +1525,7 @@
         </member>
         <member name="P:GSF.ServiceProcess.ServiceResponse.Message">
             <summary>
-            Gets or sets the palin-text message associated with the <see cref="T:GSF.ServiceProcess.ServiceResponse"/>.
+            Gets or sets the plain-text message associated with the <see cref="T:GSF.ServiceProcess.ServiceResponse"/>.
             </summary>
         </member>
         <member name="P:GSF.ServiceProcess.ServiceResponse.Attachments">
