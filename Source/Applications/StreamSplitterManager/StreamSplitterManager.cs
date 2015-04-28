@@ -506,6 +506,7 @@ namespace StreamSplitter
             if (saveFileDialog.ShowDialog(this) == DialogResult.OK)
             {
                 m_configurationFileName = saveFileDialog.FileName;
+                m_configurationSaved = false;
                 SaveConfiguration();
             }
         }
