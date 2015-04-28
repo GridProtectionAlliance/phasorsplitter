@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -568,6 +569,30 @@ namespace StreamSplitter
             // Update connection information for the multi-protocol frame parser
             m_frameParser.ConnectionString = SourceSettings;
 
+            Dictionary<string, string> settings = m_frameParser.ConnectionString.ParseKeyValuePairs();
+            string setting;
+
+            // TODO: These should be optional picked up from connection string inside of MPFP
+
+            // Apply other settings as needed
+            if (settings.TryGetValue("accessID", out setting))
+                m_frameParser.DeviceID = ushort.Parse(setting);
+
+            if (settings.TryGetValue("simulateTimestamp", out setting))
+                m_frameParser.InjectSimulatedTimestamp = setting.ParseBoolean();
+
+            if (settings.TryGetValue("allowedParsingExceptions", out setting))
+                m_frameParser.AllowedParsingExceptions = int.Parse(setting);
+
+            if (settings.TryGetValue("parsingExceptionWindow", out setting))
+                m_frameParser.ParsingExceptionWindow = Ticks.FromSeconds(double.Parse(setting));
+
+            if (settings.TryGetValue("autoStartDataParsingSequence", out setting))
+                m_frameParser.AutoStartDataParsingSequence = setting.ParseBoolean();
+
+            if (settings.TryGetValue("skipDisableRealTimeData", out setting))
+                m_frameParser.SkipDisableRealTimeData = setting.ParseBoolean();
+
             // Create a new publication server
             IServer publicationServer = ServerBase.Create(ProxySettings);
             TcpPublishChannel = publicationServer as TcpServer;
@@ -948,6 +973,8 @@ namespace StreamSplitter
         {
             // Cache latest configuration frame that was received
             m_configurationFrame = e.Argument;
+
+            OnStatusMessage("Received configuration frame at {0:yyyy-MM-dd HH:mm:ss.fff}", DateTime.UtcNow);
         }
 
         private void m_frameParser_ParsingException(object sender, EventArgs<Exception> e)

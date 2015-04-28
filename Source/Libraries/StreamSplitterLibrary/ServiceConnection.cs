@@ -256,7 +256,7 @@ namespace StreamSplitter
 
             if (m_remotingClient.CurrentState == ClientState.Connected)
             {
-                ClientRequest request = new ClientRequest(command);
+                ClientRequest request = ClientRequest.Parse(command);
 
                 // Add any attachments to the client request
                 if ((object)attachments != null && attachments.Length > 0)

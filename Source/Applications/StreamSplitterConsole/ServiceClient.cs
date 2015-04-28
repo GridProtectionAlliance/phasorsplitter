@@ -21,16 +21,16 @@
 //
 //******************************************************************************************************
 
-using GSF;
-using GSF.Console;
-using GSF.Reflection;
-using GSF.ServiceProcess;
-using StreamSplitter;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
+using GSF;
+using GSF.Console;
+using GSF.Reflection;
+using GSF.ServiceProcess;
+using StreamSplitter;
 
 namespace StreamSplitterConsole
 {

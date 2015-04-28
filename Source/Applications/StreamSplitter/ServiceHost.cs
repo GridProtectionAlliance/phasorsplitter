@@ -35,7 +35,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using GSF;
 using GSF.Communication;
+using GSF.Console;
 using GSF.IO;
+using GSF.PhasorProtocols;
 using GSF.ServiceProcess;
 using GSF.Units;
 using Microsoft.Win32;
@@ -190,6 +192,8 @@ namespace StreamSplitter
             m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("DownloadConfig", "Provides the current configuration to requester", DownloadConfigurationHandler));
             m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("UploadConfig", "Deserializes and loads received configuration", UploadConfigurationHandler));
             m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("UploadConnection", "Applies received proxy connection to running configuration", UploadConnectionHandler));
+            m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("EnumerateSplitters", "Enumerates all stream splitters", EnumerateSplittersHandler, new[] { "list", "dir", "ls" }));
+            m_serviceHelper.ClientRequestHandlers.Add(new ClientRequestHandler("SendCommand", "Sends command to a specific stream splitter", SendCommandHandler));
 
             LoadCurrentConfiguration();
         }
@@ -561,6 +565,174 @@ namespace StreamSplitter
                 }
 
                 SendResponseWithAttachment(requestInfo, true, streamProxies, null);
+            }
+        }
+
+        private void EnumerateSplittersHandler(ClientRequestInfo requestInfo)
+        {
+            if (requestInfo.Request.Arguments.ContainsHelpRequest)
+            {
+                StringBuilder helpMessage = new StringBuilder();
+
+                helpMessage.Append("Enumerates all stream splitters.");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Usage:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       EnumerateSplitters [index] [Options]");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   index:".PadRight(20));
+                helpMessage.Append("index of the splitter to display, or all if not specified");
+                helpMessage.Append("   Options:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       -?".PadRight(20));
+                helpMessage.Append("Displays this help message");
+
+                DisplayResponseMessage(requestInfo, helpMessage.ToString());
+            }
+            else
+            {
+                // Send current status all stream proxies                
+                StringBuilder splitterEnumeration = new StringBuilder();
+                StreamProxy splitter = null;
+                int index;
+
+                Arguments args = requestInfo.Request.Arguments;
+
+                if (args.Exists("OrderedArg1"))
+                {
+                    lock (m_streamSplitters)
+                    {
+                        if (int.TryParse(args["OrderedArg1"], out index) && index >= 0 && index < m_streamSplitters.Count)
+                        {
+                            splitter = m_streamSplitters[index];
+                        }
+                        else
+                        {
+                            DisplayResponseMessage(requestInfo, "Invalid splitter index specified.");
+                            requestInfo.Request.Arguments = new Arguments("-?");
+                            EnumerateSplittersHandler(requestInfo);
+                        }
+                    }
+
+                    if ((object)splitter != null)
+                    {
+                        splitterEnumeration.AppendFormat("  {0} - {1}\r\n          {2}\r\n          {3}\r\n\r\n",
+                                index.ToString().PadLeft(3),
+                                splitter.Name,
+                                splitter.ID,
+                                splitter.StreamProxyStatus.ConnectionState);
+                        
+                        splitterEnumeration.Append(splitter.Status);
+                    }
+                }
+                else
+                {
+                    // Show all splitters with associated index
+                    lock (m_streamSplitters)
+                    {
+                        splitterEnumeration.AppendFormat("\r\nIndices for {0} stream splitters:\r\n\r\n", m_streamSplitters.Count);
+
+                        for (int i = 0; i < m_streamSplitters.Count; i++)
+                        {
+                            splitter = m_streamSplitters[i];
+
+                            splitterEnumeration.AppendFormat("  {0} - {1}\r\n          {2}\r\n          {3}\r\n\r\n",
+                                    i.ToString().PadLeft(3),
+                                    splitter.Name,
+                                    splitter.ID,
+                                    splitter.StreamProxyStatus.ConnectionState);
+                        }
+                    }
+                }
+
+                if (splitterEnumeration.Length > 0)
+                    DisplayResponseMessage(requestInfo, splitterEnumeration.ToString());
+            }
+        }
+
+        private void SendCommandHandler(ClientRequestInfo requestInfo)
+        {
+            if (requestInfo.Request.Arguments.ContainsHelpRequest)
+            {
+                StringBuilder helpMessage = new StringBuilder();
+
+                helpMessage.Append("Sends command to a specific stream splitter.");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("   Usage:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       SendCommand index command [Options]");
+                helpMessage.AppendLine();
+                helpMessage.AppendLine();
+                helpMessage.Append("       index".PadRight(20));
+                helpMessage.AppendLine("Splitter index from EnumerateSplitters command");
+                helpMessage.Append("       command".PadRight(20));
+                helpMessage.AppendLine("One of the following:");
+
+                string[] commands = Enum.GetNames(typeof(DeviceCommand));
+                DeviceCommand command;
+
+                for (int i = 0; i < commands.Length; i++)
+                {
+                    command = (DeviceCommand)Enum.Parse(typeof(DeviceCommand), commands[i]);
+                    helpMessage.Append(new string(' ', 25));
+                    helpMessage.AppendFormat("{0} - {1}\r\n", (int)command, command);
+                }
+
+                helpMessage.Append("   Options:");
+                helpMessage.AppendLine();
+                helpMessage.Append("       -?".PadRight(20));
+                helpMessage.Append("Displays this help message");
+
+                DisplayResponseMessage(requestInfo, helpMessage.ToString());
+            }
+            else
+            {
+                Arguments args = requestInfo.Request.Arguments;
+
+                if (args.OrderedArgCount == 2)
+                {
+                    int index;
+                    DeviceCommand command = DeviceCommand.ReservedBits;
+                    StreamProxy splitter = null;
+
+                    lock (m_streamSplitters)
+                    {
+                        if (int.TryParse(args["OrderedArg1"], out index) && index >= 0 && index < m_streamSplitters.Count)
+                        {
+                            if (Enum.TryParse(args["OrderedArg2"], true, out command))
+                            {
+                                splitter = m_streamSplitters[index];
+                            }
+                            else
+                            {
+                                DisplayResponseMessage(requestInfo, "Invalid device command specified.");
+                                requestInfo.Request.Arguments = new Arguments("-?");
+                                SendCommandHandler(requestInfo);
+                            }
+                        }
+                        else
+                        {
+                            DisplayResponseMessage(requestInfo, "Invalid splitter index specified.");
+                            requestInfo.Request.Arguments = new Arguments("-?");
+                            SendCommandHandler(requestInfo);
+                        }
+                    }
+
+                    if ((object)splitter != null)
+                    {
+                        splitter.SendCommand(command);
+                        DisplayResponseMessage(requestInfo, "Sent device command \"{0}\" to \"{1}\"", command, splitter.Name);
+                    }
+                }
+                else
+                {
+                    DisplayResponseMessage(requestInfo, "Invalid number of arguments for send command.");
+                    requestInfo.Request.Arguments = new Arguments("-?");
+                    SendCommandHandler(requestInfo);
+                }
             }
         }
 
