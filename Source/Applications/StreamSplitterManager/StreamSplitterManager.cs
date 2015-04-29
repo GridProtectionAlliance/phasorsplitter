@@ -535,12 +535,12 @@ namespace StreamSplitter
 
             if (m_proxyConnections.Count == 0)
             {
-                if ((object)m_serviceConnection != null && MessageBox.Show(string.Format("WARNING: You are about to upload an empty configuration as the running service configuration.\r\n\r\nAre you sure you want to upload an empty configuration and clear the running service configuration?"), Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if ((object)m_serviceConnection != null && MessageBox.Show("WARNING: You are about to upload an empty configuration as the running service configuration.\r\n\r\nAre you sure you want to upload an empty configuration and clear the running service configuration?", Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     m_serviceConnection.SendCommand("UploadConfig", ProxyConnectionCollection.SerializeConfiguration(m_proxyConnections));
             }
             else if (SaveConfiguration(true, "Current configuration must be saved before you upload it. Do you want to save changes to the current configuration?") == SaveState.Saved)
             {
-                if ((object)m_serviceConnection != null && MessageBox.Show(string.Format("Are you sure you want to upload the current local configuration and make it the running service configuration?"), Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if ((object)m_serviceConnection != null && MessageBox.Show("Are you sure you want to upload the current local configuration and make it the running service configuration?", Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     m_serviceConnection.SendCommand("UploadConfig", ProxyConnectionCollection.SerializeConfiguration(m_proxyConnections));
             }
             else
@@ -677,7 +677,7 @@ namespace StreamSplitter
                         {
                             if ((object)m_serviceConnection != null)
                             {
-                                if (MessageBox.Show(string.Format("Connected to service. Would you like to download the current running configuration?"), Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                                if (MessageBox.Show("Connected to service. Would you like to download the current running configuration?", Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                                     m_serviceConnection.SendCommand("DownloadConfig");
                             }
                         });

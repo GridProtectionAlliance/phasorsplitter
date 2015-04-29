@@ -572,7 +572,7 @@ namespace StreamSplitter
             Dictionary<string, string> settings = m_frameParser.ConnectionString.ParseKeyValuePairs();
             string setting;
 
-            // TODO: These should be optional picked up from connection string inside of MPFP
+            // TODO: These should be optionally picked up from connection string inside of MPFP
 
             // Apply other settings as needed
             if (settings.TryGetValue("accessID", out setting))
@@ -586,9 +586,6 @@ namespace StreamSplitter
 
             if (settings.TryGetValue("parsingExceptionWindow", out setting))
                 m_frameParser.ParsingExceptionWindow = Ticks.FromSeconds(double.Parse(setting));
-
-            if (settings.TryGetValue("autoStartDataParsingSequence", out setting))
-                m_frameParser.AutoStartDataParsingSequence = setting.ParseBoolean();
 
             if (settings.TryGetValue("skipDisableRealTimeData", out setting))
                 m_frameParser.SkipDisableRealTimeData = setting.ParseBoolean();
