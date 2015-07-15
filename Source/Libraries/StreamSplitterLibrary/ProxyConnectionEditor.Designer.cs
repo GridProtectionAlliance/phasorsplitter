@@ -63,7 +63,7 @@ namespace StreamSplitter
             this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.groupBoxName = new System.Windows.Forms.GroupBox();
             this.textBoxName = new System.Windows.Forms.TextBox();
-            this.textBoxTcpListeningPort = new System.Windows.Forms.TextBox();
+            this.textBoxTcpPublisherListeningPort = new System.Windows.Forms.TextBox();
             this.textBoxUdpListeningPort = new System.Windows.Forms.TextBox();
             this.textBoxIDCode = new System.Windows.Forms.TextBox();
             this.textBoxAlternateTcpConnection = new System.Windows.Forms.TextBox();
@@ -89,7 +89,7 @@ namespace StreamSplitter
             this.textBoxConnectionStatus = new System.Windows.Forms.TextBox();
             this.tabControlProxyDestinationType = new System.Windows.Forms.TabControl();
             this.tabTcpProxyPoint = new System.Windows.Forms.TabPage();
-            this.labelTcpListeningPort = new System.Windows.Forms.Label();
+            this.labelTcpProxySettings = new System.Windows.Forms.Label();
             this.tabUdpRebroacasts = new System.Windows.Forms.TabPage();
             this.flowLayoutPanelUdpDestinations = new System.Windows.Forms.FlowLayoutPanel();
             this.labelUdpDestinationFormat = new System.Windows.Forms.Label();
@@ -101,8 +101,13 @@ namespace StreamSplitter
             this.textBoxConnectionString = new System.Windows.Forms.TextBox();
             this.panelCenterGroups = new System.Windows.Forms.Panel();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.checkBoxIsListener = new System.Windows.Forms.CheckBox();
+            this.radioButtonTcpServerMode = new System.Windows.Forms.RadioButton();
+            this.radioButtonTcpClientMode = new System.Windows.Forms.RadioButton();
+            this.textBoxTcpClientPublisherConnection = new System.Windows.Forms.TextBox();
             this.transparentPanel = new StreamSplitter.TransparentPanel();
             this.toolTipEx = new StreamSplitter.ToolTipEx(this.components);
+            this.textBoxTcpListeningPort = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.groupBoxName.SuspendLayout();
             this.groupBoxSourceConnection.SuspendLayout();
@@ -150,17 +155,17 @@ namespace StreamSplitter
             this.textBoxName.TabIndex = 0;
             this.textBoxName.TextChanged += new System.EventHandler(this.ControlValueChanged);
             // 
-            // textBoxTcpListeningPort
+            // textBoxTcpPublisherListeningPort
             // 
-            this.textBoxTcpListeningPort.Location = new System.Drawing.Point(27, 32);
-            this.textBoxTcpListeningPort.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.textBoxTcpListeningPort.Name = "textBoxTcpListeningPort";
-            this.textBoxTcpListeningPort.Size = new System.Drawing.Size(66, 22);
-            this.textBoxTcpListeningPort.TabIndex = 1;
-            this.textBoxTcpListeningPort.Text = "4712";
-            this.toolTip.SetToolTip(this.textBoxTcpListeningPort, "Example: 4713");
-            this.textBoxTcpListeningPort.TextChanged += new System.EventHandler(this.ControlValueChanged);
-            this.textBoxTcpListeningPort.Validating += new System.ComponentModel.CancelEventHandler(this.HandleInt16Validation);
+            this.textBoxTcpPublisherListeningPort.Location = new System.Drawing.Point(27, 40);
+            this.textBoxTcpPublisherListeningPort.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            this.textBoxTcpPublisherListeningPort.Name = "textBoxTcpPublisherListeningPort";
+            this.textBoxTcpPublisherListeningPort.Size = new System.Drawing.Size(66, 22);
+            this.textBoxTcpPublisherListeningPort.TabIndex = 3;
+            this.textBoxTcpPublisherListeningPort.Text = "4712";
+            this.toolTip.SetToolTip(this.textBoxTcpPublisherListeningPort, "Example: 4713");
+            this.textBoxTcpPublisherListeningPort.TextChanged += new System.EventHandler(this.ControlValueChanged);
+            this.textBoxTcpPublisherListeningPort.Validating += new System.ComponentModel.CancelEventHandler(this.HandleInt16Validation);
             // 
             // textBoxUdpListeningPort
             // 
@@ -301,6 +306,8 @@ namespace StreamSplitter
             // 
             // tabPageTcp
             // 
+            this.tabPageTcp.Controls.Add(this.textBoxTcpListeningPort);
+            this.tabPageTcp.Controls.Add(this.checkBoxIsListener);
             this.tabPageTcp.Controls.Add(this.labelTcpConnectionFormat);
             this.tabPageTcp.Controls.Add(this.textBoxTcpConnection);
             this.tabPageTcp.Location = new System.Drawing.Point(4, 25);
@@ -314,7 +321,7 @@ namespace StreamSplitter
             // labelTcpConnectionFormat
             // 
             this.labelTcpConnectionFormat.AutoSize = true;
-            this.labelTcpConnectionFormat.Location = new System.Drawing.Point(11, 32);
+            this.labelTcpConnectionFormat.Location = new System.Drawing.Point(11, 34);
             this.labelTcpConnectionFormat.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelTcpConnectionFormat.Name = "labelTcpConnectionFormat";
             this.labelTcpConnectionFormat.Size = new System.Drawing.Size(97, 13);
@@ -468,8 +475,11 @@ namespace StreamSplitter
             // 
             // tabTcpProxyPoint
             // 
-            this.tabTcpProxyPoint.Controls.Add(this.textBoxTcpListeningPort);
-            this.tabTcpProxyPoint.Controls.Add(this.labelTcpListeningPort);
+            this.tabTcpProxyPoint.Controls.Add(this.radioButtonTcpClientMode);
+            this.tabTcpProxyPoint.Controls.Add(this.radioButtonTcpServerMode);
+            this.tabTcpProxyPoint.Controls.Add(this.textBoxTcpPublisherListeningPort);
+            this.tabTcpProxyPoint.Controls.Add(this.textBoxTcpClientPublisherConnection);
+            this.tabTcpProxyPoint.Controls.Add(this.labelTcpProxySettings);
             this.tabTcpProxyPoint.Location = new System.Drawing.Point(4, 25);
             this.tabTcpProxyPoint.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.tabTcpProxyPoint.Name = "tabTcpProxyPoint";
@@ -479,15 +489,15 @@ namespace StreamSplitter
             this.tabTcpProxyPoint.Text = "TCP  Proxy Point";
             this.tabTcpProxyPoint.UseVisualStyleBackColor = true;
             // 
-            // labelTcpListeningPort
+            // labelTcpProxySettings
             // 
-            this.labelTcpListeningPort.AutoSize = true;
-            this.labelTcpListeningPort.Location = new System.Drawing.Point(25, 17);
-            this.labelTcpListeningPort.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.labelTcpListeningPort.Name = "labelTcpListeningPort";
-            this.labelTcpListeningPort.Size = new System.Drawing.Size(81, 13);
-            this.labelTcpListeningPort.TabIndex = 0;
-            this.labelTcpListeningPort.Text = "Listening Port:";
+            this.labelTcpProxySettings.AutoSize = true;
+            this.labelTcpProxySettings.Location = new System.Drawing.Point(25, 25);
+            this.labelTcpProxySettings.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelTcpProxySettings.Name = "labelTcpProxySettings";
+            this.labelTcpProxySettings.Size = new System.Drawing.Size(81, 13);
+            this.labelTcpProxySettings.TabIndex = 2;
+            this.labelTcpProxySettings.Text = "Listening Port:";
             // 
             // tabUdpRebroacasts
             // 
@@ -615,6 +625,54 @@ namespace StreamSplitter
             this.toolTip.ReshowDelay = 10;
             this.toolTip.ShowAlways = true;
             // 
+            // checkBoxIsListener
+            // 
+            this.checkBoxIsListener.AutoSize = true;
+            this.checkBoxIsListener.Location = new System.Drawing.Point(109, 33);
+            this.checkBoxIsListener.Name = "checkBoxIsListener";
+            this.checkBoxIsListener.Size = new System.Drawing.Size(77, 17);
+            this.checkBoxIsListener.TabIndex = 2;
+            this.checkBoxIsListener.Text = "Is Listener";
+            this.checkBoxIsListener.UseVisualStyleBackColor = true;
+            this.checkBoxIsListener.CheckedChanged += new System.EventHandler(this.checkBoxIsListener_CheckedChanged);
+            // 
+            // radioButtonTcpServerMode
+            // 
+            this.radioButtonTcpServerMode.AutoSize = true;
+            this.radioButtonTcpServerMode.Checked = true;
+            this.radioButtonTcpServerMode.Location = new System.Drawing.Point(5, 3);
+            this.radioButtonTcpServerMode.Name = "radioButtonTcpServerMode";
+            this.radioButtonTcpServerMode.Size = new System.Drawing.Size(89, 17);
+            this.radioButtonTcpServerMode.TabIndex = 0;
+            this.radioButtonTcpServerMode.TabStop = true;
+            this.radioButtonTcpServerMode.Text = "Server Mode";
+            this.radioButtonTcpServerMode.UseVisualStyleBackColor = true;
+            this.radioButtonTcpServerMode.CheckedChanged += new System.EventHandler(this.radioButtonTcpServerMode_CheckedChanged);
+            // 
+            // radioButtonTcpClientMode
+            // 
+            this.radioButtonTcpClientMode.AutoSize = true;
+            this.radioButtonTcpClientMode.Location = new System.Drawing.Point(114, 3);
+            this.radioButtonTcpClientMode.Name = "radioButtonTcpClientMode";
+            this.radioButtonTcpClientMode.Size = new System.Drawing.Size(88, 17);
+            this.radioButtonTcpClientMode.TabIndex = 1;
+            this.radioButtonTcpClientMode.Text = "Client Mode";
+            this.radioButtonTcpClientMode.UseVisualStyleBackColor = true;
+            this.radioButtonTcpClientMode.CheckedChanged += new System.EventHandler(this.radioButtonTcpClientMode_CheckedChanged);
+            // 
+            // textBoxTcpClientPublisherConnection
+            // 
+            this.textBoxTcpClientPublisherConnection.Location = new System.Drawing.Point(27, 40);
+            this.textBoxTcpClientPublisherConnection.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            this.textBoxTcpClientPublisherConnection.Name = "textBoxTcpClientPublisherConnection";
+            this.textBoxTcpClientPublisherConnection.Size = new System.Drawing.Size(170, 22);
+            this.textBoxTcpClientPublisherConnection.TabIndex = 4;
+            this.textBoxTcpClientPublisherConnection.Text = "localhost:4712";
+            this.toolTip.SetToolTip(this.textBoxTcpClientPublisherConnection, "Example: 192.168.1.10:4712");
+            this.textBoxTcpClientPublisherConnection.Visible = false;
+            this.textBoxTcpClientPublisherConnection.TextChanged += new System.EventHandler(this.ControlValueChanged);
+            this.textBoxTcpClientPublisherConnection.Validating += new System.ComponentModel.CancelEventHandler(this.HandleHostPortValidation);
+            // 
             // transparentPanel
             // 
             this.transparentPanel.Location = new System.Drawing.Point(0, 0);
@@ -633,6 +691,19 @@ namespace StreamSplitter
             this.toolTipEx.OwnerDraw = true;
             this.toolTipEx.ReshowDelay = 2;
             this.toolTipEx.ShowAlways = true;
+            // 
+            // textBoxTcpListeningPort
+            // 
+            this.textBoxTcpListeningPort.Location = new System.Drawing.Point(12, 10);
+            this.textBoxTcpListeningPort.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            this.textBoxTcpListeningPort.Name = "textBoxTcpListeningPort";
+            this.textBoxTcpListeningPort.Size = new System.Drawing.Size(66, 22);
+            this.textBoxTcpListeningPort.TabIndex = 4;
+            this.textBoxTcpListeningPort.Text = "4712";
+            this.toolTip.SetToolTip(this.textBoxTcpListeningPort, "Example: 4713");
+            this.textBoxTcpListeningPort.Visible = false;
+            this.textBoxTcpListeningPort.TextChanged += new System.EventHandler(this.ControlValueChanged);
+            this.textBoxTcpListeningPort.Validating += new System.ComponentModel.CancelEventHandler(this.HandleInt16Validation);
             // 
             // ProxyConnectionEditor
             // 
@@ -684,8 +755,8 @@ namespace StreamSplitter
         private System.Windows.Forms.TextBox textBoxConnectionStatus;
         private System.Windows.Forms.TabControl tabControlProxyDestinationType;
         private System.Windows.Forms.TabPage tabTcpProxyPoint;
-        private System.Windows.Forms.Label labelTcpListeningPort;
-        private System.Windows.Forms.TextBox textBoxTcpListeningPort;
+        private System.Windows.Forms.Label labelTcpProxySettings;
+        private System.Windows.Forms.TextBox textBoxTcpPublisherListeningPort;
         private System.Windows.Forms.TabPage tabUdpRebroacasts;
         private System.Windows.Forms.GroupBox groupBoxSourceConnection;
         private System.Windows.Forms.TabControl tabControlSourceConnectionType;
@@ -725,5 +796,10 @@ namespace StreamSplitter
         /// Button control used to apply changes to service.
         /// </summary>
         public System.Windows.Forms.Button buttonApply;
+        private System.Windows.Forms.CheckBox checkBoxIsListener;
+        private System.Windows.Forms.RadioButton radioButtonTcpClientMode;
+        private System.Windows.Forms.RadioButton radioButtonTcpServerMode;
+        private System.Windows.Forms.TextBox textBoxTcpClientPublisherConnection;
+        private System.Windows.Forms.TextBox textBoxTcpListeningPort;
     }
 }

@@ -316,7 +316,7 @@ namespace StreamSplitter
         private void RegisterControls(ControlCollection controlCollection = null)
         {
             if ((object)controlCollection == null)
-                controlCollection = this.Controls;
+                controlCollection = Controls;
 
             foreach (Control control in controlCollection)
             {
@@ -356,10 +356,22 @@ namespace StreamSplitter
             switch (sourceTransportProtocol)
             {
                 case TransportProtocol.Tcp:
-                    sourceSettings["server"] = textBoxTcpConnection.Text;
+                    if (checkBoxIsListener.Checked)
+                    {
+                        sourceSettings["port"] = textBoxTcpListeningPort.Text;
+                        sourceSettings["isListener"] = "true";
+                        sourceSettings.Remove("server");
+                    }
+                    else
+                    {
+                        sourceSettings["server"] = textBoxTcpConnection.Text;
+                        sourceSettings.Remove("isListener");
+                        sourceSettings.Remove("port");
+                    }
                     break;
                 case TransportProtocol.Udp:
                     sourceSettings["localport"] = textBoxUdpListeningPort.Text;
+                    sourceSettings.Remove("isListener");
                     break;
             }
 
@@ -382,11 +394,23 @@ namespace StreamSplitter
             switch (proxyTransportProtocol)
             {
                 case TransportProtocol.Tcp:
-                    proxySettings["port"] = textBoxTcpListeningPort.Text;
+                    if (radioButtonTcpServerMode.Checked)
+                    {
+                        proxySettings["port"] = textBoxTcpPublisherListeningPort.Text;
+                        proxySettings.Remove("useClientPublishChannel");
+                        proxySettings.Remove("server");
+                    }
+                    else
+                    {
+                        proxySettings["server"] = textBoxTcpClientPublisherConnection.Text;
+                        proxySettings["useClientPublishChannel"] = "true";
+                        proxySettings.Remove("port");
+                    }
                     break;
                 case TransportProtocol.Udp:
                     proxySettings["port"] = "-1";
                     proxySettings["clients"] = string.Join(", ", m_udpDestinations.Select(textBox => textBox.Text).Where(value => !string.IsNullOrWhiteSpace(value)));
+                    proxySettings.Remove("useClientPublishChannel");
                     break;
             }
 
@@ -439,6 +463,7 @@ namespace StreamSplitter
         private void ParseConnectionString()
         {
             string setting;
+            bool updateConnectionString = false;
 
             Dictionary<string, string> allSettings = textBoxConnectionString.Text.ToNonNullString().ParseKeyValuePairs();
             Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
@@ -455,8 +480,21 @@ namespace StreamSplitter
             switch (sourceTransportProtocol)
             {
                 case TransportProtocol.Tcp:
-                    if (sourceSettings.TryGetValue("server", out setting))
-                        textBoxTcpConnection.Text = setting;
+
+                    if (sourceSettings.TryGetValue("isListener", out setting) && setting.ParseBoolean())
+                    {
+                        checkBoxIsListener.Checked = true;
+
+                        if (sourceSettings.TryGetValue("port", out setting))
+                            textBoxTcpListeningPort.Text = setting;
+                    }
+                    else
+                    {
+                        checkBoxIsListener.Checked = false;
+
+                        if (sourceSettings.TryGetValue("server", out setting))
+                            textBoxTcpConnection.Text = setting;
+                    }
                     break;
                 case TransportProtocol.Udp:
                     if (sourceSettings.TryGetValue("localport", out setting))
@@ -503,8 +541,43 @@ namespace StreamSplitter
             switch (proxyTransportProtocol)
             {
                 case TransportProtocol.Tcp:
-                    if (proxySettings.TryGetValue("port", out setting))
-                        textBoxTcpListeningPort.Text = setting;
+                    if (proxySettings.TryGetValue("useClientPublishChannel", out setting))
+                    {
+                        if (setting.ParseBoolean())
+                        {
+                            radioButtonTcpClientMode.Checked = true;
+
+                            if (proxySettings.TryGetValue("server", out setting))
+                                textBoxTcpClientPublisherConnection.Text = setting;
+                        }
+                        else
+                        {
+                            radioButtonTcpServerMode.Checked = true;
+
+                            if (proxySettings.TryGetValue("port", out setting))
+                                textBoxTcpPublisherListeningPort.Text = setting;
+                        }
+                    }
+                    else
+                    {
+                        // If useClientPublishChannel setting is not defined, derive current
+                        // server/client mode based on other connection string contents...
+                        if (proxySettings.TryGetValue("port", out setting))
+                        {
+                            radioButtonTcpServerMode.Checked = true;
+                            textBoxTcpPublisherListeningPort.Text = setting;
+                        }
+                        else if (proxySettings.TryGetValue("server", out setting))
+                        {
+                            radioButtonTcpClientMode.Checked = true;
+                            textBoxTcpClientPublisherConnection.Text = setting;
+                            updateConnectionString = true;
+                        }
+                        else
+                        {
+                            radioButtonTcpServerMode.Checked = true;
+                        }
+                    }
                     break;
                 case TransportProtocol.Udp:
                     if (proxySettings.TryGetValue("clients", out setting))
@@ -520,7 +593,6 @@ namespace StreamSplitter
                         for (int i = 0; i < clients.Length; i++)
                             m_udpDestinations[i].Text = clients[i].Trim();
                     }
-
                     break;
             }
 
@@ -533,6 +605,9 @@ namespace StreamSplitter
                 textBoxName.Text = setting;
             else
                 textBoxName.Text = "New Proxy Connection";
+
+            if (updateConnectionString)
+                BeginInvoke((Action)(UpdateConnectionString));
         }
 
         private void ControlValueChanged(object sender, EventArgs e)
@@ -699,6 +774,44 @@ namespace StreamSplitter
             // of connection parameters for the protocol if any are available
             m_frameParser.PhasorProtocol = (PhasorProtocol)comboBoxProtocol.SelectedIndex;
             propertyGridProtocolParameters.SelectedObject = m_frameParser.ConnectionParameters;
+        }
+
+        // Change TCP operational modes
+
+        private void checkBoxIsListener_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxIsListener.Checked)
+            {
+                textBoxTcpListeningPort.Visible = true;
+                textBoxTcpConnection.Visible = false;
+                labelTcpConnectionFormat.Text = "Format: port";
+            }
+            else
+            {
+                textBoxTcpConnection.Visible = true;
+                textBoxTcpListeningPort.Visible = false;
+                labelTcpConnectionFormat.Text = "Format: host:port";
+            }
+
+            UpdateConnectionString();
+        }
+
+        private void radioButtonTcpServerMode_CheckedChanged(object sender, EventArgs e)
+        {
+            textBoxTcpPublisherListeningPort.Visible = true;
+            textBoxTcpClientPublisherConnection.Visible = false;
+            labelTcpProxySettings.Text = "Listening Port:";
+
+            UpdateConnectionString();
+        }
+
+        private void radioButtonTcpClientMode_CheckedChanged(object sender, EventArgs e)
+        {
+            textBoxTcpClientPublisherConnection.Visible = true;
+            textBoxTcpPublisherListeningPort.Visible = false;
+            labelTcpProxySettings.Text = "Listener Endpoint:";
+
+            UpdateConnectionString();
         }
 
         /// <summary>

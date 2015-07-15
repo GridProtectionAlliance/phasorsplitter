@@ -34,6 +34,7 @@ using GSF.Communication;
 using GSF.Parsing;
 using GSF.PhasorProtocols;
 using GSF.Units;
+using TcpClient = GSF.Communication.TcpClient;
 using Timer = System.Timers.Timer;
 
 namespace StreamSplitter
@@ -80,6 +81,7 @@ namespace StreamSplitter
         private string m_proxySettings;
         private MultiProtocolFrameParser m_frameParser;
         private IServer m_publishChannel;
+        private TcpClient m_clientBasedPublishChannel;
         private Timer m_dataStreamMonitor;
         private volatile IConfigurationFrame m_configurationFrame;
         private int m_lastConfigurationPublishMinute;
@@ -137,7 +139,7 @@ namespace StreamSplitter
             m_streamProxyStatus = new StreamProxyStatus(m_id);
 
             // Initialize stream splitter based on new proxy connection settings
-            this.ProxyConnection = proxyConnection;
+            ProxyConnection = proxyConnection;
         }
 
         /// <summary>
@@ -387,6 +389,14 @@ namespace StreamSplitter
                     }
                 }
 
+                if ((object)m_clientBasedPublishChannel != null)
+                {
+                    status.AppendLine();
+                    status.AppendLine("Publication Channel Status".CenterText(50));
+                    status.AppendLine("--------------------------".CenterText(50));
+                    status.Append(m_clientBasedPublishChannel.Status);
+                }
+
                 return status.ToString();
             }
         }
@@ -432,6 +442,9 @@ namespace StreamSplitter
 
                 if ((object)udpPublishChannel != null)
                 {
+                    // Detach any existing client based publish channels
+                    TcpClientPublishChannel = null;
+
                     // Attach to events on new data channel reference
                     udpPublishChannel.ClientConnectingException += udpPublishChannel_ClientConnectingException;
                     udpPublishChannel.ReceiveClientDataComplete += udpPublishChannel_ReceiveClientDataComplete;
@@ -487,6 +500,9 @@ namespace StreamSplitter
 
                 if ((object)tcpPublishChannel != null)
                 {
+                    // Detach any existing client based publish channels
+                    TcpClientPublishChannel = null;
+
                     // Attach to events on new command channel reference
                     tcpPublishChannel.ClientConnected += tcpPublishChannel_ClientConnected;
                     tcpPublishChannel.ClientDisconnected += tcpPublishChannel_ClientDisconnected;
@@ -498,6 +514,49 @@ namespace StreamSplitter
                 }
 
                 m_publishChannel = tcpPublishChannel;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets reference to <see cref="TcpClient"/> publication channel, attaching and/or detaching to events as needed.
+        /// </summary>
+        protected TcpClient TcpClientPublishChannel
+        {
+            get
+            {
+                return m_clientBasedPublishChannel;
+            }
+            set
+            {
+                if ((object)m_clientBasedPublishChannel != null)
+                {
+                    // Detach from events on existing command channel reference
+                    m_clientBasedPublishChannel.ConnectionEstablished -= tcpClientBasedPublishChannel_ConnectionEstablished;
+                    m_clientBasedPublishChannel.ConnectionTerminated -= tcpClientBasedPublishChannel_ConnectionTerminated;
+                    m_clientBasedPublishChannel.ConnectionException -= tcpClientBasedPublishChannel_ConnectionException;
+                    m_clientBasedPublishChannel.ReceiveDataComplete -= tcpClientBasedPublishChannel_ReceiveDataComplete;
+                    m_clientBasedPublishChannel.SendDataException -= tcpClientBasedPublishChannel_SendDataException;
+
+                    if (m_clientBasedPublishChannel != value)
+                        m_clientBasedPublishChannel.Dispose();
+                }
+
+                // Assign new TCP client based publish channel reference
+                m_clientBasedPublishChannel = value;
+
+                if ((object)m_clientBasedPublishChannel != null)
+                {
+                    // Detach any existing server based publish channels
+                    UdpPublishChannel = null;
+                    TcpPublishChannel = null;
+
+                    // Attach to events on new command channel reference
+                    m_clientBasedPublishChannel.ConnectionEstablished += tcpClientBasedPublishChannel_ConnectionEstablished;
+                    m_clientBasedPublishChannel.ConnectionTerminated += tcpClientBasedPublishChannel_ConnectionTerminated;
+                    m_clientBasedPublishChannel.ConnectionException += tcpClientBasedPublishChannel_ConnectionException;
+                    m_clientBasedPublishChannel.ReceiveDataComplete += tcpClientBasedPublishChannel_ReceiveDataComplete;
+                    m_clientBasedPublishChannel.SendDataException += tcpClientBasedPublishChannel_SendDataException;
+                }
             }
         }
 
@@ -528,6 +587,7 @@ namespace StreamSplitter
                     {
                         TcpPublishChannel = null;
                         UdpPublishChannel = null;
+                        TcpClientPublishChannel = null;
 
                         if ((object)m_frameParser != null)
                         {
@@ -569,31 +629,43 @@ namespace StreamSplitter
             // Update connection information for the multi-protocol frame parser
             m_frameParser.ConnectionString = SourceSettings;
 
-            Dictionary<string, string> settings = m_frameParser.ConnectionString.ParseKeyValuePairs();
+            Dictionary<string, string> sourceSettings = m_frameParser.ConnectionString.ParseKeyValuePairs();
+            Dictionary<string, string> proxySettings = ProxySettings.ParseKeyValuePairs();
             string setting;
 
             // TODO: These should be optionally picked up from connection string inside of MPFP
 
             // Apply other settings as needed
-            if (settings.TryGetValue("accessID", out setting))
+            if (sourceSettings.TryGetValue("accessID", out setting))
                 m_frameParser.DeviceID = ushort.Parse(setting);
 
-            if (settings.TryGetValue("simulateTimestamp", out setting))
+            if (sourceSettings.TryGetValue("simulateTimestamp", out setting))
                 m_frameParser.InjectSimulatedTimestamp = setting.ParseBoolean();
 
-            if (settings.TryGetValue("allowedParsingExceptions", out setting))
+            if (sourceSettings.TryGetValue("allowedParsingExceptions", out setting))
                 m_frameParser.AllowedParsingExceptions = int.Parse(setting);
 
-            if (settings.TryGetValue("parsingExceptionWindow", out setting))
+            if (sourceSettings.TryGetValue("parsingExceptionWindow", out setting))
                 m_frameParser.ParsingExceptionWindow = Ticks.FromSeconds(double.Parse(setting));
 
-            if (settings.TryGetValue("skipDisableRealTimeData", out setting))
+            if (sourceSettings.TryGetValue("skipDisableRealTimeData", out setting))
                 m_frameParser.SkipDisableRealTimeData = setting.ParseBoolean();
 
-            // Create a new publication server
-            IServer publicationServer = ServerBase.Create(ProxySettings);
-            TcpPublishChannel = publicationServer as TcpServer;
-            UdpPublishChannel = publicationServer as UdpServer;
+            if (proxySettings.TryGetValue("useClientPublishChannel", out setting) && setting.ParseBoolean())
+            {
+                // Create a new client based publication channel (for reverse TCP connections)
+                TcpClientPublishChannel = ClientBase.Create(ProxySettings) as TcpClient;
+
+                if (m_clientBasedPublishChannel != null)
+                    m_clientBasedPublishChannel.MaxConnectionAttempts = -1;
+            }
+            else
+            {
+                // Create a new server based publication channel
+                IServer publicationServer = ServerBase.Create(ProxySettings);
+                TcpPublishChannel = publicationServer as TcpServer;
+                UdpPublishChannel = publicationServer as UdpServer;
+            }
         }
 
         /// <summary>
@@ -608,6 +680,9 @@ namespace StreamSplitter
             // Start publication server
             if ((object)m_publishChannel != null)
                 m_publishChannel.Start();
+
+            if ((object)m_clientBasedPublishChannel != null)
+                m_clientBasedPublishChannel.ConnectAsync();
 
             // Start multi-protocol frame parser
             if ((object)m_frameParser != null)
@@ -647,6 +722,9 @@ namespace StreamSplitter
             // Stop publication server
             if ((object)m_publishChannel != null)
                 m_publishChannel.Stop();
+
+            if ((object)m_clientBasedPublishChannel != null)
+                m_clientBasedPublishChannel.Disconnect();
 
             m_bytesReceived = 0;
             m_receivedConfigurationFrames = 0;
@@ -770,6 +848,9 @@ namespace StreamSplitter
         {
             string connectionID;
 
+            if (((object)server == null || clientID.Equals(Guid.Empty)) && (object)m_clientBasedPublishChannel != null)
+                return m_clientBasedPublishChannel.ServerUri;
+
             if (!m_connectionIDCache.TryGetValue(clientID, out connectionID))
             {
                 // Attempt to lookup remote connection identification for logging purposes
@@ -874,11 +955,16 @@ namespace StreamSplitter
                         // Reset received configuration frame counter
                         m_receivedConfigurationFrames = 0;
 
-                        if ((object)m_publishChannel != null && (object)m_configurationFrame != null)
+                        if ((object)m_configurationFrame != null)
                         {
-                            m_publishChannel.SendToAsync(clientID, m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
+                            if ((object)m_publishChannel != null)
+                                m_publishChannel.SendToAsync(clientID, m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
+                            else if ((object)m_clientBasedPublishChannel != null)
+                                m_clientBasedPublishChannel.SendAsync(m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
+
                             OnStatusMessage("Received request for \"{0}\" from \"{1}\" - frame was returned.", commandFrame.Command, connectionID);
                         }
+
                         break;
                     case DeviceCommand.EnableRealTimeData:
                     case DeviceCommand.DisableRealTimeData:
@@ -910,7 +996,7 @@ namespace StreamSplitter
         // Redistribute received data.
         private void m_frameParser_ReceivedFrameBufferImage(object sender, EventArgs<FundamentalFrameType, byte[], int, int> e)
         {
-            if ((object)m_publishChannel == null)
+            if ((object)m_publishChannel == null && (object)m_clientBasedPublishChannel == null)
                 return;
 
             byte[] image;
@@ -959,7 +1045,10 @@ namespace StreamSplitter
             length = e.Argument4;
 
             // We republish exactly what we receive to the current destinations
-            m_publishChannel.MulticastAsync(image, offset, length);
+            if ((object)m_publishChannel != null)
+                m_publishChannel.MulticastAsync(image, offset, length);
+            else if ((object)m_clientBasedPublishChannel != null)
+                m_clientBasedPublishChannel.SendAsync(image, offset, length);
 
             // We track bytes received so that connection can be restarted if data is not flowing
             m_bytesReceived += length;
@@ -1039,7 +1128,7 @@ namespace StreamSplitter
 
         #endregion
 
-        #region [ Data Channel Event Handlers ]
+        #region [ UDP Publish Channel Event Handlers ]
 
         private void udpPublishChannel_ClientConnectingException(object sender, EventArgs<Exception> e)
         {
@@ -1078,7 +1167,7 @@ namespace StreamSplitter
 
         #endregion
 
-        #region [ Command Channel Event Handlers ]
+        #region [ TCP Publish Channel Event Handlers ]
 
         private void tcpPublishChannel_ClientConnected(object sender, EventArgs<Guid> e)
         {
@@ -1125,6 +1214,42 @@ namespace StreamSplitter
         private void tcpPublishChannel_ServerStopped(object sender, EventArgs e)
         {
             OnStatusMessage("TCP publication channel stopped.");
+        }
+
+        #endregion
+
+        #region [ TCP Client Based Publish Channel Event Handlers ]
+
+        private void tcpClientBasedPublishChannel_ConnectionEstablished(object sender, EventArgs e)
+        {
+            OnStatusMessage("TCP publishing client connected to TCP listening server channel \"{0}\".", m_clientBasedPublishChannel.ServerUri);
+        }
+
+        private void tcpClientBasedPublishChannel_ConnectionTerminated(object sender, EventArgs e)
+        {
+            OnStatusMessage("TCP publishing client disconnected from TCP listening server channel \"{0}\".", m_clientBasedPublishChannel.ServerUri);
+        }
+
+        private void tcpClientBasedPublishChannel_ConnectionException(object sender, EventArgs<Exception> e)
+        {
+            Exception ex = e.Argument;
+            OnProcessException(new InvalidOperationException(string.Format("Socket exception occurred while TCP publishing client was attempting to connect to TCP listening server channel \"{0}\": {1}", m_clientBasedPublishChannel.ServerUri, ex.Message), ex));
+        }
+
+        private void tcpClientBasedPublishChannel_ReceiveDataComplete(object sender, EventArgs<byte[], int> e)
+        {
+            // Queue up derived class device command handling on a different thread
+            ThreadPool.QueueUserWorkItem(DeviceCommandHandlerProc, new EventArgs<Guid, byte[], int>(Guid.Empty, e.Argument1, e.Argument2));
+        }
+
+        private void tcpClientBasedPublishChannel_SendDataException(object sender, EventArgs<Exception> e)
+        {
+            Exception ex = e.Argument;
+
+            if (ex is SocketException)
+                OnProcessException(new InvalidOperationException(string.Format("Socket exception occurred on the TCP publication client channel while attempting to send client data to TCP listening server \"{0}\": {1}", m_clientBasedPublishChannel.ServerUri, ex.Message), ex));
+            else
+                OnProcessException(new InvalidOperationException(string.Format("TCP publication client channel exception occurred while sending client data to TCP listening server \"{0}\": {1}", m_clientBasedPublishChannel.ServerUri, ex.Message), ex));
         }
 
         #endregion

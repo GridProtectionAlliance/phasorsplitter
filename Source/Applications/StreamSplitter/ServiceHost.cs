@@ -59,7 +59,7 @@ namespace StreamSplitter
         private AutoResetEvent m_configurationLoadComplete;
         private object m_queuedConfigurationLoadPending;
         private volatile ProxyConnectionCollection m_currentConfiguration;
-        private List<StreamProxy> m_streamSplitters;
+        private readonly List<StreamProxy> m_streamSplitters;
         private readonly ConcurrentDictionary<object, string> m_derivedNameCache;
 
         #endregion
@@ -69,6 +69,9 @@ namespace StreamSplitter
         public ServiceHost()
         {
             InitializeComponent();
+
+            // Stream proxy lists
+            m_streamSplitters = new List<StreamProxy>();
 
             // Register event handlers.
             m_serviceHelper.ServiceStarting += ServiceHelper_ServiceStarting;
@@ -143,7 +146,11 @@ namespace StreamSplitter
             // Initialize system settings
             m_configurationLoadComplete = new AutoResetEvent(true);
             m_queuedConfigurationLoadPending = new object();
-            m_streamSplitters = new List<StreamProxy>();
+
+            lock (m_streamSplitters)
+            {
+                m_streamSplitters.Clear();
+            }
         }
 
         private void ServiceHelper_ServiceStarted(object sender, EventArgs e)
@@ -623,7 +630,7 @@ namespace StreamSplitter
                                 splitter.Name,
                                 splitter.ID,
                                 splitter.StreamProxyStatus.ConnectionState);
-                        
+
                         splitterEnumeration.Append(splitter.Status);
                     }
                 }
