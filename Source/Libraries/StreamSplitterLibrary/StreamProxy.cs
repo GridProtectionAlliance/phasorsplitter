@@ -656,7 +656,7 @@ namespace StreamSplitter
                 // Create a new client based publication channel (for reverse TCP connections)
                 TcpClientPublishChannel = ClientBase.Create(ProxySettings) as TcpClient;
 
-                if (m_clientBasedPublishChannel != null)
+                if ((object)m_clientBasedPublishChannel != null)
                     m_clientBasedPublishChannel.MaxConnectionAttempts = -1;
             }
             else
