@@ -105,6 +105,7 @@ namespace StreamSplitter
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.toolTipEx = new StreamSplitter.ToolTipEx(this.components);
+            this.toolTipNewHelp = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator)).BeginInit();
             this.bindingNavigator.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).BeginInit();
@@ -462,6 +463,12 @@ namespace StreamSplitter
             this.toolTipEx.ReshowDelay = 2;
             this.toolTipEx.ShowAlways = true;
             // 
+            // toolTipNewHelp
+            // 
+            this.toolTipNewHelp.AutomaticDelay = 1;
+            this.toolTipNewHelp.IsBalloon = true;
+            this.toolTipNewHelp.ShowAlways = true;
+            // 
             // StreamSplitterManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -479,6 +486,7 @@ namespace StreamSplitter
             this.Activated += new System.EventHandler(this.StreamSplitterManager_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.StreamSplitterManager_FormClosing);
             this.Load += new System.EventHandler(this.StreamSplitterManager_Load);
+            this.Move += new System.EventHandler(this.StreamSplitterManager_Activated);
             this.Resize += new System.EventHandler(this.StreamSplitterManager_Activated);
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator)).EndInit();
             this.bindingNavigator.ResumeLayout(false);
@@ -528,6 +536,7 @@ namespace StreamSplitter
         private System.Windows.Forms.ToolStripButton toolStripButtonGPA;
         private System.Windows.Forms.ToolStripButton toolStripButtonLoadConfig;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelVersion;
+        private System.Windows.Forms.ToolTip toolTipNewHelp;
     }
 }
 

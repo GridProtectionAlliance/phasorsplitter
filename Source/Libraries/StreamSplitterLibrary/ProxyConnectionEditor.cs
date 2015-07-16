@@ -356,7 +356,7 @@ namespace StreamSplitter
             switch (sourceTransportProtocol)
             {
                 case TransportProtocol.Tcp:
-                    if (checkBoxIsListener.Checked)
+                    if (checkBoxTcpSourceIsListener.Checked)
                     {
                         sourceSettings["port"] = textBoxTcpListeningPort.Text;
                         sourceSettings["isListener"] = "true";
@@ -394,7 +394,7 @@ namespace StreamSplitter
             switch (proxyTransportProtocol)
             {
                 case TransportProtocol.Tcp:
-                    if (radioButtonTcpServerMode.Checked)
+                    if (checkBoxTcpProxyIsListener.Checked)
                     {
                         proxySettings["port"] = textBoxTcpPublisherListeningPort.Text;
                         proxySettings.Remove("useClientPublishChannel");
@@ -483,14 +483,14 @@ namespace StreamSplitter
 
                     if (sourceSettings.TryGetValue("isListener", out setting) && setting.ParseBoolean())
                     {
-                        checkBoxIsListener.Checked = true;
+                        checkBoxTcpSourceIsListener.Checked = true;
 
                         if (sourceSettings.TryGetValue("port", out setting))
                             textBoxTcpListeningPort.Text = setting;
                     }
                     else
                     {
-                        checkBoxIsListener.Checked = false;
+                        checkBoxTcpSourceIsListener.Checked = false;
 
                         if (sourceSettings.TryGetValue("server", out setting))
                             textBoxTcpConnection.Text = setting;
@@ -545,14 +545,14 @@ namespace StreamSplitter
                     {
                         if (setting.ParseBoolean())
                         {
-                            radioButtonTcpClientMode.Checked = true;
+                            checkBoxTcpProxyIsListener.Checked = false;
 
                             if (proxySettings.TryGetValue("server", out setting))
                                 textBoxTcpClientPublisherConnection.Text = setting;
                         }
                         else
                         {
-                            radioButtonTcpServerMode.Checked = true;
+                            checkBoxTcpProxyIsListener.Checked = true;
 
                             if (proxySettings.TryGetValue("port", out setting))
                                 textBoxTcpPublisherListeningPort.Text = setting;
@@ -564,18 +564,18 @@ namespace StreamSplitter
                         // server/client mode based on other connection string contents...
                         if (proxySettings.TryGetValue("port", out setting))
                         {
-                            radioButtonTcpServerMode.Checked = true;
+                            checkBoxTcpProxyIsListener.Checked = true;
                             textBoxTcpPublisherListeningPort.Text = setting;
                         }
                         else if (proxySettings.TryGetValue("server", out setting))
                         {
-                            radioButtonTcpClientMode.Checked = true;
+                            checkBoxTcpProxyIsListener.Checked = false;
                             textBoxTcpClientPublisherConnection.Text = setting;
                             updateConnectionString = true;
                         }
                         else
                         {
-                            radioButtonTcpServerMode.Checked = true;
+                            checkBoxTcpProxyIsListener.Checked = false;
                         }
                     }
                     break;
@@ -778,38 +778,42 @@ namespace StreamSplitter
 
         // Change TCP operational modes
 
-        private void checkBoxIsListener_CheckedChanged(object sender, EventArgs e)
+        private void checkBoxTcpSourceIsListener_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxIsListener.Checked)
+            if (checkBoxTcpSourceIsListener.Checked)
             {
                 textBoxTcpListeningPort.Visible = true;
                 textBoxTcpConnection.Visible = false;
-                labelTcpConnectionFormat.Text = "Format: port";
+                labelTcpSourceSettings.Text = "Listening Port:";
+                labelTcpSourceFormat.Text = "Format: port";
             }
             else
             {
                 textBoxTcpConnection.Visible = true;
                 textBoxTcpListeningPort.Visible = false;
-                labelTcpConnectionFormat.Text = "Format: host:port";
+                labelTcpSourceSettings.Text = "Connect To:";
+                labelTcpSourceFormat.Text = "Format: host:port";
             }
 
             UpdateConnectionString();
         }
 
-        private void radioButtonTcpServerMode_CheckedChanged(object sender, EventArgs e)
+        private void checkBoxTcpProxyIsListener_CheckedChanged(object sender, EventArgs e)
         {
-            textBoxTcpPublisherListeningPort.Visible = true;
-            textBoxTcpClientPublisherConnection.Visible = false;
-            labelTcpProxySettings.Text = "Listening Port:";
-
-            UpdateConnectionString();
-        }
-
-        private void radioButtonTcpClientMode_CheckedChanged(object sender, EventArgs e)
-        {
-            textBoxTcpClientPublisherConnection.Visible = true;
-            textBoxTcpPublisherListeningPort.Visible = false;
-            labelTcpProxySettings.Text = "Listener Endpoint:";
+            if (checkBoxTcpProxyIsListener.Checked)
+            {
+                textBoxTcpPublisherListeningPort.Visible = true;
+                textBoxTcpClientPublisherConnection.Visible = false;
+                labelTcpProxySettings.Text = "Listening Port:";
+                labelTcpProxyFormat.Text = "Format: port";
+            }
+            else
+            {
+                textBoxTcpClientPublisherConnection.Visible = true;
+                textBoxTcpPublisherListeningPort.Visible = false;
+                labelTcpProxySettings.Text = "Connect To:";
+                labelTcpProxyFormat.Text = "Format: host:port";
+            }
 
             UpdateConnectionString();
         }

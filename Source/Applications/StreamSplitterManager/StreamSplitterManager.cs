@@ -210,6 +210,14 @@ namespace StreamSplitter
 
             if ((object)currentItem != null && (object)currentItem.ProxyConnectionEditor != null)
                 SelectProxyConnectionEditorControl(currentItem.ProxyConnectionEditor);
+
+            toolTipNewHelp.Hide(this);
+        }
+
+        private void ShowToolTipHelpForEmptyConfiguration()
+        {
+            if (m_proxyConnections.Count == 0)
+                toolTipNewHelp.Show("Click the \"plus\" button to add a new configuration...", this, 425, -10, 10000);
         }
 
         // Create a new configuration
@@ -225,6 +233,8 @@ namespace StreamSplitter
 
             // Change form title to include working file name
             UpdateFormTitle();
+
+            ShowToolTipHelpForEmptyConfiguration();
         }
 
         // Load existing configuration
@@ -272,6 +282,8 @@ namespace StreamSplitter
 
                 // Change form title to include working file name
                 UpdateFormTitle();
+
+                ShowToolTipHelpForEmptyConfiguration();
             }
             catch (Exception ex)
             {
@@ -336,6 +348,8 @@ namespace StreamSplitter
 
         private void AddProxyConnectionEditorControl(ProxyConnection connection)
         {
+            toolTipNewHelp.Hide(this);
+
             // Create a new editing control for the proxy connection
             ProxyConnectionEditor editorControl = new ProxyConnectionEditor
             {
@@ -826,6 +840,7 @@ namespace StreamSplitter
                 Invoke((Action<ProxyConnectionEditor>)SelectProxyConnectionEditorControl, proxyConnection.ProxyConnectionEditor);
 
             Invoke((Action)Activate);
+            Invoke((Action)ShowToolTipHelpForEmptyConfiguration);
         }
 
         private void ConnectToService(object state)
@@ -855,5 +870,6 @@ namespace StreamSplitter
         }
 
         #endregion
+
     }
 }
