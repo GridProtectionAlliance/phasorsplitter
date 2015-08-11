@@ -1008,7 +1008,17 @@ namespace StreamSplitter
 
             // As soon as we start receiving data frames and a config frame exists, we change proxy connection status to "Connected" instead of "ConnectedNoData"
             if (m_streamProxyStatus.ConnectionState == ConnectionState.ConnectedNoData && e.Argument1 == FundamentalFrameType.DataFrame && (object)m_configurationFrame != null)
-                m_streamProxyStatus.ConnectionState = ConnectionState.Connected;
+            {
+                if ((object)m_clientBasedPublishChannel != null)
+                {
+                    if (m_clientBasedPublishChannel.CurrentState == ClientState.Connected)
+                        m_streamProxyStatus.ConnectionState = ConnectionState.Connected;
+                }
+                else
+                {
+                    m_streamProxyStatus.ConnectionState = ConnectionState.Connected;
+                }
+            }
 
             // Send the configuration frame at the top of each minute if publication channel is UDP and source is not auto-sending configuration frames
             if (m_receivedConfigurationFrames < 2 && m_publishChannel is UdpServer && (object)m_configurationFrame != null)
@@ -1030,7 +1040,16 @@ namespace StreamSplitter
                         m_configurationFrame.Timestamp = currentTime;
 
                         image = m_configurationFrame.BinaryImage();
-                        m_publishChannel.MulticastAsync(image, 0, image.Length);
+
+                        try
+                        {
+                            m_publishChannel.MulticastAsync(image, 0, image.Length);
+                        }
+                        catch (Exception ex)
+                        {
+                            OnProcessException(new InvalidOperationException(string.Format("Server based publication channel exception during proxy output: {0}", ex.Message), ex));
+                        }
+
                         m_totalBytesSent += image.Length;
 
                         // Sleep for a moment between config frame and data frame transmissions
@@ -1046,9 +1065,27 @@ namespace StreamSplitter
 
             // We republish exactly what we receive to the current destinations
             if ((object)m_publishChannel != null)
-                m_publishChannel.MulticastAsync(image, offset, length);
-            else if ((object)m_clientBasedPublishChannel != null)
-                m_clientBasedPublishChannel.SendAsync(image, offset, length);
+            {
+                try
+                {
+                    m_publishChannel.MulticastAsync(image, offset, length);
+                }
+                catch (Exception ex)
+                {
+                    OnProcessException(new InvalidOperationException(string.Format("Server based publication channel exception during proxy output: {0}", ex.Message), ex));
+                }
+            }
+            else if ((object)m_clientBasedPublishChannel != null && m_clientBasedPublishChannel.CurrentState == ClientState.Connected)
+            {
+                try
+                {
+                    m_clientBasedPublishChannel.SendAsync(image, offset, length);
+                }
+                catch (Exception ex)
+                {
+                    OnProcessException(new InvalidOperationException(string.Format("TCP client based publication channel exception during proxy output: {0}", ex.Message), ex));
+                }
+            }
 
             // We track bytes received so that connection can be restarted if data is not flowing
             m_bytesReceived += length;
@@ -1082,6 +1119,16 @@ namespace StreamSplitter
             // Enable data stream monitor for connections that support commands
             if ((object)m_dataStreamMonitor != null)
                 m_dataStreamMonitor.Enabled = m_frameParser.DeviceSupportsCommands;
+
+            // Reinitialize proxy connection if needed...
+            if (m_enabled && (object)m_clientBasedPublishChannel != null && m_clientBasedPublishChannel.CurrentState != ClientState.Connected)
+            {
+                ThreadPool.QueueUserWorkItem(state =>
+                {
+                    m_clientBasedPublishChannel.Disconnect();
+                    m_clientBasedPublishChannel.ConnectAsync();
+                });
+            }
         }
 
         private void m_frameParser_ConnectionAttempt(object sender, EventArgs e)
@@ -1094,6 +1141,10 @@ namespace StreamSplitter
         {
             OnStatusMessage("Connection terminated.");
             m_streamProxyStatus.ConnectionState = ConnectionState.Disconnected;
+
+            // Reset proxy connection
+            if (m_enabled)
+                ThreadPool.QueueUserWorkItem(state => Start());
         }
 
         private void m_frameParser_ConfigurationChanged(object sender, EventArgs e)
@@ -1228,6 +1279,18 @@ namespace StreamSplitter
         private void tcpClientBasedPublishChannel_ConnectionTerminated(object sender, EventArgs e)
         {
             OnStatusMessage("TCP publishing client disconnected from TCP listening server channel \"{0}\".", m_clientBasedPublishChannel.ServerUri);
+
+            // Reinitialize client connection if it was just disconnected...
+            if (m_enabled && m_frameParser.IsConnected)
+            {
+                m_streamProxyStatus.ConnectionState = ConnectionState.ConnectedNoData;
+
+                ThreadPool.QueueUserWorkItem(state =>
+                {
+                    m_clientBasedPublishChannel.Disconnect();
+                    m_clientBasedPublishChannel.ConnectAsync();
+                });
+            }
         }
 
         private void tcpClientBasedPublishChannel_ConnectionException(object sender, EventArgs<Exception> e)
