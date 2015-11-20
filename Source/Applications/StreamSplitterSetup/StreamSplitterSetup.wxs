@@ -3,10 +3,10 @@
   <Product Id="*" Name="StreamSplitter" Language="1033" Version="!(bind.FileVersion.StreamSplitter.exe)" Manufacturer="Grid Protection Alliance" UpgradeCode="7E475E71-0956-4FB9-81A7-543C3D8A4C21">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
-    <PropertyRef Id="NETFRAMEWORK45"/>
+    <PropertyRef Id="WIX_IS_NETFRAMEWORK_46_OR_LATER_INSTALLED"/>
 
-    <Condition Message='This setup requires Microsoft .NET Framework 4.5 or greater - this will need to be installed before installation can continue.'>
-      <![CDATA[Installed OR NETFRAMEWORK45]]>
+    <Condition Message='This setup requires Microsoft .NET Framework 4.6 or greater - this will need to be installed before installation can continue.'>
+      <![CDATA[WIX_IS_NETFRAMEWORK_46_OR_LATER_INSTALLED]]>
     </Condition>
 
     <MajorUpgrade Schedule="afterInstallInitialize" DowngradeErrorMessage="A newer version of [ProductName] is already installed. Setup will now exit." />

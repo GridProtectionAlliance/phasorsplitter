@@ -274,6 +274,11 @@ namespace StreamSplitter
         }
 
         /// <summary>
+        /// Gets a flag that indicates whether the object has been disposed.
+        /// </summary>
+        public bool IsDisposed => m_disposed;
+
+        /// <summary>
         /// Gets the total number of bytes sent to clients of this <see cref="StreamProxy"/>.
         /// </summary>
         public long TotalBytesSent
