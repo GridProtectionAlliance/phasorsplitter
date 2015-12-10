@@ -46,6 +46,9 @@ namespace StreamSplitter
     {
         #region [ Members ]
 
+        // Constants
+        private double DefaultDataMonitorInterval = 10000.0D;
+
         // Events
 
         /// <summary>
@@ -125,7 +128,7 @@ namespace StreamSplitter
             // Create data stream monitoring timer
             m_dataStreamMonitor = new Timer();
             m_dataStreamMonitor.Elapsed += m_dataStreamMonitor_Elapsed;
-            m_dataStreamMonitor.Interval = 10000.0D;
+            m_dataStreamMonitor.Interval = DefaultDataMonitorInterval;
             m_dataStreamMonitor.AutoReset = true;
             m_dataStreamMonitor.Enabled = false;
 
@@ -637,6 +640,11 @@ namespace StreamSplitter
             Dictionary<string, string> sourceSettings = m_frameParser.ConnectionString.ParseKeyValuePairs();
             Dictionary<string, string> proxySettings = ProxySettings.ParseKeyValuePairs();
             string setting;
+            double value;
+
+            // Apply custom data monitoring interval
+            if (sourceSettings.TryGetValue("dataMonitorInterval", out setting) && double.TryParse(setting, out value) && (object)m_dataStreamMonitor != null)
+                m_dataStreamMonitor.Interval = value;
 
             // TODO: These should be optionally picked up from connection string inside of MPFP
 
