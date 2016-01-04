@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Synchrophasor Stream Splitter Proxy Management Library")]
 [assembly: AssemblyProduct("Synchrophasor Stream Splitter")]
 [assembly: AssemblyCompany("Grid Protection Alliance")]
-[assembly: AssemblyCopyright("Copyright © GPA, 2015.  All Rights Reserved.")]
+[assembly: AssemblyCopyright("Copyright © GPA, 2016.  All Rights Reserved.")]
 
 #if DEBUG
 [assembly: AssemblyConfiguration("Debug Build")]
@@ -34,5 +34,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.9.0")]
-[assembly: AssemblyFileVersion("1.0.9.0")]
+[assembly: AssemblyVersion("1.0.10.0")]
+[assembly: AssemblyFileVersion("1.0.10.0")]
