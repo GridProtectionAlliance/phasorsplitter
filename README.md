@@ -1,4 +1,4 @@
-![Logo](https://raw.githubusercontent.com/GridProtectionAlliance/phasorsplitter/master/readme%20files/Logo.png)
+![icon](http://www.gridprotectionalliance.org/images/products/icons%2064/streamsplitter.png)![Logo](https://raw.githubusercontent.com/GridProtectionAlliance/phasorsplitter/master/readme%20files/Logo.png)
 
 # Overview
 
