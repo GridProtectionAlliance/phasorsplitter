@@ -26,6 +26,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Timers;
@@ -684,6 +685,7 @@ namespace StreamSplitter
         /// <summary>
         /// Starts the <see cref="StreamProxy"/>, if it is not already running.
         /// </summary>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void Start()
         {
             // Make sure we are stopped before attempting to start
