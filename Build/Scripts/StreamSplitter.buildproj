@@ -117,6 +117,8 @@
     <ItemGroup>
       <!--List of projects to build.-->
       <ProjectsToBuild Include="$(ProjectSolution)"/>
+      <!-- List of installs to build. -->
+      <InstallsToBuild Include="$(LocalFolder)\Source\**\*.wixproj" />
     </ItemGroup>
   </Target>
 
