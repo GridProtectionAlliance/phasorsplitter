@@ -2797,38 +2797,108 @@
             <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
             <exception cref="T:System.ArgumentNullException"><paramref name="source" /> or <paramref name="predicate" /> is <c>null</c>.</exception>
         </member>
-        <member name="M:GSF.Collections.CollectionExtensions.Majority``1(System.Collections.Generic.IEnumerable{``0})">
+        <member name="M:GSF.Collections.CollectionExtensions.Median``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Gets the median item(s) from an enumeration, i.e., one return item for odd lengths, two for even lengths.
+            </summary>
+            <remarks>
+            If enumeration length is even, two items will be returned representing the items in the middle of the set;
+            otherwise, if the enumeration length is odd, one item will be returned from exactly the middle of the set.
+            </remarks>
+            <typeparam name="T"><see cref="T:System.Type"/> of elements in the <paramref name="source"/></typeparam>
+            <param name="source">An enumeration over which to find the median element(s).</param>
+            <returns>The median item(s) from an enumeration, or <c>null</c> if <paramref name="source"/> is <c>null</c>.</returns>
+        </member>
+        <member name="M:GSF.Collections.CollectionExtensions.MajorityBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Boolean,System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Returns the majority value in the collection, or default type value if no item represents the majority.
+            </summary>
+            <typeparam name="TSource"><see cref="T:System.Type"/> of elements in the <paramref name="source"/>.</typeparam>
+            <typeparam name="TKey">The generic type of the objects to be compared.</typeparam>
+            <param name="source">An enumeration over which to find the majority element.</param>
+            <param name="keySelector">A delegate that takes an object and produces the key for comparison.</param>
+            <param name="forwardSearch"><c>true</c> to search forward in <paramref name="source"/>; otherwise <c>false</c> to search backwards.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or <c>null</c> to use the default comparer for the type of the key.</param>
+            <returns>The majority value in the collection.</returns>
+        </member>
+        <member name="M:GSF.Collections.CollectionExtensions.MajorityBy``2(System.Collections.Generic.IEnumerable{``0},``0,System.Func{``0,``1},System.Boolean,System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Returns the majority value in the collection, or <paramref name="defaultValue"/> if no item represents the majority.
+            </summary>
+            <typeparam name="TSource"><see cref="T:System.Type"/> of elements in the <paramref name="source"/>.</typeparam>
+            <typeparam name="TKey">The generic type of the objects to be compared.</typeparam>
+            <param name="source">An enumeration over which to find the majority element.</param>
+            <param name="defaultValue">Default value to return if no item represents the majority.</param>
+            <param name="keySelector">A delegate that takes an object and produces the key for comparison.</param>
+            <param name="forwardSearch"><c>true</c> to search forward in <paramref name="source"/>; otherwise <c>false</c> to search backwards.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or <c>null</c> to use the default comparer for the type of the key.</param>
+            <returns>The majority value in the collection.</returns>
+        </member>
+        <member name="M:GSF.Collections.CollectionExtensions.Majority``1(System.Collections.Generic.IEnumerable{``0},System.Boolean,System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Returns the majority value in the collection, or default type value if no item represents the majority.
             </summary>
             <typeparam name="T"><see cref="T:System.Type"/> of elements in the <paramref name="source"/>.</typeparam>
             <param name="source">An enumeration over which to find the majority element.</param>
+            <param name="forwardSearch"><c>true</c> to search forward in <paramref name="source"/>; otherwise <c>false</c> to search backwards.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or <c>null</c> to use the default comparer for the type of the key.</param>
             <returns>The majority value in the collection.</returns>
         </member>
-        <member name="M:GSF.Collections.CollectionExtensions.Majority``1(System.Collections.Generic.IEnumerable{``0},``0)">
+        <member name="M:GSF.Collections.CollectionExtensions.Majority``1(System.Collections.Generic.IEnumerable{``0},``0,System.Boolean,System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Returns the majority value in the collection, or <paramref name="defaultValue"/> if no item represents the majority.
             </summary>
             <typeparam name="T"><see cref="T:System.Type"/> of elements in the <paramref name="source"/>.</typeparam>
             <param name="source">An enumeration over which to find the majority element.</param>
             <param name="defaultValue">Default value to return if no item represents the majority.</param>
+            <param name="forwardSearch"><c>true</c> to search forward in <paramref name="source"/>; otherwise <c>false</c> to search backwards.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or <c>null</c> to use the default comparer for the type of the key.</param>
             <returns>The majority value in the collection.</returns>
         </member>
-        <member name="M:GSF.Collections.CollectionExtensions.Minority``1(System.Collections.Generic.IEnumerable{``0})">
+        <member name="M:GSF.Collections.CollectionExtensions.MinorityBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Boolean,System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Returns the minority value in the collection, or default type value if no item represents the majority.
+            </summary>
+            <typeparam name="TSource"><see cref="T:System.Type"/> of elements in the <paramref name="source"/>.</typeparam>
+            <typeparam name="TKey">The generic type of the objects to be compared.</typeparam>
+            <param name="source">An enumeration over which to find the majority element.</param>
+            <param name="keySelector">A delegate that takes an object and produces the key for comparison.</param>
+            <param name="forwardSearch"><c>true</c> to search forward in <paramref name="source"/>; otherwise <c>false</c> to search backwards.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or <c>null</c> to use the default comparer for the type of the key.</param>
+            <returns>The minority value in the collection.</returns>
+        </member>
+        <member name="M:GSF.Collections.CollectionExtensions.MinorityBy``2(System.Collections.Generic.IEnumerable{``0},``0,System.Func{``0,``1},System.Boolean,System.Collections.Generic.IEqualityComparer{``1})">
+            <summary>
+            Returns the minority value in the collection, or <paramref name="defaultValue"/> if no item represents the majority.
+            </summary>
+            <typeparam name="TSource"><see cref="T:System.Type"/> of elements in the <paramref name="source"/>.</typeparam>
+            <typeparam name="TKey">The generic type of the objects to be compared.</typeparam>
+            <param name="source">An enumeration over which to find the majority element.</param>
+            <param name="defaultValue">Default value to return if no item represents the majority.</param>
+            <param name="keySelector">A delegate that takes an object and produces the key for comparison.</param>
+            <param name="forwardSearch"><c>true</c> to search forward in <paramref name="source"/>; otherwise <c>false</c> to search backwards.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or <c>null</c> to use the default comparer for the type of the key.</param>
+            <returns>The majority value in the collection.</returns>
+        </member>
+        <member name="M:GSF.Collections.CollectionExtensions.Minority``1(System.Collections.Generic.IEnumerable{``0},System.Boolean,System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Returns the minority value in the collection, or default type value if no item represents the minority.
             </summary>
             <typeparam name="T"><see cref="T:System.Type"/> of elements in the <paramref name="source"/>.</typeparam>
             <param name="source">An enumeration over which to find the minority element.</param>
+            <param name="forwardSearch"><c>true</c> to search forward in <paramref name="source"/>; otherwise <c>false</c> to search backwards.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or <c>null</c> to use the default comparer for the type of the key.</param>
             <returns>The minority value in the collection.</returns>
         </member>
-        <member name="M:GSF.Collections.CollectionExtensions.Minority``1(System.Collections.Generic.IEnumerable{``0},``0)">
+        <member name="M:GSF.Collections.CollectionExtensions.Minority``1(System.Collections.Generic.IEnumerable{``0},``0,System.Boolean,System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Returns the minority value in the collection, or <paramref name="defaultValue"/> if no item represents the minority.
             </summary>
             <typeparam name="T"><see cref="T:System.Type"/> of elements in the <paramref name="source"/>.</typeparam>
             <param name="source">An enumeration over which to find the minority element.</param>
             <param name="defaultValue">Default value to return if no item represents the minority.</param>
+            <param name="forwardSearch"><c>true</c> to search forward in <paramref name="source"/>; otherwise <c>false</c> to search backwards.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or <c>null</c> to use the default comparer for the type of the key.</param>
             <returns>The minority value in the collection.</returns>
         </member>
         <member name="M:GSF.Collections.CollectionExtensions.AddRange``1(System.Collections.Generic.IList{``0},System.Collections.Generic.IEnumerable{``0})">
@@ -2930,7 +3000,7 @@
             <param name="comparer">A comparer object.</param>
             <returns>Returns a generic type.</returns>
         </member>
-        <member name="M:GSF.Collections.CollectionExtensions.DistinctBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+        <member name="M:GSF.Collections.CollectionExtensions.DistinctBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Boolean)">
             <summary>
             Returns only the elements whose keys are distinct.
             </summary>
@@ -2938,6 +3008,7 @@
             <typeparam name="TKey">The type of the keys to be compared.</typeparam>
             <param name="source">The collection of source objects.</param>
             <param name="keySelector">The function used to access the keys of the source objects.</param>
+            <param name="forwardSearch"><c>true</c> to search forward in <paramref name="source"/>; otherwise <c>false</c> to search backwards.</param>
             <returns>The elements from <paramref name="source"/> whose keys are distinct.</returns>
         </member>
         <member name="M:GSF.Collections.CollectionExtensions.ToDelimitedString``1(System.Collections.Generic.IEnumerable{``0})">
@@ -6505,6 +6576,147 @@
             </summary>
             <param name="searchType">Type of search that should be used for field queried.</param>
         </member>
+        <member name="T:GSF.Data.Model.StatementTypes">
+            <summary>
+            Statement types for amendment application.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.StatementTypes.Select">
+            <summary>
+            Apply amendment to all SELECT statements, i.e., <see cref="F:GSF.Data.Model.StatementTypes.SelectCount"/>, <see cref="F:GSF.Data.Model.StatementTypes.SelectSet"/> and <see cref="F:GSF.Data.Model.StatementTypes.SelectRow"/>.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.StatementTypes.SelectCount">
+            <summary>
+            Apply amendment to SELECT COUNT statements.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.StatementTypes.SelectSet">
+            <summary>
+            Apply amendment to SELECT statements that can return multiple rows of data.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.StatementTypes.SelectRow">
+            <summary>
+            Apply amendment to SELECT statements that will return a single row of data.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.StatementTypes.Insert">
+            <summary>
+            Apply amendment to INSERT statements.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.StatementTypes.Update">
+            <summary>
+            Apply amendment to UPDATE statements.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.StatementTypes.Delete">
+            <summary>
+            Apply amendment to DELETE statements.
+            </summary>
+        </member>
+        <member name="T:GSF.Data.Model.TargetExpression">
+            <summary>
+            Target expressions for amendment application.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.TargetExpression.TableName">
+            <summary>
+            Apply amendment to table name.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.TargetExpression.FieldList">
+            <summary>
+            Apply amendment to full field list.
+            </summary>
+        </member>
+        <member name="T:GSF.Data.Model.AffixPosition">
+            <summary>
+            Locations for target expression amendment application.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.AffixPosition.Prefix">
+            <summary>
+            Apply amendment to beginning of <see cref="T:GSF.Data.Model.TargetExpression"/>.
+            </summary>
+        </member>
+        <member name="F:GSF.Data.Model.AffixPosition.Suffix">
+            <summary>
+            Apply amendment to ending of <see cref="T:GSF.Data.Model.TargetExpression"/>.
+            </summary>
+        </member>
+        <member name="T:GSF.Data.Model.AmendExpressionAttribute">
+            <summary>
+            Defines an attribute that will request amendment of a table name or field list with the specified text.
+            </summary>
+            <remarks>
+            <para>
+            As an example, this can be used to add table hints, e.g., <c>WITH (NOLOCK)</c>, for select statements in
+            SQL Server.
+            </para>
+            <para>
+            Applying the <see cref="T:GSF.Data.Model.AmendExpressionAttribute"/> to a modeled table with no specified database type parameter
+            will be meant to infer that the amendment be used for all database types. Using a specific database type as a
+            parameter to the attribute, e.g., <c>[AmendExpression("WITH (NOLOCK)", DatabaseType.SQLServer)]</c>, means the
+            amendment text will only be applied to the specific database - however, the attribute allows multiple instances
+            on the same identifier so you could specify that amendment application only be applied to two databases:
+            <code>
+            [AmendExpression("AS T1", DatabaseType.SQLServer), AmendExpression("AS T1", DatabaseType.MySQL)]
+            </code>
+            Other parameters exist to fully customize target expression, set affix position and specify statement types:
+            <code>
+            [AmendExpression("TOP 200",
+                TargetExpression = TargetExpression.FieldList,
+                AffixPosition = AffixPosition.Prefix,
+                StatementTypes = StatementTypes.SelectSet)]
+            </code>
+            </para>
+            </remarks>
+        </member>
+        <member name="P:GSF.Data.Model.AmendExpressionAttribute.AmendmentText">
+            <summary>
+            Gets or sets amendment text to be applied.
+            </summary>
+        </member>
+        <member name="P:GSF.Data.Model.AmendExpressionAttribute.TargetExpression">
+            <summary>
+            Gets or sets target expression for amendment application; defaults to <see cref="F:GSF.Data.Model.TargetExpression.TableName"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.Data.Model.AmendExpressionAttribute.AffixPosition">
+            <summary>
+            Gets or sets location for amendment application; defaults to <see cref="F:GSF.Data.Model.AffixPosition.Suffix"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.Data.Model.AmendExpressionAttribute.StatementTypes">
+            <summary>
+            Gets or sets statement types for amendment application; defaults to <see cref="F:GSF.Data.Model.StatementTypes.Select"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.Data.Model.AmendExpressionAttribute.TargetDatabaseType">
+            <summary>
+            Gets target <see cref="T:GSF.Data.DatabaseType"/> for amendment application.
+            </summary>
+            <remarks>
+            When value is <c>null</c>, amendment text will be applied to all database types.
+            </remarks>
+        </member>
+        <member name="M:GSF.Data.Model.AmendExpressionAttribute.#ctor(System.String)">
+            <summary>
+            Creates a new <see cref="T:GSF.Data.Model.AmendExpressionAttribute"/> that will request application of <paramref name="amendmentText"/>
+            for any database.
+            </summary>
+            <param name="amendmentText">Amendment text to apply.</param>
+        </member>
+        <member name="M:GSF.Data.Model.AmendExpressionAttribute.#ctor(System.String,GSF.Data.DatabaseType)">
+            <summary>
+            Creates a new <see cref="T:GSF.Data.Model.AmendExpressionAttribute"/> that will request application of <paramref name="amendmentText"/>
+            for the specified <paramref name="targetDatabaseType"/>.
+            </summary>
+            <param name="amendmentText">Amendment text to apply.</param>
+            <param name="targetDatabaseType">Target <see cref="T:GSF.Data.DatabaseType"/> for amendment text.</param>
+        </member>
         <member name="T:GSF.Data.Model.UseEscapedNameAttribute">
             <summary>
             Defines an attribute that will request use of the escaped name of a modeled identifier, i.e.,
@@ -6895,22 +7107,56 @@
             </summary>
             <typeparam name="T">Modeled table.</typeparam>
         </member>
-        <member name="M:GSF.Data.Model.TableOperations`1.#ctor(GSF.Data.AdoDataConnection)">
+        <member name="M:GSF.Data.Model.TableOperations`1.#ctor(GSF.Data.AdoDataConnection,System.Collections.Generic.KeyValuePair{System.String,System.String}[])">
             <summary>
             Creates a new <see cref="T:GSF.Data.Model.TableOperations`1"/>.
             </summary>
             <param name="connection"><see cref="T:GSF.Data.AdoDataConnection"/> instance to use for database operations.</param>
+            <param name="customTokens">Custom run-time tokens to apply to any modeled <see cref="T:GSF.Data.Model.AmendExpressionAttribute"/> values.</param>
             <exception cref="T:System.ArgumentNullException"><paramref name="connection"/> cannot be <c>null</c>.</exception>
+            <remarks>
+            The <paramref name="customTokens"/> can be used to apply run-time tokens to any defined <see cref="T:GSF.Data.Model.AmendExpressionAttribute"/> values,
+            for example, given the following amendment expression applied to a modeled class:
+            <code>
+            [AmendExpression("TOP {count}", 
+                TargetExpression = TargetExpression.FieldList,
+                AffixPosition = AffixPosition.Prefix,
+                StatementTypes = StatementTypes.SelectSet)]]
+            </code>
+            The <paramref name="customTokens"/> key/value pairs could be set as follows at run-time:
+            <code>
+            int count = 200;
+            customTokens = new[] { new KeyValuePair&lt;string, string&gt;("{count}", $"{count}") };
+            </code>
+            </remarks>
         </member>
-        <member name="M:GSF.Data.Model.TableOperations`1.#ctor(GSF.Data.AdoDataConnection,System.Action{System.Exception})">
+        <member name="M:GSF.Data.Model.TableOperations`1.#ctor(GSF.Data.AdoDataConnection,System.Action{System.Exception},System.Collections.Generic.KeyValuePair{System.String,System.String}[])">
             <summary>
             Creates a new <see cref="T:GSF.Data.Model.TableOperations`1"/>.
             </summary>
             <param name="connection"><see cref="T:GSF.Data.AdoDataConnection"/> instance to use for database operations.</param>
             <param name="exceptionHandler">Delegate to handle table operation exceptions.</param>
+            <param name="customTokens">Custom run-time tokens to apply to any modeled <see cref="T:GSF.Data.Model.AmendExpressionAttribute"/> values.</param>
             <remarks>
+            <para>
             When exception handler is provided, table operations will not throw exceptions for database calls, any
             encountered exceptions will be passed to handler for processing.
+            </para>
+            <para>
+            The <paramref name="customTokens"/> can be used to apply run-time tokens to any defined <see cref="T:GSF.Data.Model.AmendExpressionAttribute"/> values,
+            for example, given the following amendment expression applied to a modeled class:
+            <code>
+            [AmendExpression("TOP {count}", 
+                TargetExpression = TargetExpression.FieldList,
+                AffixPosition = AffixPosition.Prefix,
+                StatementTypes = StatementTypes.SelectSet)]]
+            </code>
+            The <paramref name="customTokens"/> key/value pairs could be set as follows at run-time:
+            <code>
+            int count = 200;
+            customTokens = new[] { new KeyValuePair&lt;string, string&gt;("{count}", $"{count}") };
+            </code>
+            </para>
             </remarks>
             <exception cref="T:System.ArgumentNullException"><paramref name="connection"/> cannot be <c>null</c>.</exception>
         </member>
@@ -15612,6 +15858,11 @@
         <member name="P:GSF.IO.RunTimeLog.RunningTime">
             <summary>
             Gets last known running-time (10-second resolution).
+            </summary>
+        </member>
+        <member name="P:GSF.IO.RunTimeLog.UpTime">
+            <summary>
+            Gets the up-time calculation for run-time log, i.e., <see cref="P:GSF.IO.RunTimeLog.RunningTime"/> - <see cref="P:GSF.IO.RunTimeLog.StartTime"/> (10-second resolution).
             </summary>
         </member>
         <member name="P:GSF.IO.RunTimeLog.Enabled">
@@ -26308,25 +26559,39 @@
             </summary>
         </member>
         <member name="T:GSF.NumericalAnalysis.NumericalAnalysisExtensions">
-            <summary>Defines extension functions related to numerical analysis over a sequence of data.</summary>
+            <summary>
+            Defines extension functions related to numerical analysis over a sequence of data.
+            </summary>
         </member>
-        <member name="M:GSF.NumericalAnalysis.NumericalAnalysisExtensions.StandardDeviation(System.Collections.Generic.IEnumerable{System.Double})">
-            <summary>Computes the standard deviation over a sequence of double values.</summary>
+        <member name="M:GSF.NumericalAnalysis.NumericalAnalysisExtensions.StandardDeviation(System.Collections.Generic.IEnumerable{System.Double},System.Boolean)">
+            <summary>
+            Computes the standard deviation over a sequence of <see cref="T:System.Double"/> values.
+            </summary>
             <param name="source">Source data sample.</param>
+            <param name="calculateForSample">Set to <c>true</c> to calculate for estimated population size, or <c>false</c> for full population.</param>
             <returns>The standard deviation of the sequence.</returns>
-            <exception cref="T:System.ArgumentNullException">source is null</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="source"/> does not contain enough values to produce a result.</exception>
         </member>
-        <member name="M:GSF.NumericalAnalysis.NumericalAnalysisExtensions.StandardDeviation(System.Collections.Generic.IEnumerable{System.Decimal})">
-            <summary>Computes the standard deviation over a sequence of decimal values.</summary>
+        <member name="M:GSF.NumericalAnalysis.NumericalAnalysisExtensions.StandardDeviation(System.Collections.Generic.IEnumerable{System.Decimal},System.Boolean)">
+            <summary>
+            Computes the standard deviation over a sequence of <see cref="T:System.Decimal"/> values.
+            </summary>
             <param name="source">Source data sample.</param>
+            <param name="calculateForSample">Set to <c>true</c> to calculate for estimated population size, or <c>false</c> for full population.</param>
             <returns>The standard deviation of the sequence.</returns>
-            <exception cref="T:System.ArgumentNullException">source is null</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="source"/> does not contain enough values to produce a result.</exception>
         </member>
-        <member name="M:GSF.NumericalAnalysis.NumericalAnalysisExtensions.StandardDeviation(System.Collections.Generic.IEnumerable{System.Single})">
-            <summary>Computes the standard deviation over a sequence of float values.</summary>
+        <member name="M:GSF.NumericalAnalysis.NumericalAnalysisExtensions.StandardDeviation(System.Collections.Generic.IEnumerable{System.Single},System.Boolean)">
+            <summary>
+            Computes the standard deviation over a sequence of <see cref="T:System.Single"/> values.
+            </summary>
             <param name="source">Source data sample.</param>
+            <param name="calculateForSample">Set to <c>true</c> to calculate for estimated population size, or <c>false</c> for full population.</param>
             <returns>The standard deviation of the sequence.</returns>
-            <exception cref="T:System.ArgumentNullException">source is null</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="source"/> does not contain enough values to produce a result.</exception>
         </member>
         <member name="T:GSF.NumericExtensions">
             <summary>Defines extension functions related to numbers.</summary>
@@ -32576,6 +32841,13 @@
             are specific legal values for the <see cref="T:GSF.Scheduling.DateTimePart"/> that the <see cref="T:GSF.Scheduling.SchedulePart"/> represents.
             </summary>
         </member>
+        <member name="F:GSF.Scheduling.SchedulePartTextSyntax.RangeWithEveryN">
+            <summary>
+            Values for the <see cref="T:GSF.Scheduling.SchedulePart"/> were specified using the 'n1-nn/n' text syntax. Included values 
+            are legal values for the <see cref="T:GSF.Scheduling.DateTimePart"/> that the <see cref="T:GSF.Scheduling.SchedulePart"/> represents that
+            are within the specified range and that are divisible by 'n'. 
+            </summary>
+        </member>
         <member name="T:GSF.Scheduling.SchedulePart">
             <summary>
             Represents a part of the <see cref="T:GSF.Scheduling.Schedule"/>.
@@ -38338,6 +38610,45 @@
             <param name="timestamp">Timestamp in <see cref="T:GSF.Ticks"/>.</param>
             <returns>Seconds in NTP from given <paramref name="timestamp"/>.</returns>
         </member>
+        <member name="T:GSF.NullableWeakReference">
+            <summary>
+            A <see cref="T:System.WeakReference"/> implementation that can have the <see cref="P:GSF.NullableWeakReference.Target"/> object set to null.
+            Natively, setting <see cref="P:System.WeakReference.Target"/> to null will throw an <see cref="T:System.InvalidOperationException"/>,
+            </summary>
+        </member>
+        <member name="M:GSF.NullableWeakReference.#ctor(System.Object)">
+            <summary>
+            Creates a <see cref="T:GSF.NullableWeakReference"/>
+            </summary>
+            <param name="target">the object to maintain the weak reference to. Cannot be null.</param>
+        </member>
+        <member name="P:GSF.NullableWeakReference.IsAlive">
+            <summary>
+            Gets an indication whether the object referenced by the current <see cref="T:NullableWeakReference" /> object has been cleared or garbage collected.
+            </summary>
+            <returns>
+            true if the object referenced by the current <see cref="T:NullableWeakReference" /> object has not been garbage collected or cleared 
+            and is still accessible; otherwise, false.
+            </returns>
+            <filterpriority>2</filterpriority>
+        </member>
+        <member name="P:GSF.NullableWeakReference.Target">
+            <summary>
+            Gets the object (the target) referenced by the current <see cref="T:NullableWeakReference" /> object.
+            Set will only accept null.
+            </summary>
+            <returns>
+            null if the object referenced by the current <see cref="T:NullableWeakReference" /> object has been garbage collected or cleared;
+            otherwise, a reference to the object referenced by the current <see cref="T:NullableWeakReference" /> object.
+            </returns>
+            <exception cref="T:System.InvalidOperationException">If setting this property to anything other than null</exception>
+            <filterpriority>2</filterpriority>
+        </member>
+        <member name="M:GSF.NullableWeakReference.Clear">
+            <summary>
+            Sets <see cref="P:GSF.NullableWeakReference.Target"/> to null so subsequent calls to <see cref="P:GSF.NullableWeakReference.Target"/> returns null
+            </summary>
+        </member>
         <member name="T:GSF.Reflection.AppDomainTypeLookup">
             <summary>
             Defines a lookup class that searches all assemblies in the current <see cref="T:System.AppDomain"/> for all <see cref="T:System.Type"/>.
@@ -40082,6 +40393,11 @@
         <member name="T:GSF.TimeTagBase">
             <summary>
             Represents the base class for alternate timetag implementations.
+            </summary>
+        </member>
+        <member name="F:GSF.TimeTagBase.DefaultFormat">
+            <summary>
+            Default format for <see cref="T:GSF.TimeTagBase"/> implementations.
             </summary>
         </member>
         <member name="M:GSF.TimeTagBase.#ctor(System.Int64,System.Decimal)">
