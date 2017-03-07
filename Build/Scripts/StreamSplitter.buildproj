@@ -122,6 +122,25 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="CoreBuildProjects">
+    <!-- Build all of the specified projects. -->
+    <Message Text="Compiling projects..."/>
+    <MSBuild Projects="@(ProjectsToBuild)" Properties="Configuration=$(BuildFlavor);Platform=$(BuildTarget);BuildInParallel=$(BuildInParallel)"/>
+
+    <!-- Build all of the specified installs. -->
+    <Message Text="Compiling installs..."/>
+    <Exec Command="%22$(VisualStudio)%22 %22$(ProjectSolution)%22 /Project %22%(InstallsToBuild.FullPath)%22 /Build %22$(BuildFlavor)|Any CPU%22" Condition="'$(ProjectSolution)' != '' And '@(InstallsToBuild)' != ''"/>
+    <Exec Command="%22$(VisualStudio)%22 %22$(ProjectSolution)%22 /Project %22%(InstallsToBuild.FullPath)%22 /Build %22$(BuildFlavor)|x86%22" Condition="'$(ProjectSolution)' != '' And '@(InstallsToBuild)' != ''"/>
+
+    <!-- Create list of files to be deleted from build output. -->
+    <ItemGroup>
+      <FilesToDelete Include="$(BuildOutputFolder)\**\setup.exe"/>
+      <!-- <FilesToDelete Include="$(BuildOutputFolder)\**\*.pdb" Condition="'$(BuildFlavor)' == 'Release'"/> -->
+      <FilesToDelete Include="$(BuildOutputFolder)\**\*.vshost.exe"/>
+      <FilesToDelete Include="$(BuildOutputFolder)\**\*.vshost.exe.manifest"/>
+    </ItemGroup>
+  </Target>
+
   <Target Name="BeforeExecuteUnitTests">
     <ItemGroup>
       <!--List of unit test assemblies.-->
