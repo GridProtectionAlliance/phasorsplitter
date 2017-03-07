@@ -141,6 +141,16 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="AfterBuildProjects">
+    <ItemGroup>
+      <Install64Source Include="$(BuildOutputFolder)\Applications\StreamSplitter\Setup\x64\StreamSplitterSetup.msi"/>
+      <Install32Source Include="$(BuildOutputFolder)\Applications\StreamSplitter\Setup\x86\StreamSplitterSetup.msi"/>
+    </ItemGroup>
+    
+    <Copy SourceFiles="@(Install64Source)" DestinationFiles="$(BuildOutputFolder)\Setup\StreamSplitterSetup (64-bit).msi"/>
+    <Copy SourceFiles="@(Install32Source)" DestinationFiles="$(BuildOutputFolder)\Setup\StreamSplitterSetup (32-bit).msi"/>
+  </Target>
+
   <Target Name="BeforeExecuteUnitTests">
     <ItemGroup>
       <!--List of unit test assemblies.-->
