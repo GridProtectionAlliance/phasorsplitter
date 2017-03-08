@@ -38,6 +38,7 @@ namespace StreamSplitter
 
         // Fields
         private Font m_font;
+        private bool m_disposed;
 
         #endregion
 
@@ -81,9 +82,37 @@ namespace StreamSplitter
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="ToolTipEx"/> has been disposed of.
+        /// </summary>
+        public bool IsDisposed => m_disposed;
+
         #endregion
 
         #region [ Methods ]
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the <see cref="ToolTipEx"/> object and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (!m_disposed)
+            {
+                try
+                {
+                    if (disposing)
+                    {
+                        m_font?.Dispose();
+                    }
+                }
+                finally
+                {
+                    m_disposed = true;          // Prevent duplicate dispose.
+                    base.Dispose(disposing);    // Call base class Dispose().
+                }
+            }
+        }
 
         // Handle custom drawing of tool-tip when a new font is provided
         private void OnPopup(object sender, PopupEventArgs e)

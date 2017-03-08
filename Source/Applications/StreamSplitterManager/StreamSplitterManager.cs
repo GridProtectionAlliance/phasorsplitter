@@ -413,21 +413,28 @@ namespace StreamSplitter
             if (string.IsNullOrWhiteSpace(status))
                 return;
 
-            string currentToolTip = Invoke((Func<string>)(() => toolTipEx.GetToolTip(statusStrip))) as string;
-
-            if (string.IsNullOrWhiteSpace(currentToolTip))
+            try
             {
-                Invoke((Action)(() => toolTipEx.SetToolTip(statusStrip, ToolTipEx.WordWrapStatus(status))));
-                return;
+                string currentToolTip = Invoke((Func<string>)(() => toolTipEx.GetToolTip(statusStrip))) as string;
+
+                if (string.IsNullOrWhiteSpace(currentToolTip))
+                {
+                    Invoke((Action)(() => toolTipEx.SetToolTip(statusStrip, ToolTipEx.WordWrapStatus(status))));
+                    return;
+                }
+
+                currentToolTip += ToolTipEx.WordWrapStatus(status);
+
+                // Truncate from the left to maintain maximum tool-tip size
+                if (currentToolTip.Length > MaximumToolTipSize)
+                    currentToolTip = currentToolTip.Substring(currentToolTip.Length - MaximumToolTipSize);
+
+                Invoke((Action)(() => toolTipEx.SetToolTip(statusStrip, currentToolTip)));
             }
-
-            currentToolTip += ToolTipEx.WordWrapStatus(status);
-
-            // Truncate from the left to maintain maximum tool-tip size
-            if (currentToolTip.Length > MaximumToolTipSize)
-                currentToolTip = currentToolTip.Substring(currentToolTip.Length - MaximumToolTipSize);
-
-            Invoke((Action)(() => toolTipEx.SetToolTip(statusStrip, currentToolTip)));
+            catch (ObjectDisposedException)
+            {
+                // This can happen on shutdown :-p
+            }
         }
 
         private void bindingSource_AddingNew(object sender, System.ComponentModel.AddingNewEventArgs e)

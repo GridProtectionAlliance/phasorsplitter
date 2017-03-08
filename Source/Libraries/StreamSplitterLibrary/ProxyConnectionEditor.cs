@@ -889,10 +889,7 @@ namespace StreamSplitter
 
             ushort value;
 
-            if (ushort.TryParse(text, out value))
-                return value > 0;
-
-            return false;
+            return ushort.TryParse(text, out value);
         }
 
         #endregion
