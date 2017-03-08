@@ -150,7 +150,7 @@
     
     <Copy SourceFiles="@(Install64Source)" DestinationFiles="$(BuildOutputFolder)\Setup\StreamSplitterSetup (64-bit).msi"/>
     <Copy SourceFiles="@(Install32Source)" DestinationFiles="$(BuildOutputFolder)\Setup\StreamSplitterSetup (32-bit).msi"/>
-    <Copy SourceFiles="%(ReadmeSource.FullPath)" DestinationFiles="$(BuildOutputFolder)\Setup\"/>
+    <Copy SourceFiles="%(ReadmeSource.FullPath)" DestinationFolder="$(BuildOutputFolder)\Setup\"/>
   </Target>
 
   <Target Name="BeforeExecuteUnitTests">
