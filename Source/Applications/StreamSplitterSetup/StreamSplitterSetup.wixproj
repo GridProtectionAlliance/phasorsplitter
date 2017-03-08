@@ -85,6 +85,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="INSTALL_LICENSE.rtf" />
+    <Content Include="LICENSE.txt" />
+    <Content Include="README.txt" />
     <Content Include="StreamSplitterSetupBanner.bmp" />
     <Content Include="StreamSplitterSetupDialog.bmp" />
   </ItemGroup>
