@@ -34,6 +34,7 @@ using GSF;
 using GSF.Communication;
 using GSF.Parsing;
 using GSF.PhasorProtocols;
+using GSF.Threading;
 using GSF.Units;
 using TcpClient = GSF.Communication.TcpClient;
 using Timer = System.Timers.Timer;
@@ -1314,11 +1315,12 @@ namespace StreamSplitter
             {
                 m_streamProxyStatus.ConnectionState = ConnectionState.ConnectedNoData;
 
-                ThreadPool.QueueUserWorkItem(state =>
+                new Action(() =>
                 {
                     m_clientBasedPublishChannel.Disconnect();
                     m_clientBasedPublishChannel.ConnectAsync();
-                });
+                })
+                .DelayAndExecute(1000);
             }
         }
 
