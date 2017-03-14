@@ -1317,8 +1317,8 @@ namespace StreamSplitter
 
                 new Action(() =>
                 {
-                    m_clientBasedPublishChannel.Disconnect();
-                    m_clientBasedPublishChannel.ConnectAsync();
+                    if (m_clientBasedPublishChannel.CurrentState == ClientState.Disconnected)
+                        m_clientBasedPublishChannel.ConnectAsync();
                 })
                 .DelayAndExecute(1000);
             }
