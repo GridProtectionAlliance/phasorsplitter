@@ -32,6 +32,7 @@ using System.Threading;
 using System.Timers;
 using GSF;
 using GSF.Communication;
+using GSF.Configuration;
 using GSF.Parsing;
 using GSF.PhasorProtocols;
 using GSF.Units;
@@ -49,6 +50,7 @@ namespace StreamSplitter
 
         // Constants
         private double DefaultDataMonitorInterval = 10000.0D;
+        private double DefaultSocketErrorReportingInterval = 10.0D;
 
         // Events
 
@@ -97,6 +99,9 @@ namespace StreamSplitter
         private long m_stopTime;
         private long m_bytesReceived;
         private long m_totalBytesSent;
+        private readonly double m_socketErrorReportingInterval;
+        private int m_lastSocketErrorNumber;
+        private long m_lastSocketErrorTime;
         private volatile bool m_enabled;
         private bool m_disposed;
 
@@ -125,6 +130,8 @@ namespace StreamSplitter
             m_frameParser.ParsingException += m_frameParser_ParsingException;
             m_frameParser.ReceivedConfigurationFrame += m_frameParser_ReceivedConfigurationFrame;
             m_frameParser.ReceivedFrameBufferImage += m_frameParser_ReceivedFrameBufferImage;
+            m_frameParser.ServerStarted += m_frameParser_ServerStarted;
+            m_frameParser.ServerStopped += m_frameParser_ServerStopped;
 
             // Create data stream monitoring timer
             m_dataStreamMonitor = new Timer();
@@ -144,6 +151,18 @@ namespace StreamSplitter
 
             // Initialize stream splitter based on new proxy connection settings
             ProxyConnection = proxyConnection;
+
+            // Read any needed configuration settings
+            try
+            {
+                ConfigurationFile configFile = ConfigurationFile.Current;
+                CategorizedSettingsElementCollection systemSettings = configFile.Settings["systemSettings"];
+                m_socketErrorReportingInterval = systemSettings["SocketErrorReportingInterval"].ValueAs(DefaultSocketErrorReportingInterval);
+            }
+            catch (Exception)
+            {
+                m_socketErrorReportingInterval = DefaultSocketErrorReportingInterval;
+            }
         }
 
         /// <summary>
@@ -166,7 +185,7 @@ namespace StreamSplitter
             set
             {
                 if ((object)value == null)
-                    throw new ArgumentNullException("value", "Cannot update StreamSplitter configuration: provided ProxyConnection is null.");
+                    throw new ArgumentNullException(nameof(value), "Cannot update StreamSplitter configuration: provided ProxyConnection is null.");
 
                 // Validate that this is correct proxy connection
                 if (value.ID != m_id)
@@ -822,7 +841,7 @@ namespace StreamSplitter
             catch (Exception ex)
             {
                 // We protect our code from consumer thrown exceptions
-                OnProcessException(new InvalidOperationException(string.Format("Exception in consumer handler for StatusMessage event: {0}", ex.Message), ex));
+                OnProcessException(new InvalidOperationException($"Exception in consumer handler for StatusMessage event: {ex.Message}", ex));
             }
         }
 
@@ -848,7 +867,7 @@ namespace StreamSplitter
             catch (Exception ex)
             {
                 // We protect our code from consumer thrown exceptions
-                OnProcessException(new InvalidOperationException(string.Format("Exception in consumer handler for StatusMessage event: {0}", ex.Message), ex));
+                OnProcessException(new InvalidOperationException($"Exception in consumer handler for StatusMessage event: {ex.Message}", ex));
             }
         }
 
@@ -974,7 +993,7 @@ namespace StreamSplitter
                         commandFrame = new GSF.PhasorProtocols.IEC61850_90_5.CommandFrame(commandBuffer, 0, length);
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(string.Format("Protocol \"{0}\" does not support commands.", m_frameParser.PhasorProtocol));
+                        throw new ArgumentOutOfRangeException($"Protocol \"{m_frameParser.PhasorProtocol}\" does not support commands.");
                 }
 
                 switch (commandFrame.Command)
@@ -1007,7 +1026,7 @@ namespace StreamSplitter
             }
             catch (Exception ex)
             {
-                OnProcessException(new InvalidOperationException(string.Format("Remotely connected device \"{0}\" sent an unrecognized data sequence to the concentrator, no action was taken. Exception details: {1}", connectionID, ex.Message), ex));
+                OnProcessException(new InvalidOperationException($"Remotely connected device \"{connectionID}\" sent an unrecognized data sequence to the concentrator, no action was taken. Exception details: {ex.Message}", ex));
             }
         }
 
@@ -1018,6 +1037,39 @@ namespace StreamSplitter
 
             if ((object)e != null)
                 DeviceCommandHandler(e.Argument1, GetConnectionID(m_publishChannel, e.Argument1), e.Argument2, e.Argument3);
+        }
+
+        private void m_dataStreamMonitor_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (m_bytesReceived == 0 && (m_frameParser.DeviceSupportsCommands || m_frameParser.ConnectionIsMulticast || m_frameParser.ConnectionIsListener))
+            {
+                // If we've received no data in the last time-span, we restart connect cycle...
+                m_dataStreamMonitor.Enabled = false;
+                OnStatusMessage("\r\nNo data received in {0} seconds, restarting connect cycle...\r\n", (m_dataStreamMonitor.Interval / 1000.0D).ToString("0.0"));
+                Start();
+            }
+
+            m_bytesReceived = 0;
+        }
+
+        private bool HandleException(Exception ex)
+        {
+            SocketException socketEx = ex as SocketException;
+
+            if ((object)socketEx != null)
+            {
+                if (m_lastSocketErrorNumber == socketEx.ErrorCode)
+                    return DateTime.UtcNow.Ticks - m_lastSocketErrorTime > Ticks.FromSeconds(m_socketErrorReportingInterval);
+
+                m_lastSocketErrorNumber = socketEx.ErrorCode;
+                m_lastSocketErrorTime = DateTime.UtcNow.Ticks;
+            }
+            else if ((object)ex.InnerException != null)
+            {
+                return HandleException(ex.InnerException);
+            }
+
+            return true;
         }
 
         #region [ Frame Parser Event Handlers ]
@@ -1076,7 +1128,7 @@ namespace StreamSplitter
                         }
                         catch (Exception ex)
                         {
-                            OnProcessException(new InvalidOperationException(string.Format("Server based publication channel exception during proxy output: {0}", ex.Message), ex));
+                            OnProcessException(new InvalidOperationException($"Server based publication channel exception during proxy output: {ex.Message}", ex));
                         }
 
                         m_totalBytesSent += image.Length;
@@ -1101,7 +1153,7 @@ namespace StreamSplitter
                 }
                 catch (Exception ex)
                 {
-                    OnProcessException(new InvalidOperationException(string.Format("Server based publication channel exception during proxy output: {0}", ex.Message), ex));
+                    OnProcessException(new InvalidOperationException($"Server based publication channel exception during proxy output: {ex.Message}", ex));
                 }
             }
             else if ((object)m_clientBasedPublishChannel != null && m_clientBasedPublishChannel.CurrentState == ClientState.Connected)
@@ -1112,7 +1164,7 @@ namespace StreamSplitter
                 }
                 catch (Exception ex)
                 {
-                    OnProcessException(new InvalidOperationException(string.Format("TCP client based publication channel exception during proxy output: {0}", ex.Message), ex));
+                    OnProcessException(new InvalidOperationException($"TCP client based publication channel exception during proxy output: {ex.Message}", ex));
                 }
             }
 
@@ -1136,7 +1188,9 @@ namespace StreamSplitter
 
         private void m_frameParser_ConnectionException(object sender, EventArgs<Exception, int> e)
         {
-            OnProcessException(new InvalidOperationException(string.Format("Connection attempt {0} failed due to exception: {1}", e.Argument2, e.Argument1.Message), e.Argument1));
+            if (HandleException(e.Argument1))
+                OnProcessException(new InvalidOperationException($"Connection attempt failed due to exception: {e.Argument1.Message}", e.Argument1));
+
             m_streamProxyStatus.ConnectionState = ConnectionState.Disconnected;
         }
 
@@ -1193,17 +1247,16 @@ namespace StreamSplitter
             SendCommand(DeviceCommand.SendConfigurationFrame2);
         }
 
-        private void m_dataStreamMonitor_Elapsed(object sender, ElapsedEventArgs e)
+        private void m_frameParser_ServerStarted(object sender, EventArgs e)
         {
-            if (m_bytesReceived == 0 && (m_frameParser.DeviceSupportsCommands || m_frameParser.ConnectionIsMulticast || m_frameParser.ConnectionIsListener))
-            {
-                // If we've received no data in the last time-span, we restart connect cycle...
-                m_dataStreamMonitor.Enabled = false;
-                OnStatusMessage("\r\nNo data received in {0} seconds, restarting connect cycle...\r\n", (m_dataStreamMonitor.Interval / 1000.0D).ToString("0.0"));
-                Start();
-            }
+            OnStatusMessage("TCP server based data channel listener started.");
+            m_streamProxyStatus.ConnectionState = ConnectionState.Disconnected;
+        }
 
-            m_bytesReceived = 0;
+        private void m_frameParser_ServerStopped(object sender, EventArgs e)
+        {
+            OnStatusMessage("TCP server based data channel listener stopped.");
+            m_streamProxyStatus.ConnectionState = ConnectionState.Disabled;
         }
 
         #endregion
@@ -1213,7 +1266,9 @@ namespace StreamSplitter
         private void udpPublishChannel_ClientConnectingException(object sender, EventArgs<Exception> e)
         {
             Exception ex = e.Argument;
-            OnProcessException(new InvalidOperationException(string.Format("Exception occurred while client attempting to connect to UDP publication channel: {0}", ex.Message), ex));
+
+            if (HandleException(ex))
+                OnProcessException(new InvalidOperationException($"Exception occurred while client attempting to connect to UDP publication channel: {ex.Message}", ex));
         }
 
         private void udpPublishChannel_ReceiveClientDataComplete(object sender, EventArgs<Guid, byte[], int> e)
@@ -1229,10 +1284,13 @@ namespace StreamSplitter
         {
             Exception ex = e.Argument2;
 
-            if (ex is SocketException)
-                OnProcessException(new InvalidOperationException(string.Format("Socket exception occurred on the UDP publication channel while attempting to send client data to \"{0}\": {1}", GetConnectionID(m_publishChannel, e.Argument1), ex.Message), ex));
-            else
-                OnProcessException(new InvalidOperationException(string.Format("UDP publication channel exception occurred while sending client data to \"{0}\": {1}", GetConnectionID(m_publishChannel, e.Argument1), ex.Message), ex));
+            if (HandleException(ex))
+            {
+                if (ex is SocketException)
+                    OnProcessException(new InvalidOperationException($"Socket exception occurred on the UDP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
+                else
+                    OnProcessException(new InvalidOperationException($"UDP publication channel exception occurred while sending client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
+            }
         }
 
         private void udpPublishChannel_ServerStarted(object sender, EventArgs e)
@@ -1267,7 +1325,9 @@ namespace StreamSplitter
         private void tcpPublishChannel_ClientConnectingException(object sender, EventArgs<Exception> e)
         {
             Exception ex = e.Argument;
-            OnProcessException(new InvalidOperationException(string.Format("Socket exception occurred while client was attempting to connect to TCP publication channel: {0}", ex.Message), ex));
+
+            if (HandleException(ex))
+                OnProcessException(new InvalidOperationException($"Socket exception occurred while client was attempting to connect to TCP publication channel: {ex.Message}", ex));
         }
 
         private void tcpPublishChannel_ReceiveClientDataComplete(object sender, EventArgs<Guid, byte[], int> e)
@@ -1280,10 +1340,13 @@ namespace StreamSplitter
         {
             Exception ex = e.Argument2;
 
-            if (ex is SocketException)
-                OnProcessException(new InvalidOperationException(string.Format("Socket exception occurred on the TCP publication channel while attempting to send client data to \"{0}\": {1}", GetConnectionID(m_publishChannel, e.Argument1), ex.Message), ex));
-            else
-                OnProcessException(new InvalidOperationException(string.Format("TCP publication channel exception occurred while sending client data to \"{0}\": {1}", GetConnectionID(m_publishChannel, e.Argument1), ex.Message), ex));
+            if (HandleException(ex))
+            {
+                if (ex is SocketException)
+                    OnProcessException(new InvalidOperationException($"Socket exception occurred on the TCP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
+                else
+                    OnProcessException(new InvalidOperationException($"TCP publication channel exception occurred while sending client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
+            }
         }
 
         private void tcpPublishChannel_ServerStarted(object sender, EventArgs e)
@@ -1325,7 +1388,9 @@ namespace StreamSplitter
         private void tcpClientBasedPublishChannel_ConnectionException(object sender, EventArgs<Exception> e)
         {
             Exception ex = e.Argument;
-            OnProcessException(new InvalidOperationException(string.Format("Socket exception occurred while TCP publishing client was attempting to connect to TCP listening server channel \"{0}\": {1}", m_clientBasedPublishChannel.ServerUri, ex.Message), ex));
+
+            if (HandleException(ex))
+                OnProcessException(new InvalidOperationException($"Socket exception occurred while TCP publishing client was attempting to connect to TCP listening server channel \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex));
         }
 
         private void tcpClientBasedPublishChannel_ReceiveDataComplete(object sender, EventArgs<byte[], int> e)
@@ -1338,10 +1403,13 @@ namespace StreamSplitter
         {
             Exception ex = e.Argument;
 
-            if (ex is SocketException)
-                OnProcessException(new InvalidOperationException(string.Format("Socket exception occurred on the TCP publication client channel while attempting to send client data to TCP listening server \"{0}\": {1}", m_clientBasedPublishChannel.ServerUri, ex.Message), ex));
-            else
-                OnProcessException(new InvalidOperationException(string.Format("TCP publication client channel exception occurred while sending client data to TCP listening server \"{0}\": {1}", m_clientBasedPublishChannel.ServerUri, ex.Message), ex));
+            if (HandleException(ex))
+            {
+                if (ex is SocketException)
+                    OnProcessException(new InvalidOperationException($"Socket exception occurred on the TCP publication client channel while attempting to send client data to TCP listening server \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex));
+                else
+                    OnProcessException(new InvalidOperationException($"TCP publication client channel exception occurred while sending client data to TCP listening server \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex));
+            }
         }
 
         #endregion

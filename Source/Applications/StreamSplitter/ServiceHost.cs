@@ -35,6 +35,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GSF;
 using GSF.Communication;
+using GSF.Configuration;
 using GSF.Console;
 using GSF.IO;
 using GSF.PhasorProtocols;
@@ -140,6 +141,13 @@ namespace StreamSplitter
 
         private void ServiceHelper_ServiceStarting(object sender, EventArgs<string[]> e)
         {
+            // Make sure default service settings exist
+            ConfigurationFile configFile = ConfigurationFile.Current;
+
+            // System settings
+            CategorizedSettingsElementCollection systemSettings = configFile.Settings["systemSettings"];
+            systemSettings.Add("SocketErrorReportingInterval", "10", "Interval, in seconds, that defines the maximum reporting rate for duplicate exceptions on a connection.");
+
             // Create a handler for unobserved task exceptions
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
