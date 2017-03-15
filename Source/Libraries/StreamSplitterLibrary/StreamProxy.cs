@@ -1060,7 +1060,11 @@ namespace StreamSplitter
             if ((object)socketEx != null)
             {
                 if (m_lastSocketErrorNumber == socketEx.ErrorCode)
-                    return DateTime.UtcNow.Ticks - m_lastSocketErrorTime > Ticks.FromSeconds(m_socketErrorReportingInterval);
+                {
+                    // Suppress exception if we are within reporting interval
+                    if (DateTime.UtcNow.Ticks - m_lastSocketErrorTime <= Ticks.FromSeconds(m_socketErrorReportingInterval))
+                        return false;
+                }
 
                 m_lastSocketErrorNumber = socketEx.ErrorCode;
                 m_lastSocketErrorTime = DateTime.UtcNow.Ticks;
