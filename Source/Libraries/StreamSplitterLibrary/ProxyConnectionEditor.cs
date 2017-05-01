@@ -518,15 +518,15 @@ namespace StreamSplitter
 
             // Update protocol information
             PhasorProtocol protocol;
-            short idCode;
+            ushort idCode;
 
             if (sourceSettings.TryGetValue("phasorProtocol", out setting) && Enum.TryParse(setting, out protocol))
                 comboBoxProtocol.SelectedIndex = (int)protocol;
             else
                 comboBoxProtocol.SelectedIndex = DefaultPhasorProtocol;
 
-            if (sourceSettings.TryGetValue("accessID", out setting) && short.TryParse(setting, out idCode))
-                textBoxIDCode.Text = Math.Abs(idCode).ToString();
+            if (sourceSettings.TryGetValue("accessID", out setting) && ushort.TryParse(setting, out idCode))
+                textBoxIDCode.Text = idCode.ToString();
             else
                 textBoxIDCode.Text = "1";
 
