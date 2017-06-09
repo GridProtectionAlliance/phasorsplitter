@@ -96,6 +96,7 @@ namespace StreamSplitter
         private long m_receivedConfigurationFrames;
         private readonly StreamProxyStatus m_streamProxyStatus;
         private readonly ConcurrentDictionary<Guid, string> m_connectionIDCache;
+        private readonly object m_startStopLock;
         private long m_startTime;
         private long m_stopTime;
         private long m_bytesReceived;
@@ -143,6 +144,9 @@ namespace StreamSplitter
 
             // Create a new connection ID cache
             m_connectionIDCache = new ConcurrentDictionary<Guid, string>();
+
+            // Create lock object for Start() and Stop() methods
+            m_startStopLock = new object();
 
             // Set stream proxy ID
             m_id = proxyConnection.ID;
@@ -705,38 +709,40 @@ namespace StreamSplitter
         /// <summary>
         /// Starts the <see cref="StreamProxy"/>, if it is not already running.
         /// </summary>
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void Start()
         {
-            // Make sure we are stopped before attempting to start
-            if (Enabled)
-                Stop();
-
-            try
+            lock (m_startStopLock)
             {
-                // Start publication server
-                if ((object)m_publishChannel != null)
-                    m_publishChannel.Start();
+                // Make sure we are stopped before attempting to start
+                if (Enabled)
+                    Stop();
 
-                if ((object)m_clientBasedPublishChannel != null)
-                    m_clientBasedPublishChannel.ConnectAsync();
-
-                // Start multi-protocol frame parser
-                if ((object)m_frameParser != null)
-                    m_frameParser.Start();
-
-                if (!m_enabled)
+                try
                 {
-                    m_stopTime = 0;
-                    m_startTime = DateTime.UtcNow.Ticks;
+                    // Start publication server
+                    if ((object)m_publishChannel != null)
+                        m_publishChannel.Start();
 
-                    // Start real-time frame publication
-                    m_enabled = true;
+                    if ((object)m_clientBasedPublishChannel != null)
+                        m_clientBasedPublishChannel.ConnectAsync();
+
+                    // Start multi-protocol frame parser
+                    if ((object)m_frameParser != null)
+                        m_frameParser.Start();
+
+                    if (!m_enabled)
+                    {
+                        m_stopTime = 0;
+                        m_startTime = DateTime.UtcNow.Ticks;
+
+                        // Start real-time frame publication
+                        m_enabled = true;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                OnProcessException(new InvalidOperationException($"Failed to start stream proxy: {ex.Message}", ex));
+                catch (Exception ex)
+                {
+                    OnProcessException(new InvalidOperationException($"Failed to start stream proxy: {ex.Message}", ex));
+                }
             }
         }
 
@@ -745,37 +751,40 @@ namespace StreamSplitter
         /// </summary>
         public void Stop()
         {
-            try
+            lock (m_startStopLock)
             {
-                m_streamProxyStatus.ConnectionState = ConnectionState.Disabled;
-
-                // Stop data stream monitor
-                if ((object)m_dataStreamMonitor != null)
-                    m_dataStreamMonitor.Enabled = false;
-
-                if (m_enabled)
+                try
                 {
-                    m_enabled = false;
-                    m_stopTime = DateTime.UtcNow.Ticks;
+                    m_streamProxyStatus.ConnectionState = ConnectionState.Disabled;
+
+                    // Stop data stream monitor
+                    if ((object)m_dataStreamMonitor != null)
+                        m_dataStreamMonitor.Enabled = false;
+
+                    if (m_enabled)
+                    {
+                        m_enabled = false;
+                        m_stopTime = DateTime.UtcNow.Ticks;
+                    }
+
+                    // Stop multi-protocol frame parser
+                    if ((object)m_frameParser != null)
+                        m_frameParser.Stop();
+
+                    // Stop publication server
+                    if ((object)m_publishChannel != null)
+                        m_publishChannel.Stop();
+
+                    if ((object)m_clientBasedPublishChannel != null)
+                        m_clientBasedPublishChannel.Disconnect();
+
+                    m_bytesReceived = 0;
+                    m_receivedConfigurationFrames = 0;
                 }
-
-                // Stop multi-protocol frame parser
-                if ((object)m_frameParser != null)
-                    m_frameParser.Stop();
-
-                // Stop publication server
-                if ((object)m_publishChannel != null)
-                    m_publishChannel.Stop();
-
-                if ((object)m_clientBasedPublishChannel != null)
-                    m_clientBasedPublishChannel.Disconnect();
-
-                m_bytesReceived = 0;
-                m_receivedConfigurationFrames = 0;
-            }
-            catch (Exception ex)
-            {
-                OnProcessException(new InvalidOperationException($"Failed to stop stream proxy: {ex.Message}", ex));
+                catch (Exception ex)
+                {
+                    OnProcessException(new InvalidOperationException($"Failed to stop stream proxy: {ex.Message}", ex));
+                }
             }
         }
 
