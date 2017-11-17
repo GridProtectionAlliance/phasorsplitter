@@ -130,6 +130,7 @@ namespace StreamSplitter
             m_frameParser.ConnectionTerminated += m_frameParser_ConnectionTerminated;
             m_frameParser.ConfigurationChanged += m_frameParser_ConfigurationChanged;
             m_frameParser.ParsingException += m_frameParser_ParsingException;
+            m_frameParser.ExceededParsingExceptionThreshold += m_frameParser_ExceededParsingExceptionThreshold;
             m_frameParser.ReceivedConfigurationFrame += m_frameParser_ReceivedConfigurationFrame;
             m_frameParser.ReceivedFrameBufferImage += m_frameParser_ReceivedFrameBufferImage;
             m_frameParser.ServerStarted += m_frameParser_ServerStarted;
@@ -630,6 +631,7 @@ namespace StreamSplitter
                             m_frameParser.ConnectionTerminated -= m_frameParser_ConnectionTerminated;
                             m_frameParser.ConfigurationChanged -= m_frameParser_ConfigurationChanged;
                             m_frameParser.ParsingException -= m_frameParser_ParsingException;
+                            m_frameParser.ExceededParsingExceptionThreshold -= m_frameParser_ExceededParsingExceptionThreshold;
                             m_frameParser.ReceivedConfigurationFrame -= m_frameParser_ReceivedConfigurationFrame;
                             m_frameParser.ReceivedFrameBufferImage -= m_frameParser_ReceivedFrameBufferImage;
                             m_frameParser.Dispose();
@@ -1200,6 +1202,14 @@ namespace StreamSplitter
             OnProcessException(e.Argument);
         }
 
+        private void m_frameParser_ExceededParsingExceptionThreshold(object sender, EventArgs e)
+        {
+            OnStatusMessage("\r\nConnection is being reset due to an excessive number of eceptions...\r\n");
+
+            if (Enabled)
+                Start();
+        }
+
         private void m_frameParser_ConnectionException(object sender, EventArgs<Exception, int> e)
         {
             if (HandleException(e.Argument1))
@@ -1241,7 +1251,7 @@ namespace StreamSplitter
 
             // Reset proxy connection
             if (m_enabled)
-                ThreadPool.QueueUserWorkItem(state => Start());
+                new Action(Start).DelayAndExecute(1500);
         }
 
         private void m_frameParser_ConfigurationChanged(object sender, EventArgs e)
