@@ -1204,7 +1204,7 @@ namespace StreamSplitter
 
         private void m_frameParser_ExceededParsingExceptionThreshold(object sender, EventArgs e)
         {
-            OnStatusMessage("Connection is being reset due to an excessive number of eceptions...\r\n");
+            OnStatusMessage("Connection is being reset due to an excessive number of exceptions...\r\n");
 
             if (Enabled)
                 Start();
