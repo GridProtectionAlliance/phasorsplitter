@@ -8,6 +8,8 @@ All common synchrophasor protocols are supported (e.g., IEEE C37.118, IEC 61850-
 
 For TCP proxy point, configuration frames are cached and sent to clients upon request. For UDP rebroadcasts, configuration frames will automatically be sent once per minute unless source connection is already doing this.
 
+_**Using multiple instances of this service can allow you to safely traverse security zones with synchrophasor data by making sure connections are initiated from the higher security zone regardless of the direction of data flow.**_
+
 # Documentation and Support
 
 * Get in contact with our development team on our new [discussion board](http://discussions.gridprotectionalliance.org/c/gpa-products/stream-splitter).
