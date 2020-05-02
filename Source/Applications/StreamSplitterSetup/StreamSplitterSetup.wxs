@@ -30,6 +30,7 @@
       </Feature>
 
       <ComponentGroupRef Id="Dependencies" />
+      <ComponentGroupRef Id="Registry" />
       <ComponentRef Id="Cleanup" />
     </Feature>
 
@@ -87,6 +88,17 @@
 
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- Registry Settings -->
+      <Component Id="Registry" Guid="{F74C123C-C923-4B04-813B-05E81397C764}">
+        <RegistryKey Id="REG_GridProtectionAlliance" Root="HKLM" Key="SOFTWARE\Grid Protection Alliance" ForceCreateOnInstall="yes">
+          <RegistryKey Id="REG_GridProtectionAlliance.SynchrophasorStreamSplitter" Key="SynchrophasorStreamSplitter" ForceCreateOnInstall="yes">
+            <RegistryValue Id="REG_GridProtectionAlliance.SynchrophasorStreamSplitter.InstallPath" Name="InstallPath" Value="[INSTALLFOLDER]" Type="string" />
+            <RegistryValue Id="REG_GridProtectionAlliance.SynchrophasorStreamSplitter.Revision" Name="Revision" Value="[ProductVersion]" Type="string" />
+            <RegistryValue Id="REG_GridProtectionAlliance.SynchrophasorStreamSplitter.TargetBitSize" Name="TargetBitSize" Value="$(var.Platform)" Type="string" />
+          </RegistryKey>
+        </RegistryKey>
+      </Component>
+      
       <!-- Applications -->
       <Component Id="StreamSplitter">
         <File Id="StreamSplitter.exe" Name="$(var.StreamSplitter.TargetFileName)" Source="$(var.StreamSplitter.TargetPath)" />
