@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
   <Product Id="*" Name="StreamSplitter" Language="1033" Version="!(bind.FileVersion.StreamSplitter.exe)" Manufacturer="Grid Protection Alliance" UpgradeCode="7E475E71-0956-4FB9-81A7-543C3D8A4C21">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
@@ -30,7 +30,7 @@
       </Feature>
 
       <ComponentGroupRef Id="Dependencies" />
-      <ComponentGroupRef Id="Registry" />
+      <ComponentRef Id="Registry" />
       <ComponentRef Id="Cleanup" />
     </Feature>
 
@@ -101,16 +101,22 @@
       
       <!-- Applications -->
       <Component Id="StreamSplitter">
-        <File Id="StreamSplitter.exe" Name="$(var.StreamSplitter.TargetFileName)" Source="$(var.StreamSplitter.TargetPath)" />
+        <File Id="StreamSplitter.exe" Name="$(var.StreamSplitter.TargetFileName)" Source="$(var.StreamSplitter.TargetPath)" >
+          <netfx:NativeImage Id="ngen_StreamSplitter.exe" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
         <ServiceInstall Id="StreamSplitterService" Name="[SERVICENAME]" Type="ownProcess" Start="auto" ErrorControl="normal" Description="Service for redistributing synchrophasor data streams." />
         <ServiceControl Id="StreamSplitterServiceControl" Name="[SERVICENAME]" Start="install" Stop="both" Remove="uninstall" />
       </Component>
       <Component Id="StreamSplitterConsole">
-        <File Id="StreamSplitterConsole.exe" Name="$(var.StreamSplitterConsole.TargetFileName)" Source="$(var.StreamSplitterConsole.TargetPath)" />
+        <File Id="StreamSplitterConsole.exe" Name="$(var.StreamSplitterConsole.TargetFileName)" Source="$(var.StreamSplitterConsole.TargetPath)" >
+          <netfx:NativeImage Id="ngen_StreamSplitterConsole.exe" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
         <Shortcut Id="StreamSplitterConsoleStartMenuShortcut" Name="StreamSplitter Console" Icon="StreamSplitterConsole.ico.exe" Description="Console client for the StreamSplitter service." WorkingDirectory="INSTALLFOLDER" Directory="ApplicationProgramsFolder" Advertise="yes" />
       </Component>
       <Component Id="StreamSplitterManager">
-        <File Id="StreamSplitterManager.exe" Name="$(var.StreamSplitterManager.TargetFileName)" Source="$(var.StreamSplitterManager.TargetPath)" />
+        <File Id="StreamSplitterManager.exe" Name="$(var.StreamSplitterManager.TargetFileName)" Source="$(var.StreamSplitterManager.TargetPath)"  >
+          <netfx:NativeImage Id="ngen_StreamSplitterManager.exe" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
         <Shortcut Id="StreamSplitterManagerStartMenuShortcut" Name="StreamSplitter Manager" Icon="StreamSplitterManager.ico.exe" Description="Manager application for the StreamSplitter service." WorkingDirectory="INSTALLFOLDER" Directory="ApplicationProgramsFolder" Advertise="yes" />
 
         <!-- Capabilities keys for Vista/7/8 "Set Program Access and Defaults" -->
@@ -165,41 +171,63 @@
     <ComponentGroup Id="Dependencies" Directory="INSTALLFOLDER">
       <!-- Libraries -->
       <Component Id="StreamSplitterLibrary">
-        <File Id="StreamSplitterLibrary.dll" Name="$(var.StreamSplitterLibrary.TargetFileName)" Source="$(var.StreamSplitterLibrary.TargetPath)" />
+        <File Id="StreamSplitterLibrary.dll" Name="$(var.StreamSplitterLibrary.TargetFileName)" Source="$(var.StreamSplitterLibrary.TargetPath)" >
+          <netfx:NativeImage Id="ngen_StreamSplitterLibrary.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
 
       <!-- DotNetZip Dependencies -->
       <Component Id="Ionic.Zlib">
-        <File Id="Ionic.Zlib.dll" Name="Ionic.Zlib.dll" Source="$(var.SolutionDir)\Dependencies\DotNetZip\Ionic.Zlib.dll" />
+        <File Id="Ionic.Zlib.dll" Name="Ionic.Zlib.dll" Source="$(var.SolutionDir)\Dependencies\DotNetZip\Ionic.Zlib.dll">
+          <netfx:NativeImage Id="ngen_Ionic.Zlib.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
 
       <!-- GSF Dependencies -->
       <Component Id="GSF.Communication">
-        <File Id="GSF.Communication.dll" Name="GSF.Communication.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Communication.dll" />
+        <File Id="GSF.Communication.dll" Name="GSF.Communication.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Communication.dll" >
+          <netfx:NativeImage Id="ngen_GSF.Communication.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
       <Component Id="GSF.Core">
-        <File Id="GSF.Core.dll" Name="GSF.Core.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Core.dll" />
+        <File Id="GSF.Core.dll" Name="GSF.Core.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Core.dll" >
+          <netfx:NativeImage Id="ngen_GSF.Core.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
       <Component Id="GSF.PhasorProtocols">
-        <File Id="GSF.PhasorProtocols.dll" Name="GSF.PhasorProtocols.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.PhasorProtocols.dll" />
+        <File Id="GSF.PhasorProtocols.dll" Name="GSF.PhasorProtocols.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.PhasorProtocols.dll" >
+          <netfx:NativeImage Id="ngen_GSF.PhasorProtocolls.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
       <Component Id="GSF.Security">
-        <File Id="GSF.Security.dll" Name="GSF.Security.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Security.dll" />
+        <File Id="GSF.Security.dll" Name="GSF.Security.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Security.dll" >
+          <netfx:NativeImage Id="ngen_GSF.Security.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
       <Component Id="GSF.ServiceBus">
-        <File Id="GSF.ServiceBus.dll" Name="GSF.ServiceBus.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.ServiceBus.dll" />
+        <File Id="GSF.ServiceBus.dll" Name="GSF.ServiceBus.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.ServiceBus.dll" >
+          <netfx:NativeImage Id="ngen_GSF.ServiceBus.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
       <Component Id="GSF.ServiceModel">
-        <File Id="GSF.ServiceModel.dll" Name="GSF.ServiceModel.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.ServiceModel.dll" />
+        <File Id="GSF.ServiceModel.dll" Name="GSF.ServiceModel.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.ServiceModel.dll" >
+          <netfx:NativeImage Id="ngen_GSF.ServiceModel.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
       <Component Id="GSF.ServiceProcess">
-        <File Id="GSF.ServiceProcess.dll" Name="GSF.ServiceProcess.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.ServiceProcess.dll" />
+        <File Id="GSF.ServiceProcess.dll" Name="GSF.ServiceProcess.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.ServiceProcess.dll" >
+          <netfx:NativeImage Id="ngen_GSF.ServiceProcess.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
       <Component Id="GSF.TimeSeries">
-        <File Id="GSF.TimeSeries.dll" Name="GSF.TimeSeries.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.TimeSeries.dll" />
+        <File Id="GSF.TimeSeries.dll" Name="GSF.TimeSeries.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.TimeSeries.dll" >
+          <netfx:NativeImage Id="ngen_GSF.TimeSeries.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
       <Component Id="GSF.Windows">
-        <File Id="GSF.Windows.dll" Name="GSF.Windows.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Windows.dll" />
+        <File Id="GSF.Windows.dll" Name="GSF.Windows.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Windows.dll" >
+          <netfx:NativeImage Id="ngen_GSF.Windows.dll" Platform="all" Priority="0" AppBaseDirectory="INSTALLFOLDER"/>
+        </File>
       </Component>
     </ComponentGroup>
   </Fragment>
