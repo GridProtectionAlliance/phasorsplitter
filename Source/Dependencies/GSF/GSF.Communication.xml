@@ -466,6 +466,40 @@
             <returns>A communications client.</returns>
             <param name="connectionString">Connection string for the client.</param>
         </member>
+        <member name="T:GSF.Communication.SerialException">
+            <summary>
+            Defines an exception for errors related <see cref="T:GSF.Communication.SerialClient"/> connections.
+            </summary>
+        </member>
+        <member name="M:GSF.Communication.SerialException.#ctor(System.IO.Ports.SerialError,System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:GSF.Communication.SerialException"/> class.
+            </summary>
+            <param name="serialError">The <see cref="T:System.IO.Ports.SerialError"/> associated with the exception.</param>
+            <param name="message">The error message that explains the reason for the exception, or <see langword="null"/> to use the default message associated with <paramref name="serialError"/>.</param>
+            <param name="innerException">The exception that is the cause of the current exception, or <see langword="null"/> if no inner exception is specified.</param>
+        </member>
+        <member name="M:GSF.Communication.SerialException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:GSF.Communication.SerialException"/> class with serialized data.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"/> that contains contextual information about the source or destination.</param>
+            <exception cref="T:System.ArgumentNullException"> <paramref name="info"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="P:GSF.Communication.SerialException.SerialError">
+            <summary>
+            Gets the <see cref="T:System.IO.Ports.SerialError"/> associated with the <see cref="T:GSF.Communication.SerialException"/>.
+            </summary>
+        </member>
+        <member name="M:GSF.Communication.SerialException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            When overridden in a derived class, sets the <see cref="T:System.Runtime.Serialization.SerializationInfo"/> with information about the exception.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"/> that contains contextual information about the source or destination.</param>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="info"/> parameter is <see langword="null"/>.</exception>
+        </member>
         <member name="T:GSF.Communication.ZeroMQServer">
             <summary>
             Represents a ZeroMQ ROUTER style socket as a communication server.
@@ -1627,14 +1661,15 @@
             Default byte sequence used to mark the beginning of the payload in a "Payload-Aware" transmissions.
             </summary>
         </member>
-        <member name="M:GSF.Communication.Payload.AddHeader(System.Byte[]@,System.Int32@,System.Int32@,System.Byte[])">
+        <member name="M:GSF.Communication.Payload.AddHeader(System.Byte[]@,System.Int32@,System.Int32@,System.Byte[],GSF.EndianOrder)">
             <summary>
             Adds header containing the <paramref name="marker"/> to the payload in the <paramref name="buffer"/> for "Payload-Aware" transmission.
             </summary>
             <param name="buffer">The buffer containing the payload.</param>
             <param name="offset">The offset in the <paramref name="buffer"/> at which the payload starts.</param>
-            <param name="length">The lenght of the payload in the <paramref name="buffer"/> starting at the <paramref name="offset"/>.</param>
+            <param name="length">The length of the payload in the <paramref name="buffer"/> starting at the <paramref name="offset"/>.</param>
             <param name="marker">The byte sequence used to mark the beginning of the payload in a "Payload-Aware" transmissions.</param>
+            <param name="endianOrder">The endian order to apply to payload size encoding.</param>
         </member>
         <member name="M:GSF.Communication.Payload.HasHeader(System.Byte[],System.Byte[])">
             <summary>
@@ -1644,13 +1679,14 @@
             <param name="marker">The byte sequence used to mark the beginning of the payload in a "Payload-Aware" transmissions.</param>
             <returns>true if the buffer contains "Payload-Aware" transmission header; otherwise false.</returns>
         </member>
-        <member name="M:GSF.Communication.Payload.ExtractLength(System.Byte[],System.Int32,System.Byte[])">
+        <member name="M:GSF.Communication.Payload.ExtractLength(System.Byte[],System.Int32,System.Byte[],GSF.EndianOrder)">
             <summary>
             Determines the length of a payload in a "Payload-Aware" transmission from the payload header information.
             </summary>
-            <param name="buffer">The buffer containg payload header information starting at index zero.</param>
+            <param name="buffer">The buffer containing payload header information starting at index zero.</param>
             <param name="length">The length of valid data within in <paramref name="buffer"/>.</param>
             <param name="marker">The byte sequence used to mark the beginning of the payload in a "Payload-Aware" transmissions.</param>
+            <param name="endianOrder">The endian order to apply to payload size decoding.</param>
             <returns>Length of the payload.</returns>
         </member>
         <member name="T:GSF.Communication.Radius.NamespaceDoc">
@@ -2451,6 +2487,11 @@
             Specifies the default value for the <see cref="P:GSF.Communication.ClientBase.ConnectionString"/> property.
             </summary>
         </member>
+        <member name="F:GSF.Communication.SerialClient.DefaultReceivedBytesThreshold">
+            <summary>
+            Default value for <see cref="P:GSF.Communication.SerialClient.ReceivedBytesThreshold"/> property.
+            </summary>
+        </member>
         <member name="M:GSF.Communication.SerialClient.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:GSF.Communication.SerialClient"/> class.
@@ -2485,6 +2526,11 @@
             <remarks>
             This option is ignored under Mono deployments.
             </remarks>
+        </member>
+        <member name="P:GSF.Communication.SerialClient.Status">
+            <summary>
+            Gets the descriptive status of the <see cref="T:GSF.Communication.SerialClient"/>.
+            </summary>
         </member>
         <member name="M:GSF.Communication.SerialClient.Read(System.Byte[],System.Int32,System.Int32)">
             <summary>
@@ -3168,6 +3214,11 @@
             Specifies the default value for the <see cref="P:GSF.Communication.TlsClient.MaxSendQueueSize"/> property.
             </summary>
         </member>
+        <member name="F:GSF.Communication.TlsClient.DefaultNoDelay">
+            <summary>
+            Specifies the default value for the <see cref="P:GSF.Communication.TlsClient.NoDelay"/> property.
+            </summary>
+        </member>
         <member name="F:GSF.Communication.TlsClient.DefaultConnectionString">
             <summary>
             Specifies the default value for the <see cref="P:GSF.Communication.ClientBase.ConnectionString"/> property.
@@ -3199,7 +3250,17 @@
             <summary>
             Gets or sets the byte sequence used to mark the beginning of a payload in a <see cref="P:GSF.Communication.TlsClient.PayloadAware"/> transmission.
             </summary>
-            <exception cref="T:System.ArgumentNullException">The value being assigned is null or empty buffer.</exception>
+            <remarks>
+            Setting property to <c>null</c> will create a zero-length payload marker.
+            </remarks>
+        </member>
+        <member name="P:GSF.Communication.TlsClient.PayloadEndianOrder">
+            <summary>
+            Gets or sets the endian order to apply for encoding and decoding payload size in a <see cref="P:GSF.Communication.TlsClient.PayloadAware"/> transmission.
+            </summary>
+            <remarks>
+            Setting property to <c>null</c> will force use of little-endian encoding.
+            </remarks>
         </member>
         <member name="P:GSF.Communication.TlsClient.IntegratedSecurity">
             <summary>
@@ -3229,9 +3290,19 @@
             Gets or sets the maximum size for the send queue before payloads are dumped from the queue.
             </summary>
         </member>
+        <member name="P:GSF.Communication.TlsClient.NoDelay">
+            <summary>
+            Gets or sets a boolean value that determines if small packets are delivered to the remote host without delay.
+            </summary>
+        </member>
         <member name="P:GSF.Communication.TlsClient.Client">
             <summary>
             Gets the <see cref="T:System.Net.Sockets.Socket"/> object for the <see cref="T:GSF.Communication.TlsClient"/>.
+            </summary>
+        </member>
+        <member name="P:GSF.Communication.TlsClient.SslStream">
+            <summary>
+            Gets the <see cref="P:GSF.Communication.TlsClient.SslStream"/> object for the <see cref="T:GSF.Communication.TlsClient"/>.
             </summary>
         </member>
         <member name="P:GSF.Communication.TlsClient.ServerUri">
@@ -3314,6 +3385,11 @@
             Determines whether the base class should track statistics.
             </summary>
         </member>
+        <member name="P:GSF.Communication.TlsClient.Status">
+            <summary>
+            Gets the descriptive status of the client.
+            </summary>
+        </member>
         <member name="M:GSF.Communication.TlsClient.SaveSettings">
             <summary>
             Saves <see cref="T:GSF.Communication.TlsClient"/> settings to the config file if the <see cref="P:GSF.Communication.ClientBase.PersistSettings"/> property is set to true.
@@ -3335,6 +3411,12 @@
             <summary>
             Initiates an asynchronous connection attempt.
             </summary>
+        </member>
+        <member name="M:GSF.Communication.TlsClient.OnConnectionException(System.Exception)">
+            <summary>
+            Raises the <see cref="E:GSF.Communication.ClientBase.ConnectionException"/> event.
+            </summary>
+            <param name="ex">Exception to send to <see cref="E:GSF.Communication.ClientBase.ConnectionException"/> event.</param>
         </member>
         <member name="M:GSF.Communication.TlsClient.ProcessTlsAuthentication(System.IAsyncResult)">
             <summary>
@@ -3470,6 +3552,11 @@
             sending to or receiving from the remote host.
             </summary>
         </member>
+        <member name="F:GSF.Communication.TlsServer.TlsSocket.RemoteEndPoint">
+            <summary>
+            The end point of the remote client connecting to this server.
+            </summary>
+        </member>
         <member name="M:GSF.Communication.TlsServer.TlsSocket.Dispose">
             <summary>
             Performs application-defined tasks associated with
@@ -3506,6 +3593,11 @@
             Specifies the default value for the <see cref="P:GSF.Communication.TlsServer.MaxSendQueueSize"/> property.
             </summary>
         </member>
+        <member name="F:GSF.Communication.TlsServer.DefaultNoDelay">
+            <summary>
+            Specifies the default value for the <see cref="P:GSF.Communication.TlsServer.NoDelay"/> property.
+            </summary>
+        </member>
         <member name="F:GSF.Communication.TlsServer.DefaultConfigurationString">
             <summary>
             Specifies the default value for the <see cref="P:GSF.Communication.ServerBase.ConfigurationString"/> property.
@@ -3537,7 +3629,17 @@
             <summary>
             Gets or sets the byte sequence used to mark the beginning of a payload in a <see cref="P:GSF.Communication.TlsServer.PayloadAware"/> transmission.
             </summary>
-            <exception cref="T:System.ArgumentNullException">The value being assigned is null or empty buffer.</exception>
+            <remarks>
+            Setting property to <c>null</c> will create a zero-length payload marker.
+            </remarks>
+        </member>
+        <member name="P:GSF.Communication.TlsServer.PayloadEndianOrder">
+            <summary>
+            Gets or sets the endian order to apply for encoding and decoding payload size in a <see cref="P:GSF.Communication.TlsServer.PayloadAware"/> transmission.
+            </summary>
+            <remarks>
+            Setting property to <c>null</c> will force use of little-endian encoding.
+            </remarks>
         </member>
         <member name="P:GSF.Communication.TlsServer.IntegratedSecurity">
             <summary>
@@ -3567,6 +3669,11 @@
         <member name="P:GSF.Communication.TlsServer.MaxSendQueueSize">
             <summary>
             Gets or sets the maximum size for the send queue before payloads are dumped from the queue.
+            </summary>
+        </member>
+        <member name="P:GSF.Communication.TlsServer.NoDelay">
+            <summary>
+            Gets or sets a boolean value that determines if small packets are delivered to the remote host without delay.
             </summary>
         </member>
         <member name="P:GSF.Communication.TlsServer.Server">
@@ -3886,6 +3993,11 @@
             Specifies the default value for the <see cref="P:GSF.Communication.TcpClient.MaxSendQueueSize"/> property.
             </summary>
         </member>
+        <member name="F:GSF.Communication.TcpClient.DefaultNoDelay">
+            <summary>
+            Specifies the default value for the <see cref="P:GSF.Communication.TcpClient.NoDelay"/> property.
+            </summary>
+        </member>
         <member name="F:GSF.Communication.TcpClient.DefaultConnectionString">
             <summary>
             Specifies the default value for the <see cref="P:GSF.Communication.ClientBase.ConnectionString"/> property.
@@ -3917,7 +4029,17 @@
             <summary>
             Gets or sets the byte sequence used to mark the beginning of a payload in a <see cref="P:GSF.Communication.TcpClient.PayloadAware"/> transmission.
             </summary>
-            <exception cref="T:System.ArgumentNullException">The value being assigned is null or empty buffer.</exception>
+            <remarks>
+            Setting property to <c>null</c> will create a zero-length payload marker.
+            </remarks>
+        </member>
+        <member name="P:GSF.Communication.TcpClient.PayloadEndianOrder">
+            <summary>
+            Gets or sets the endian order to apply for encoding and decoding payload size in a <see cref="P:GSF.Communication.TcpClient.PayloadAware"/> transmission.
+            </summary>
+            <remarks>
+            Setting property to <c>null</c> will force use of little-endian encoding.
+            </remarks>
         </member>
         <member name="P:GSF.Communication.TcpClient.IntegratedSecurity">
             <summary>
@@ -3945,6 +4067,11 @@
         <member name="P:GSF.Communication.TcpClient.MaxSendQueueSize">
             <summary>
             Gets or sets the maximum size for the send queue before payloads are dumped from the queue.
+            </summary>
+        </member>
+        <member name="P:GSF.Communication.TcpClient.NoDelay">
+            <summary>
+            Gets or sets a boolean value that determines if small packets are delivered to the remote host without delay.
             </summary>
         </member>
         <member name="P:GSF.Communication.TcpClient.Client">
@@ -3994,6 +4121,12 @@
             <summary>
             Initiates an asynchronous connection attempt.
             </summary>
+        </member>
+        <member name="M:GSF.Communication.TcpClient.OnConnectionException(System.Exception)">
+            <summary>
+            Raises the <see cref="E:GSF.Communication.ClientBase.ConnectionException"/> event.
+            </summary>
+            <param name="ex">Exception to send to <see cref="E:GSF.Communication.ClientBase.ConnectionException"/> event.</param>
         </member>
         <member name="M:GSF.Communication.TcpClient.ProcessConnect(GSF.Communication.TcpClient.ConnectState)">
             <summary>
@@ -4211,6 +4344,11 @@
             Specifies the default value for the <see cref="P:GSF.Communication.TcpServer.MaxSendQueueSize"/> property.
             </summary>
         </member>
+        <member name="F:GSF.Communication.TcpServer.DefaultNoDelay">
+            <summary>
+            Specifies the default value for the <see cref="P:GSF.Communication.TcpServer.NoDelay"/> property.
+            </summary>
+        </member>
         <member name="F:GSF.Communication.TcpServer.DefaultConfigurationString">
             <summary>
             Specifies the default value for the <see cref="P:GSF.Communication.ServerBase.ConfigurationString"/> property.
@@ -4242,7 +4380,17 @@
             <summary>
             Gets or sets the byte sequence used to mark the beginning of a payload in a <see cref="P:GSF.Communication.TcpServer.PayloadAware"/> transmission.
             </summary>
-            <exception cref="T:System.ArgumentNullException">The value being assigned is null or empty buffer.</exception>
+            <remarks>
+            Setting property to <c>null</c> will create a zero-length payload marker.
+            </remarks>
+        </member>
+        <member name="P:GSF.Communication.TcpServer.PayloadEndianOrder">
+            <summary>
+            Gets or sets the endian order to apply for encoding and decoding payload size in a <see cref="P:GSF.Communication.TcpServer.PayloadAware"/> transmission.
+            </summary>
+            <remarks>
+            Setting property to <c>null</c> will force use of little-endian encoding.
+            </remarks>
         </member>
         <member name="P:GSF.Communication.TcpServer.IntegratedSecurity">
             <summary>
@@ -4272,6 +4420,11 @@
         <member name="P:GSF.Communication.TcpServer.MaxSendQueueSize">
             <summary>
             Gets or sets the maximum size for the send queue before payloads are dumped from the queue.
+            </summary>
+        </member>
+        <member name="P:GSF.Communication.TcpServer.NoDelay">
+            <summary>
+            Gets or sets a boolean value that determines if small packets are delivered to the remote host without delay.
             </summary>
         </member>
         <member name="P:GSF.Communication.TcpServer.Server">
@@ -4540,12 +4693,14 @@
         <member name="M:GSF.Communication.Transport.GetInterfaceIPStack(System.Collections.Generic.Dictionary{System.String,System.String})">
             <summary>
             Derives the desired <see cref="T:GSF.Communication.IPStack"/> from the "interface" setting in the connection string key/value pairs.
+            If interface is not specified, <see cref="T:GSF.Communication.IPStack"/> is derived from the server value in connectionStringEntries
             </summary>
             <param name="connectionStringEntries">Connection string key/value pairs.</param>
             <returns>Desired <see cref="T:GSF.Communication.IPStack"/> based on "interface" setting.</returns>
             <remarks>
             The "interface" setting will be added to the <paramref name="connectionStringEntries"/> if it
-            doesn't exist, in this case return value will be <see cref="F:GSF.Communication.IPStack.Default"/>.
+            doesn't exist. in this case the return value will be based off of the "server" value. If the server parameter 
+            doesn't exist, the return value will be <see cref="F:GSF.Communication.IPStack.Default"/>.
             </remarks>
         </member>
         <member name="M:GSF.Communication.Transport.IsIPv6IP(System.String)">
