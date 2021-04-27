@@ -35,6 +35,7 @@ using GSF.Communication;
 using GSF.Configuration;
 using GSF.Parsing;
 using GSF.PhasorProtocols;
+using GSF.PhasorProtocols.IEEEC37_118;
 using GSF.Threading;
 using GSF.Units;
 using TcpClient = GSF.Communication.TcpClient;
@@ -91,6 +92,7 @@ namespace StreamSplitter
         private TcpClient m_clientBasedPublishChannel;
         private Timer m_dataStreamMonitor;
         private volatile IConfigurationFrame m_configurationFrame;
+        private volatile ConfigurationFrame3 m_configurationFrame3;
         private int m_lastConfigurationPublishMinute;
         private bool m_configurationFramePublished;
         private long m_receivedConfigurationFrames;
@@ -389,6 +391,12 @@ namespace StreamSplitter
                 if ((object)m_configurationFrame != null)
                 {
                     status.AppendFormat("  Configuration frame size: {0} bytes", m_configurationFrame.BinaryLength);
+                    status.AppendLine();
+                }
+
+                if ((object)m_configurationFrame3 != null)
+                {
+                    status.AppendFormat(" Configuration frame3 size: {0} bytes", m_configurationFrame3.BinaryLength);
                     status.AppendLine();
                 }
 
@@ -1024,7 +1032,26 @@ namespace StreamSplitter
 
                             OnStatusMessage("Received request for \"{0}\" from \"{1}\" - frame was returned.", commandFrame.Command, connectionID);
                         }
+                        break;
+                    case DeviceCommand.SendConfigurationFrame3:
+                        // Reset received configuration frame counter
+                        m_receivedConfigurationFrames = 0;
 
+                        if ((object)m_configurationFrame3 != null)
+                        {
+                            void publishFrame(byte[] frameImage)
+                            {
+                                if ((object)m_publishChannel != null)
+                                    m_publishChannel.SendToAsync(clientID, frameImage, 0, frameImage.Length);
+                                else if ((object)m_clientBasedPublishChannel != null)
+                                    m_clientBasedPublishChannel.SendAsync(frameImage, 0, frameImage.Length);
+                            }
+                            
+                            foreach (byte[] frame in m_configurationFrame3.BinaryImageFrames)
+                                publishFrame(frame);
+
+                            OnStatusMessage("Received request for \"{0}\" from \"{1}\" - frame was returned.", commandFrame.Command, connectionID);
+                        }
                         break;
                     case DeviceCommand.EnableRealTimeData:
                     case DeviceCommand.DisableRealTimeData:
@@ -1192,9 +1219,16 @@ namespace StreamSplitter
         private void m_frameParser_ReceivedConfigurationFrame(object sender, EventArgs<IConfigurationFrame> e)
         {
             // Cache latest configuration frame that was received
-            m_configurationFrame = e.Argument;
-
-            OnStatusMessage("Received configuration frame at {0:yyyy-MM-dd HH:mm:ss.fff}", DateTime.UtcNow);
+            if (e.Argument is ConfigurationFrame3 configFrame3)
+            {
+                m_configurationFrame3 = configFrame3;
+                OnStatusMessage("Received configuration frame 3 at {0:yyyy-MM-dd HH:mm:ss.fff}", DateTime.UtcNow);
+            }
+            else
+            {
+                m_configurationFrame = e.Argument;
+                OnStatusMessage("Received configuration frame at {0:yyyy-MM-dd HH:mm:ss.fff}", DateTime.UtcNow);
+            }
         }
 
         private void m_frameParser_ParsingException(object sender, EventArgs<Exception> e)
@@ -1269,6 +1303,7 @@ namespace StreamSplitter
             m_receivedConfigurationFrames = 0;
 
             SendCommand(DeviceCommand.SendConfigurationFrame2);
+            SendCommand(DeviceCommand.SendConfigurationFrame3);
         }
 
         private void m_frameParser_ServerStarted(object sender, EventArgs e)
