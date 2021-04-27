@@ -32,8 +32,7 @@ To deploy:
 ## Downloads
 
 * Download the latest stable release [here](https://github.com/GridProtectionAlliance/phasorsplitter/releases).
-* Download old releases [here](http://phasorsplitter.codeplex.com/releases/view/112147).
-* Download the nightly build [here](http://www.gridprotectionalliance.org/nightlybuilds/SynchrophasorStreamSplitter/Beta/) - click on Setup.zip.
+* Download the nightly build [here](http://www.gridprotectionalliance.org/nightlybuilds/StreamSplitter/Beta/).
 
 # Contributing
 
