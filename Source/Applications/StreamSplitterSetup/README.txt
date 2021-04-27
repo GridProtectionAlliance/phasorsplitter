@@ -5,7 +5,7 @@ The MSI may also be used to upgrade an existing version of Stream Splitter.
 Configuration will be preserved across installations.
 
 Stream Splitter product page:
-http://www.gridprotectionalliance.org/products.asp#SSS
+https://www.gridprotectionalliance.org/productsPhasor.asp#SSS
 
 Stream Splitter on GitHub:
 https://github.com/GridProtectionAlliance/phasorsplitter
