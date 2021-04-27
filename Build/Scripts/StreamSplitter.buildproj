@@ -82,7 +82,7 @@
       <!--Must-override setting(s).-->
       <ProjectName>StreamSplitter</ProjectName>
       <GitServer>git@github.com:GridProtectionAlliance/phasorsplitter.git</GitServer>
-      <VisualStudio Condition="'$(VisualStudio )' == ''">C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\devenv.exe</VisualStudio>
+      <VisualStudio Condition="'$(VisualStudio )' == ''">C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe</VisualStudio>
       <VersionMajorChange>None</VersionMajorChange>
       <VersionMinorChange>None</VersionMinorChange>
       <VersionBuildChange>Increment</VersionBuildChange>
