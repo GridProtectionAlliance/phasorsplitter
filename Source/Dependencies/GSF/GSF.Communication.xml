@@ -1231,6 +1231,11 @@
             Specifies the default value for the <see cref="P:GSF.Communication.ClientBase.ConnectionString"/> property.
             </summary>
         </member>
+        <member name="E:GSF.Communication.FileClient.EndOfFile">
+            <summary>
+            Occurs when the end of a file has been reached.
+            </summary>
+        </member>
         <member name="M:GSF.Communication.FileClient.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:GSF.Communication.FileClient"/> class.
@@ -1295,6 +1300,11 @@
         <member name="P:GSF.Communication.FileClient.DisconnectAtEOF">
             <summary>
             Gets or sets flag that determines if client should disconnect when end of file has been reached.
+            </summary>
+        </member>
+        <member name="P:GSF.Communication.FileClient.AtEOF">
+            <summary>
+            Gets flags that determines if <see cref="T:GSF.Communication.FileClient"/> is positioned at the end of file.
             </summary>
         </member>
         <member name="P:GSF.Communication.FileClient.Client">
@@ -1397,6 +1407,11 @@
             Raises the <see cref="E:GSF.Communication.ClientBase.ConnectionException"/> event.
             </summary>
             <param name="ex">Exception to send to <see cref="E:GSF.Communication.ClientBase.ConnectionException"/> event.</param>
+        </member>
+        <member name="M:GSF.Communication.FileClient.OnEndOfFile">
+            <summary>
+            Raises the <see cref="E:GSF.Communication.FileClient.EndOfFile"/> event.
+            </summary>
         </member>
         <member name="T:GSF.Communication.ClientState">
             <summary>
@@ -2738,9 +2753,6 @@
             <summary>
             Gets or sets the needed number of bytes in the internal input buffer before a <see cref="M:GSF.Communication.ClientBase.OnReceiveDataComplete(System.Byte[],System.Int32)"/> event occurs.
             </summary>
-            <remarks>
-            This option is ignored under Mono deployments.
-            </remarks>
         </member>
         <member name="P:GSF.Communication.SerialClient.Status">
             <summary>
