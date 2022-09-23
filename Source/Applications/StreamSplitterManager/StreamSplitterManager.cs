@@ -228,7 +228,7 @@ namespace StreamSplitter
                 return;
 
             m_configurationFileName = null;
-            ProxyConnections = ProxyConnectionCollection.LoadConfiguration(null);
+            ProxyConnections = ProxyConnectionCollection.LoadConfiguration(null, Invoke, SuspendFlowLayout, ResumeFlowLayout);
             ConfigurationSaved = true;
 
             // Change form title to include working file name
@@ -262,7 +262,7 @@ namespace StreamSplitter
             try
             {
                 Cursor = Cursors.WaitCursor;
-                ProxyConnections = ProxyConnectionCollection.LoadConfiguration(m_configurationFileName);
+                ProxyConnections = ProxyConnectionCollection.LoadConfiguration(m_configurationFileName, Invoke, SuspendFlowLayout, ResumeFlowLayout);
 
                 // Establish an editing user control for each proxy connection
                 foreach (ProxyConnection connection in m_proxyConnections)
@@ -408,6 +408,24 @@ namespace StreamSplitter
             flowLayoutPanelProxyConnections.Refresh();
         }
 
+        private void SuspendFlowLayout()
+        {
+            Cursor = Cursors.WaitCursor;           
+            flowLayoutPanelProxyConnections.SuspendLayout();
+        }
+
+        private void ResumeFlowLayout()
+        {
+            flowLayoutPanelProxyConnections.ResumeLayout();           
+            bindingSource.DataSource = m_proxyConnections.SearchList ?? m_proxyConnections;
+            PostProxyConnectionsLoad(null);
+            
+            if (!string.IsNullOrWhiteSpace(toolStripTextBoxSearch.Text))
+                toolStripTextBoxSearch.Focus();
+
+            Cursor = Cursors.Default;
+        }
+        
         private void UpdateToolTip(string status)
         {
             if (string.IsNullOrWhiteSpace(status))
@@ -644,6 +662,19 @@ namespace StreamSplitter
             }
         }
 
+        private void toolStripTextBoxSearch_TextChanged(object sender, EventArgs e)
+        {
+            if ((object)m_proxyConnections == null)
+                return;
+            
+            m_proxyConnections.SearchText = toolStripTextBoxSearch.Text;
+        }
+
+        private void toolStripButtonClearSearch_Click(object sender, EventArgs e)
+        {
+            toolStripTextBoxSearch.Text = "";
+        }
+        
         private void m_serviceConnection_ConnectionState(object sender, EventArgs<bool> e)
         {
             bool connected = e.Argument;
@@ -764,7 +795,7 @@ namespace StreamSplitter
             else if (string.Compare(sourceCommand, "DownloadConfig", true) == 0)
             {
                 if (responseSuccess && attachmentsExist)
-                    ThreadPool.QueueUserWorkItem(ApplyDownloadedProxyConnections, ProxyConnectionCollection.DeserializeConfiguration(attachments[0] as byte[]));
+                    ThreadPool.QueueUserWorkItem(ApplyDownloadedProxyConnections, ProxyConnectionCollection.DeserializeConfiguration(attachments[0] as byte[], Invoke, SuspendFlowLayout, ResumeFlowLayout));
             }
         }
 

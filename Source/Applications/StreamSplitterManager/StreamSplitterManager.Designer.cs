@@ -106,10 +106,17 @@ namespace StreamSplitter
             this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.toolTipEx = new StreamSplitter.ToolTipEx(this.components);
             this.toolTipNewHelp = new System.Windows.Forms.ToolTip(this.components);
+            this.panel = new System.Windows.Forms.Panel();
+            this.toolStrip = new System.Windows.Forms.ToolStrip();
+            this.toolStripLabelSearch = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripTextBoxSearch = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripButtonClearSearch = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator)).BeginInit();
             this.bindingNavigator.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).BeginInit();
             this.statusStrip.SuspendLayout();
+            this.panel.SuspendLayout();
+            this.toolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // bindingNavigator
@@ -469,6 +476,55 @@ namespace StreamSplitter
             this.toolTipNewHelp.IsBalloon = true;
             this.toolTipNewHelp.ShowAlways = true;
             // 
+            // panel
+            // 
+            this.panel.Controls.Add(this.toolStrip);
+            this.panel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel.Location = new System.Drawing.Point(0, 34);
+            this.panel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.panel.Name = "panel";
+            this.panel.Size = new System.Drawing.Size(1142, 69);
+            this.panel.TabIndex = 0;
+            // 
+            // toolStrip
+            // 
+            this.toolStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabelSearch,
+            this.toolStripTextBoxSearch,
+            this.toolStripButtonClearSearch});
+            this.toolStrip.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip.Name = "toolStrip";
+            this.toolStrip.Padding = new System.Windows.Forms.Padding(0, 9, 3, 0);
+            this.toolStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            this.toolStrip.Size = new System.Drawing.Size(1142, 43);
+            this.toolStrip.TabIndex = 0;
+            this.toolStrip.TabStop = true;
+            // 
+            // toolStripLabelSearch
+            // 
+            this.toolStripLabelSearch.Margin = new System.Windows.Forms.Padding(6, 2, 0, 3);
+            this.toolStripLabelSearch.Name = "toolStripLabelSearch";
+            this.toolStripLabelSearch.Size = new System.Drawing.Size(68, 29);
+            this.toolStripLabelSearch.Text = "Search:";
+            // 
+            // toolStripTextBoxSearch
+            // 
+            this.toolStripTextBoxSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.toolStripTextBoxSearch.Name = "toolStripTextBoxSearch";
+            this.toolStripTextBoxSearch.Size = new System.Drawing.Size(200, 34);
+            this.toolStripTextBoxSearch.TextChanged += new System.EventHandler(this.toolStripTextBoxSearch_TextChanged);
+            // 
+            // toolStripButtonClearSearch
+            // 
+            this.toolStripButtonClearSearch.AutoSize = false;
+            this.toolStripButtonClearSearch.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonClearSearch.Name = "toolStripButtonClearSearch";
+            this.toolStripButtonClearSearch.Size = new System.Drawing.Size(60, 29);
+            this.toolStripButtonClearSearch.Text = "Clear";
+            this.toolStripButtonClearSearch.Click += new System.EventHandler(this.toolStripButtonClearSearch_Click);
+            // 
             // StreamSplitterManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -476,6 +532,7 @@ namespace StreamSplitter
             this.ClientSize = new System.Drawing.Size(761, 428);
             this.Controls.Add(this.flowLayoutPanelProxyConnections);
             this.Controls.Add(this.statusStrip);
+            this.Controls.Add(this.panel);
             this.Controls.Add(this.bindingNavigator);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -494,6 +551,10 @@ namespace StreamSplitter
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).EndInit();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
+            this.panel.ResumeLayout(false);
+            this.panel.PerformLayout();
+            this.toolStrip.ResumeLayout(false);
+            this.toolStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -537,6 +598,11 @@ namespace StreamSplitter
         private System.Windows.Forms.ToolStripButton toolStripButtonLoadConfig;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelVersion;
         private System.Windows.Forms.ToolTip toolTipNewHelp;
+        private System.Windows.Forms.Panel panel;
+        private System.Windows.Forms.ToolStrip toolStrip;
+        private System.Windows.Forms.ToolStripLabel toolStripLabelSearch;
+        private System.Windows.Forms.ToolStripTextBox toolStripTextBoxSearch;
+        private System.Windows.Forms.ToolStripButton toolStripButtonClearSearch;
     }
 }
 

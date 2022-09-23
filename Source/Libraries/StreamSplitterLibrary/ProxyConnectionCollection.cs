@@ -22,13 +22,16 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Soap;
+using System.Threading;
 using GSF;
+using GSF.Threading;
 
 namespace StreamSplitter
 {
@@ -91,6 +94,16 @@ namespace StreamSplitter
         /// </remarks>
         public event EventHandler<EventArgs<ProxyConnection, bool>> RemovingItem;
 
+        private DelayedSynchronizedOperation m_updateVisibilityOperation;
+        HashSet<ProxyConnection> m_visibleConnections;
+
+        private ShortSynchronizedOperation m_searchOperation;
+        private string m_searchText;
+
+        private Func<Delegate, object> m_invoke;
+        private Action m_suspend;
+        private Action m_resume;
+
         #endregion
 
         #region [ Constructors ]
@@ -111,9 +124,7 @@ namespace StreamSplitter
         {
             // Deserialize proxy connection collection
             for (int x = 0; x < info.GetInt32("count"); x++)
-            {
                 Add((ProxyConnection)info.GetValue("item" + x, typeof(ProxyConnection)));
-            }
         }
 
         #endregion
@@ -167,6 +178,92 @@ namespace StreamSplitter
                     if ((object)editorControl != null)
                         editorControl.TransparentPanelEnabled = value;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sets search text.
+        /// </summary>
+        public string SearchText
+        {
+            set
+            {
+                m_searchText = value.Trim();
+                Search();
+            }
+        }
+
+        private void Search() => (m_searchOperation ?? (m_searchOperation = new ShortSynchronizedOperation(SearchConnections))).RunOnceAsync();
+
+        private void SearchConnections()
+        {
+            string value = m_searchText;
+
+            if (string.IsNullOrEmpty(value))
+            {
+                Interlocked.Exchange(ref m_visibleConnections, null);
+            }
+            else
+            {
+                HashSet<ProxyConnection> visibleConnections = new HashSet<ProxyConnection>();
+                string[] searchValues = value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (ProxyConnection connection in this)
+                {
+                    foreach (string searchValue in searchValues)
+                    {
+                        if (connection.Name.IndexOf(searchValue, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            visibleConnections.Add(connection);
+                            break;
+                        }
+                        else if (searchValue.IsAllNumbers() && connection.ConnectionString.Contains(searchValue))
+                        {
+                            visibleConnections.Add(connection);
+                            break;
+                        }
+                    }
+                }
+
+                Interlocked.Exchange(ref m_visibleConnections, visibleConnections);
+            }
+            
+            UpdateVisibility();
+        }
+
+        private void UpdateVisibility() => (m_updateVisibilityOperation ?? (m_updateVisibilityOperation = new DelayedSynchronizedOperation(UpdateConnectionVisibility) { Delay = 1000 })).RunOnceAsync();
+
+        private void UpdateConnectionVisibility()
+        {
+            m_invoke((Action)(() =>
+            {
+                try
+                {
+                    m_suspend?.Invoke();
+
+                    HashSet<ProxyConnection> visibleConnections = m_visibleConnections;               
+
+                    foreach (ProxyConnection connection in this)
+                        connection.Visible = visibleConnections?.Contains(connection) ?? true;
+                }
+                finally
+                {
+                    m_resume?.Invoke();
+                }
+            }));
+        }
+
+        /// <summary>
+        /// Gets the reduced search list.
+        /// </summary>
+        public BindingList<ProxyConnection> SearchList
+        {
+            get
+            {
+                HashSet<ProxyConnection> visibleConnections = m_visibleConnections;
+
+                return visibleConnections is null || visibleConnections.Count == 0 ? null : 
+                    new BindingList<ProxyConnection>(visibleConnections.ToArray());
             }
         }
 
@@ -386,8 +483,11 @@ namespace StreamSplitter
         /// Deserializes proxy connections from a stream.
         /// </summary>
         /// <param name="sourceStream">Source stream.</param>
+        /// <param name="invoke">Defines any invoke function that may be needed to update UI controls, if applicable.</param>
+        /// <param name="suspend">Defines suspend UI function.</param>
+        /// <param name="resume">Defines resume UI function.</param>
         /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="sourceStream"/>.</returns>
-        public static ProxyConnectionCollection DeserializeConfiguration(Stream sourceStream)
+        public static ProxyConnectionCollection DeserializeConfiguration(Stream sourceStream, Func<Delegate, object> invoke = null, Action suspend = null, Action resume = null)
         {
             ProxyConnectionCollection proxyConnections;
 
@@ -401,6 +501,10 @@ namespace StreamSplitter
 
             if ((object)proxyConnections != null)
             {
+                proxyConnections.m_invoke = invoke;
+                proxyConnections.m_suspend = suspend;
+                proxyConnections.m_resume = resume;
+
                 // Parse updated connection strings in proxy connections
                 foreach (ProxyConnection proxyConnection in proxyConnections)
                 {
@@ -429,15 +533,18 @@ namespace StreamSplitter
         /// Deserializes proxy connections from a byte-array.
         /// </summary>
         /// <param name="buffer">Byte-array of serialized proxy connections.</param>
+        /// <param name="invoke">Defines any invoke function that may be needed to update UI controls, if applicable.</param>
+        /// <param name="suspend">Defines suspend UI function.</param>
+        /// <param name="resume">Defines resume UI function.</param>
         /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="buffer"/>.</returns>
-        public static ProxyConnectionCollection DeserializeConfiguration(byte[] buffer)
+        public static ProxyConnectionCollection DeserializeConfiguration(byte[] buffer, Func<Delegate, object> invoke = null, Action suspend = null, Action resume = null)
         {
             if ((object)buffer == null)
                 return null;
 
             using (MemoryStream sourceStream = new MemoryStream(buffer))
             {
-                return DeserializeConfiguration(sourceStream);
+                return DeserializeConfiguration(sourceStream, invoke, suspend, resume);
             }
         }
 
@@ -458,25 +565,31 @@ namespace StreamSplitter
         /// Loads proxy connections from a previously saved configuration file.
         /// </summary>
         /// <param name="fileName">Configuration file to load.</param>
+        /// <param name="invoke">Defines any invoke function that may be needed to update UI controls, if applicable.</param>
+        /// <param name="suspend">Defines suspend UI function.</param>
+        /// <param name="resume">Defines resume UI function.</param>
         /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="fileName"/>.</returns>
-        public static ProxyConnectionCollection LoadConfiguration(string fileName)
+        public static ProxyConnectionCollection LoadConfiguration(string fileName, Func<Delegate, object> invoke = null, Action suspend = null, Action resume = null)
         {
             ProxyConnectionCollection proxyConnections = null;
 
             if ((object)fileName == null)
                 fileName = string.Empty;
-
+            
             if (File.Exists(fileName))
             {
                 using (FileStream settingsFile = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    proxyConnections = DeserializeConfiguration(settingsFile);
-                }
+                    proxyConnections = DeserializeConfiguration(settingsFile, invoke, suspend, resume);
             }
-
+            
             // Create an empty proxy connection list if none exists
             if ((object)proxyConnections == null)
-                proxyConnections = new ProxyConnectionCollection();
+                proxyConnections = new ProxyConnectionCollection()
+                { 
+                    m_invoke = invoke,
+                    m_suspend = suspend,
+                    m_resume = resume
+                };
 
             return proxyConnections;
         }

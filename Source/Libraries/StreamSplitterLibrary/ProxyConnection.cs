@@ -254,6 +254,19 @@ namespace StreamSplitter
             }
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="ProxyConnection"/> visibility flag.
+        /// </summary>
+        public bool Visible
+        {
+            get => m_proxyConnectionEditor?.Visible ?? false;
+            set
+            {
+                if (!(m_proxyConnectionEditor is null))
+                    m_proxyConnectionEditor.Visible = value;
+            }
+        }
+
         #endregion
 
         #region [ Methods ]
