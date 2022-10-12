@@ -51,9 +51,6 @@ namespace StreamSplitter
         private IConnectionParameters m_temporaryConnectionParameters;
         private string m_temporaryConnectionString;
         private string m_name;
-        private bool m_enabled;
-        private string m_proxySettings;
-        private string m_sourceSettings;
 
         #endregion
 
@@ -98,10 +95,7 @@ namespace StreamSplitter
         /// </summary>
         public Guid ID
         {
-            get
-            {
-                return m_id;
-            }
+            get => m_id;
             set
             {
                 m_id = value;
@@ -114,18 +108,12 @@ namespace StreamSplitter
         /// </summary>
         public string ConnectionString
         {
-            get
-            {
-                if ((object)m_proxyConnectionEditor == null)
-                    return m_temporaryConnectionString;
-
-                return m_proxyConnectionEditor.ConnectionString;
-            }
+            get => m_proxyConnectionEditor is null ? m_temporaryConnectionString : m_proxyConnectionEditor.ConnectionString;
             set
             {
                 // If no associated proxy connection editor control is available yet, we temporarily
                 // cache any connection string until a control is referenced
-                if ((object)m_proxyConnectionEditor != null)
+                if (m_proxyConnectionEditor is not null)
                     m_proxyConnectionEditor.ConnectionString = value;
                 else
                     m_temporaryConnectionString = value;
@@ -144,7 +132,7 @@ namespace StreamSplitter
         {
             get
             {
-                if ((object)m_proxyConnectionEditor == null)
+                if (m_proxyConnectionEditor is null)
                     return m_temporaryConnectionParameters;
 
                 return m_proxyConnectionEditor.ConnectionParameters;
@@ -153,7 +141,7 @@ namespace StreamSplitter
             {
                 // If no associated proxy connection editor control is available yet, we temporarily
                 // cache any connection parameters until a control is referenced
-                if ((object)m_proxyConnectionEditor != null)
+                if (m_proxyConnectionEditor is not null)
                     m_proxyConnectionEditor.ConnectionParameters = value;
                 else
                     m_temporaryConnectionParameters = value;
@@ -167,23 +155,20 @@ namespace StreamSplitter
         /// </summary>
         public ProxyConnectionEditor ProxyConnectionEditor
         {
-            get
-            {
-                return m_proxyConnectionEditor;
-            }
+            get => m_proxyConnectionEditor;
             set
             {
-                if ((object)value != null && (object)m_proxyConnectionEditor != null)
+                if (value is not null && m_proxyConnectionEditor is not null)
                     throw new InvalidOperationException("Proxy connection is already associated with an existing editing control, only one association is expected per instance.");
 
                 m_proxyConnectionEditor = value;
 
-                if ((object)m_proxyConnectionEditor != null)
+                if (m_proxyConnectionEditor is not null)
                 {
                     if (!string.IsNullOrWhiteSpace(m_temporaryConnectionString))
                         m_proxyConnectionEditor.ConnectionString = m_temporaryConnectionString;
 
-                    if ((object)m_temporaryConnectionParameters != null)
+                    if (m_temporaryConnectionParameters is not null)
                         m_proxyConnectionEditor.ConnectionParameters = m_temporaryConnectionParameters;
                 }
 
@@ -198,16 +183,7 @@ namespace StreamSplitter
         /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>,
         /// if there is an associated editor control it may have more recent edited values.
         /// </remarks>
-        public string Name
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(m_name))
-                    return m_name;
-
-                return m_id.ToString();
-            }
-        }
+        public string Name => !string.IsNullOrWhiteSpace(m_name) ? m_name : m_id.ToString();
 
         /// <summary>
         /// Gets enabled state for the proxy connection.
@@ -216,13 +192,7 @@ namespace StreamSplitter
         /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>,
         /// if there is an associated editor control it may have more recent edited values.
         /// </remarks>
-        public bool Enabled
-        {
-            get
-            {
-                return m_enabled;
-            }
-        }
+        public bool Enabled { get; private set; }
 
         /// <summary>
         /// Gets source settings (or null if there are none) for the proxy connection.
@@ -231,13 +201,7 @@ namespace StreamSplitter
         /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>,
         /// if there is an associated editor control it may have more recent edited values.
         /// </remarks>
-        public string SourceSettings
-        {
-            get
-            {
-                return m_sourceSettings;
-            }
-        }
+        public string SourceSettings { get; private set; }
 
         /// <summary>
         /// Gets proxy settings (or null if there are none) for the proxy connection.
@@ -246,13 +210,7 @@ namespace StreamSplitter
         /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>,
         /// if there is an associated editor control it may have more recent edited values.
         /// </remarks>
-        public string ProxySettings
-        {
-            get
-            {
-                return m_proxySettings;
-            }
-        }
+        public string ProxySettings { get; private set; }
 
         /// <summary>
         /// Gets or sets the <see cref="ProxyConnection"/> visibility flag.
@@ -262,7 +220,7 @@ namespace StreamSplitter
             get => m_proxyConnectionEditor?.Visible ?? false;
             set
             {
-                if (!(m_proxyConnectionEditor is null))
+                if (m_proxyConnectionEditor is not null)
                     m_proxyConnectionEditor.Visible = value;
             }
         }
@@ -279,38 +237,34 @@ namespace StreamSplitter
         {
             // Reset fields to their default value
             m_name = m_id.ToString();
-            m_enabled = false;
-            m_sourceSettings = null;
-            m_proxySettings = null;
+            Enabled = false;
+            SourceSettings = null;
+            ProxySettings = null;
 
             if (string.IsNullOrWhiteSpace(connectionString))
                 return;
 
             Dictionary<string, string> settings = connectionString.ParseKeyValuePairs();
-            string setting;
 
-            if (settings.TryGetValue("name", out setting) && !string.IsNullOrWhiteSpace(setting))
+            if (settings.TryGetValue("name", out string setting) && !string.IsNullOrWhiteSpace(setting))
                 m_name = setting;
 
             if (settings.TryGetValue("enabled", out setting))
-                m_enabled = setting.ParseBoolean();
+                Enabled = setting.ParseBoolean();
 
             if (settings.TryGetValue("sourceSettings", out setting))
-                m_sourceSettings = setting;
+                SourceSettings = setting;
 
             if (settings.TryGetValue("proxySettings", out setting))
-                m_proxySettings = setting;
+                ProxySettings = setting;
         }
 
         /// <summary>
         /// Raises the <see cref="PropertyChanged"/> event.
         /// </summary>
         /// <param name="propertyName">Name of property that changed.</param>
-        protected virtual void OnProperyChanged(string propertyName)
-        {
-            if ((object)PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
+        protected virtual void OnProperyChanged(string propertyName) => 
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         /// <summary>
         /// Populates a <see cref="SerializationInfo"/> with the data needed to serialize the target object.

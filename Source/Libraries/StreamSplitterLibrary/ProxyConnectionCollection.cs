@@ -95,7 +95,7 @@ namespace StreamSplitter
         public event EventHandler<EventArgs<ProxyConnection, bool>> RemovingItem;
 
         private DelayedSynchronizedOperation m_updateVisibilityOperation;
-        HashSet<ProxyConnection> m_visibleConnections;
+        private HashSet<ProxyConnection> m_visibleConnections;
 
         private ShortSynchronizedOperation m_searchOperation;
         private string m_searchText;
@@ -146,7 +146,7 @@ namespace StreamSplitter
             {
                 ProxyConnection connection = this[id];
 
-                if ((object)connection == null)
+                if (connection is null)
                 {
                     Add(value);
                 }
@@ -169,13 +169,11 @@ namespace StreamSplitter
         {
             set
             {
-                ProxyConnectionEditor editorControl;
-
                 foreach (ProxyConnection connection in this)
                 {
-                    editorControl = connection.ProxyConnectionEditor;
+                    ProxyConnectionEditor editorControl = connection.ProxyConnectionEditor;
 
-                    if ((object)editorControl != null)
+                    if (editorControl is not null)
                         editorControl.TransparentPanelEnabled = value;
                 }
             }
@@ -193,7 +191,7 @@ namespace StreamSplitter
             }
         }
 
-        private void Search() => (m_searchOperation ?? (m_searchOperation = new ShortSynchronizedOperation(SearchConnections))).RunOnceAsync();
+        private void Search() => (m_searchOperation ??= new ShortSynchronizedOperation(SearchConnections)).RunOnceAsync();
 
         private void SearchConnections()
         {
@@ -205,24 +203,13 @@ namespace StreamSplitter
             }
             else
             {
-                HashSet<ProxyConnection> visibleConnections = new HashSet<ProxyConnection>();
+                HashSet<ProxyConnection> visibleConnections = new();
                 string[] searchValues = value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (ProxyConnection connection in this)
                 {
-                    foreach (string searchValue in searchValues)
-                    {
-                        if (connection.Name.IndexOf(searchValue, StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            visibleConnections.Add(connection);
-                            break;
-                        }
-                        else if (searchValue.IsAllNumbers() && connection.ConnectionString.Contains(searchValue))
-                        {
-                            visibleConnections.Add(connection);
-                            break;
-                        }
-                    }
+                    if (searchValues.Any(searchValue => connection.ConnectionString.IndexOf(searchValue, StringComparison.OrdinalIgnoreCase) >= 0))
+                        visibleConnections.Add(connection);
                 }
 
                 Interlocked.Exchange(ref m_visibleConnections, visibleConnections);
@@ -231,7 +218,7 @@ namespace StreamSplitter
             UpdateVisibility();
         }
 
-        private void UpdateVisibility() => (m_updateVisibilityOperation ?? (m_updateVisibilityOperation = new DelayedSynchronizedOperation(UpdateConnectionVisibility) { Delay = 1000 })).RunOnceAsync();
+        private void UpdateVisibility() => (m_updateVisibilityOperation ??= new DelayedSynchronizedOperation(UpdateConnectionVisibility) { Delay = 1000 }).RunOnceAsync();
 
         private void UpdateConnectionVisibility()
         {
@@ -282,9 +269,7 @@ namespace StreamSplitter
             info.AddValue("count", Count);
 
             for (int x = 0; x < Count; x++)
-            {
                 info.AddValue("item" + x, this[x], typeof(ProxyConnection));
-            }
         }
 
         /// <summary>
@@ -294,13 +279,16 @@ namespace StreamSplitter
         /// <param name="connection">The item to insert in the list.</param>
         protected override void InsertItem(int index, ProxyConnection connection)
         {
+            if (connection is null)
+                return;
+
             ProxyConnectionEditor editorControl = connection.ProxyConnectionEditor;
 
             // Attach to proxy connection events
             connection.PropertyChanged += item_PropertyChanged;
 
             // Attach to editor control events
-            if ((object)editorControl != null)
+            if (editorControl is not null)
             {
                 editorControl.GotFocus += editorControl_GotFocus;
                 editorControl.ConfigurationChanged += editorControl_ConfigurationChanged;
@@ -327,7 +315,7 @@ namespace StreamSplitter
                 // Detach from editor control events
                 ProxyConnectionEditor editorControl = connection.ProxyConnectionEditor;
 
-                if ((object)editorControl != null)
+                if (editorControl is not null)
                 {
                     editorControl.GotFocus -= editorControl_GotFocus;
                     editorControl.ConfigurationChanged -= editorControl_ConfigurationChanged;
@@ -349,7 +337,7 @@ namespace StreamSplitter
         /// <param name="connection"><see cref="ProxyConnection"/> object that has been selected.</param>
         protected virtual void OnGotFocus(ProxyConnection connection)
         {
-            if ((object)GotFocus != null)
+            if (GotFocus is not null)
                 GotFocus(this, new EventArgs<ProxyConnection>(connection));
         }
 
@@ -359,7 +347,7 @@ namespace StreamSplitter
         /// <param name="connection"><see cref="ProxyConnection"/> object that has changed.</param>
         protected virtual void OnConfigurationChanged(ProxyConnection connection)
         {
-            if ((object)ConfigurationChanged != null)
+            if (ConfigurationChanged is not null)
                 ConfigurationChanged(this, new EventArgs<ProxyConnection>(connection));
         }
 
@@ -369,7 +357,7 @@ namespace StreamSplitter
         /// <param name="connection"><see cref="ProxyConnection"/> object that has requested that changes be applied.</param>
         protected virtual void OnApplyChanges(ProxyConnection connection)
         {
-            if ((object)ApplyChanges != null)
+            if (ApplyChanges is not null)
                 ApplyChanges(this, new EventArgs<ProxyConnection>(connection));
         }
 
@@ -380,7 +368,7 @@ namespace StreamSplitter
         /// <param name="newState">New enabled state.</param>
         protected virtual void OnEnabledStateChanged(ProxyConnection connection, bool newState)
         {
-            if ((object)EnabledStateChanged != null)
+            if (EnabledStateChanged is not null)
                 EnabledStateChanged(this, new EventArgs<ProxyConnection, bool>(connection, newState));
         }
 
@@ -390,9 +378,9 @@ namespace StreamSplitter
         /// <param name="connection"><see cref="ProxyConnection"/> object about to be removed.</param>
         protected virtual bool OnRemovingItem(ProxyConnection connection)
         {
-            EventArgs<ProxyConnection, bool> e = new EventArgs<ProxyConnection, bool>(connection, true);
+            EventArgs<ProxyConnection, bool> e = new(connection, true);
 
-            if ((object)RemovingItem != null)
+            if (RemovingItem is not null)
                 RemovingItem(this, e);
 
             return e.Argument2;
@@ -405,55 +393,45 @@ namespace StreamSplitter
             // post-load normal run-time a new connection will be associated with its editing control during creation
             // before the collection has even attached to this event (since item won't be in list yet) and the InsertItem
             // event attachment will be executed.
-            if (e.PropertyName == "ProxyConnectionEditor")
-            {
-                ProxyConnection item = sender as ProxyConnection;
+            if (e.PropertyName != "ProxyConnectionEditor")
+                return;
 
-                if ((object)item != null)
-                {
-                    ProxyConnectionEditor editorControl = item.ProxyConnectionEditor;
+            if (sender is not ProxyConnection item)
+                return;
 
-                    if ((object)editorControl != null)
-                    {
-                        editorControl.GotFocus += editorControl_GotFocus;
-                        editorControl.ConfigurationChanged += editorControl_ConfigurationChanged;
-                        editorControl.ApplyChanges += editorControl_ApplyChanges;
-                        editorControl.EnabledStateChanged += editorControl_EnabledStateChanged;
-                    }
-                }
-            }
+            ProxyConnectionEditor editorControl = item.ProxyConnectionEditor;
+
+            if (editorControl is null)
+                return;
+
+            editorControl.GotFocus += editorControl_GotFocus;
+            editorControl.ConfigurationChanged += editorControl_ConfigurationChanged;
+            editorControl.ApplyChanges += editorControl_ApplyChanges;
+            editorControl.EnabledStateChanged += editorControl_EnabledStateChanged;
         }
 
         // Bubble up proxy editor control events
         private void editorControl_GotFocus(object sender, EventArgs e)
         {
-            ProxyConnectionEditor editorControl = sender as ProxyConnectionEditor;
-
-            if ((object)editorControl != null)
+            if (sender is ProxyConnectionEditor editorControl)
                 OnGotFocus(editorControl.ProxyConnection);
         }
 
         private void editorControl_ConfigurationChanged(object sender, EventArgs e)
         {
-            ProxyConnectionEditor editorControl = sender as ProxyConnectionEditor;
-
-            if ((object)editorControl != null)
+            if (sender is ProxyConnectionEditor editorControl)
                 OnConfigurationChanged(editorControl.ProxyConnection);
         }
 
         private void editorControl_ApplyChanges(object sender, EventArgs e)
         {
-            ProxyConnectionEditor editorControl = sender as ProxyConnectionEditor;
-
-            if ((object)editorControl != null)
+            if (sender is ProxyConnectionEditor editorControl)
                 OnApplyChanges(editorControl.ProxyConnection);
         }
 
         private void editorControl_EnabledStateChanged(object sender, EventArgs<bool> e)
         {
-            ProxyConnectionEditor editorControl = sender as ProxyConnectionEditor;
-
-            if ((object)editorControl != null)
+            if (sender is ProxyConnectionEditor editorControl)
                 OnEnabledStateChanged(editorControl.ProxyConnection, e.Argument);
         }
 
@@ -470,7 +448,7 @@ namespace StreamSplitter
         /// <param name="destinationStream">Destination stream.</param>
         public static void SerializeConfiguration(ProxyConnectionCollection proxyConnections, Stream destinationStream)
         {
-            SoapFormatter formatter = new SoapFormatter
+            SoapFormatter formatter = new()
             {
                 AssemblyFormat = FormatterAssemblyStyle.Simple,
                 TypeFormat = FormatterTypeStyle.TypesWhenNeeded
@@ -491,7 +469,7 @@ namespace StreamSplitter
         {
             ProxyConnectionCollection proxyConnections;
 
-            SoapFormatter formatter = new SoapFormatter
+            SoapFormatter formatter = new()
             {
                 AssemblyFormat = FormatterAssemblyStyle.Simple,
                 TypeFormat = FormatterTypeStyle.TypesWhenNeeded
@@ -499,7 +477,7 @@ namespace StreamSplitter
 
             proxyConnections = formatter.Deserialize(sourceStream) as ProxyConnectionCollection;
 
-            if ((object)proxyConnections != null)
+            if (proxyConnections is not null)
             {
                 proxyConnections.m_invoke = invoke;
                 proxyConnections.m_suspend = suspend;
@@ -522,11 +500,10 @@ namespace StreamSplitter
         /// <returns>Buffer of serializes proxy connections.</returns>
         public static byte[] SerializeConfiguration(ProxyConnectionCollection proxyConnections)
         {
-            using (MemoryStream destinationStream = new MemoryStream())
-            {
-                SerializeConfiguration(proxyConnections, destinationStream);
-                return destinationStream.ToArray();
-            }
+            using MemoryStream destinationStream = new();
+
+            SerializeConfiguration(proxyConnections, destinationStream);
+            return destinationStream.ToArray();
         }
 
         /// <summary>
@@ -539,13 +516,12 @@ namespace StreamSplitter
         /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="buffer"/>.</returns>
         public static ProxyConnectionCollection DeserializeConfiguration(byte[] buffer, Func<Delegate, object> invoke = null, Action suspend = null, Action resume = null)
         {
-            if ((object)buffer == null)
+            if (buffer is null)
                 return null;
 
-            using (MemoryStream sourceStream = new MemoryStream(buffer))
-            {
-                return DeserializeConfiguration(sourceStream, invoke, suspend, resume);
-            }
+            using MemoryStream sourceStream = new(buffer);
+
+            return DeserializeConfiguration(sourceStream, invoke, suspend, resume);
         }
 
         /// <summary>
@@ -555,10 +531,9 @@ namespace StreamSplitter
         /// <param name="fileName">Configuration file name to use when saving.</param>
         public static void SaveConfiguration(ProxyConnectionCollection proxyConnections, string fileName)
         {
-            using (FileStream settingsFile = File.Create(fileName))
-            {
-                SerializeConfiguration(proxyConnections, settingsFile);
-            }
+            using FileStream settingsFile = File.Create(fileName);
+
+            SerializeConfiguration(proxyConnections, settingsFile);
         }
 
         /// <summary>
@@ -573,25 +548,24 @@ namespace StreamSplitter
         {
             ProxyConnectionCollection proxyConnections = null;
 
-            if ((object)fileName == null)
-                fileName = string.Empty;
-            
+            fileName ??= string.Empty;
+
             if (File.Exists(fileName))
             {
-                using (FileStream settingsFile = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    proxyConnections = DeserializeConfiguration(settingsFile, invoke, suspend, resume);
+                using FileStream settingsFile = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                proxyConnections = DeserializeConfiguration(settingsFile, invoke, suspend, resume);
             }
+
+            if (proxyConnections is not null)
+                return proxyConnections;
             
             // Create an empty proxy connection list if none exists
-            if ((object)proxyConnections == null)
-                proxyConnections = new ProxyConnectionCollection()
-                { 
-                    m_invoke = invoke,
-                    m_suspend = suspend,
-                    m_resume = resume
-                };
-
-            return proxyConnections;
+            return new ProxyConnectionCollection()
+            {
+                m_invoke = invoke,
+                m_suspend = suspend,
+                m_resume = resume
+            };
         }
 
         #endregion

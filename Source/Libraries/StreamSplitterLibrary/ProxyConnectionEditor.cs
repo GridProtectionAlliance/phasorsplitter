@@ -67,7 +67,6 @@ namespace StreamSplitter
         private ProxyConnection m_proxyConnection;
         private volatile bool m_updatingConnectionString;
         private bool m_transparentPanelEnabled;
-        private Guid m_id;
 
         #endregion
 
@@ -80,9 +79,7 @@ namespace StreamSplitter
         {
             InitializeComponent();
 
-            m_udpDestinations = new List<TextBox>();
-            m_udpDestinations.Add(textBoxUdpRebroadcast0);
-
+            m_udpDestinations = new List<TextBox> { textBoxUdpRebroadcast0 };
             m_frameParser = new MultiProtocolFrameParser();
 
             // Initialize phasor protocol selection list
@@ -119,40 +116,44 @@ namespace StreamSplitter
         }
 
         /// <summary>
+        /// Gets or sets property that determines if focus should be applied upon selection.
+        /// </summary>
+        public bool SelectionFocus { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets selected state for <see cref="ProxyConnectionEditor"/>.
         /// </summary>
         public bool Selected
         {
-            get
-            {
-                return BorderStyle == BorderStyle.FixedSingle;
-            }
+            get => BorderStyle == BorderStyle.FixedSingle;
             set
             {
                 if (value)
                 {
-                    if (BorderStyle != BorderStyle.FixedSingle)
-                    {
-                        Font bold = new Font(Font.Name, Font.Size, FontStyle.Bold, GraphicsUnit.Point, (byte)0);
+                    if (BorderStyle == BorderStyle.FixedSingle)
+                        return;
 
-                        BorderStyle = BorderStyle.FixedSingle;
-                        groupBoxName.Font = bold;
+                    Font bold = new(Font.Name, Font.Size, FontStyle.Bold, GraphicsUnit.Point, (byte)0);
 
-                        transparentPanel.Visible = false;
+                    BorderStyle = BorderStyle.FixedSingle;
+                    groupBoxName.Font = bold;
+
+                    transparentPanel.Visible = false;
+
+                    if (SelectionFocus)
                         textBoxName.Focus();
-                    }
                 }
                 else
                 {
-                    if (BorderStyle != BorderStyle.None)
-                    {
-                        Font normal = new Font(Font.Name, Font.Size, Font.Style, GraphicsUnit.Point, (byte)0);
+                    if (BorderStyle == BorderStyle.None)
+                        return;
 
-                        BorderStyle = BorderStyle.None;
-                        groupBoxName.Font = normal;
+                    Font normal = new(Font.Name, Font.Size, Font.Style, GraphicsUnit.Point, (byte)0);
 
-                        transparentPanel.Visible = m_transparentPanelEnabled;
-                    }
+                    BorderStyle = BorderStyle.None;
+                    groupBoxName.Font = normal;
+
+                    transparentPanel.Visible = m_transparentPanelEnabled;
                 }
             }
         }
@@ -162,54 +163,35 @@ namespace StreamSplitter
         /// </summary>
         public ProxyConnection ProxyConnection
         {
-            get
-            {
-                return m_proxyConnection;
-            }
+            get => m_proxyConnection;
             set
             {
                 m_proxyConnection = value;
 
-                if ((object)m_proxyConnection != null)
-                {
-                    ConnectionString = m_proxyConnection.ConnectionString;
-                    m_frameParser.ConnectionParameters = m_proxyConnection.ConnectionParameters;
-                    ID = m_proxyConnection.ID;
+                if (m_proxyConnection is null)
+                    return;
 
-                    // Establish linkage from proxy connection instance to its editor control
-                    m_proxyConnection.ProxyConnectionEditor = this;
-                }
+                ConnectionString = m_proxyConnection.ConnectionString;
+                m_frameParser.ConnectionParameters = m_proxyConnection.ConnectionParameters;
+                ID = m_proxyConnection.ID;
+
+                // Establish linkage from proxy connection instance to its editor control
+                m_proxyConnection.ProxyConnectionEditor = this;
             }
         }
 
         /// <summary>
         /// Gets or sets ID for <see cref="ProxyConnectionEditor"/>.
         /// </summary>
-        public Guid ID
-        {
-            get
-            {
-                return m_id;
-            }
-            set
-            {
-                m_id = value;
-            }
-        }
+        public Guid ID { get; set; }
 
         /// <summary>
         /// Gets or sets connection string value for the <see cref="ProxyConnectionEditor"/>.
         /// </summary>
         public string ConnectionString
         {
-            get
-            {
-                return textBoxConnectionString.Text;
-            }
-            set
-            {
-                textBoxConnectionString.Text = value;
-            }
+            get => textBoxConnectionString.Text;
+            set => textBoxConnectionString.Text = value;
         }
 
         /// <summary>
@@ -217,17 +199,12 @@ namespace StreamSplitter
         /// </summary>
         public IConnectionParameters ConnectionParameters
         {
-            get
-            {
-                return m_frameParser.ConnectionParameters;
-            }
+            get => m_frameParser.ConnectionParameters;
             set
             {
-                string connectionString;
-
                 Dictionary<string, string> allSettings = textBoxConnectionString.Text.ToNonNullString().ParseKeyValuePairs();
 
-                if (!allSettings.TryGetValue("sourceSettings", out connectionString) || string.IsNullOrWhiteSpace(connectionString))
+                if (!allSettings.TryGetValue("sourceSettings", out string connectionString) || string.IsNullOrWhiteSpace(connectionString))
                     return;
 
                 m_frameParser.ConnectionString = connectionString;
@@ -315,8 +292,7 @@ namespace StreamSplitter
 
         private void RegisterControls(ControlCollection controlCollection = null)
         {
-            if ((object)controlCollection == null)
-                controlCollection = Controls;
+            controlCollection ??= Controls;
 
             foreach (Control control in controlCollection)
             {
@@ -337,10 +313,8 @@ namespace StreamSplitter
 
         private string GenerateConnectionString()
         {
-            string setting;
-
             Dictionary<string, string> allSettings = textBoxConnectionString.Text.ToNonNullString().ParseKeyValuePairs();
-            Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out string setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             Dictionary<string, string> proxySettings = allSettings.TryGetValue("proxySettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
             // Update source connection information
@@ -425,11 +399,9 @@ namespace StreamSplitter
 
         private void UpdateCommandChannelSettings(Dictionary<string, string> sourceSettings)
         {
-            string setting;
-
             if (checkBoxUseAlternateTcpConnection.Checked)
             {
-                if (sourceSettings.TryGetValue("commandChannel", out setting))
+                if (sourceSettings.TryGetValue("commandChannel", out string setting))
                 {
                     Dictionary<string, string> settings = setting.ParseKeyValuePairs();
                     settings["server"] = textBoxAlternateTcpConnection.Text;
@@ -446,33 +418,31 @@ namespace StreamSplitter
                     }
                     else
                     {
-                        sourceSettings["commandChannel"] = string.Format("transportProtocol=Tcp; server={0}; interface=0.0.0.0", textBoxAlternateTcpConnection.Text);
+                        sourceSettings["commandChannel"] = $"transportProtocol=Tcp; server={textBoxAlternateTcpConnection.Text}; interface=0.0.0.0";
                     }
                 }
             }
             else
             {
-                if (sourceSettings.ContainsKey("commandChannel"))
-                {
-                    checkBoxUseAlternateTcpConnection.Tag = sourceSettings["commandChannel"];
-                    sourceSettings.Remove("commandChannel");
-                }
+                if (!sourceSettings.ContainsKey("commandChannel"))
+                    return;
+
+                checkBoxUseAlternateTcpConnection.Tag = sourceSettings["commandChannel"];
+                sourceSettings.Remove("commandChannel");
             }
         }
 
         private void ParseConnectionString()
         {
-            string setting;
             bool updateConnectionString = false;
 
             Dictionary<string, string> allSettings = textBoxConnectionString.Text.ToNonNullString().ParseKeyValuePairs();
-            Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out string setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             Dictionary<string, string> proxySettings = allSettings.TryGetValue("proxySettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
             // Update source connection information
-            TransportProtocol sourceTransportProtocol;
 
-            if (!sourceSettings.TryGetValue("transportProtocol", out setting) || !Enum.TryParse(setting, out sourceTransportProtocol) || (int)sourceTransportProtocol > 1)
+            if (!sourceSettings.TryGetValue("transportProtocol", out setting) || !Enum.TryParse(setting, out TransportProtocol sourceTransportProtocol) || (int)sourceTransportProtocol > 1)
                 sourceTransportProtocol = TransportProtocol.Tcp;
 
             tabControlSourceConnectionType.SelectedIndex = (int)sourceTransportProtocol;
@@ -517,23 +487,20 @@ namespace StreamSplitter
             }
 
             // Update protocol information
-            PhasorProtocol protocol;
-            ushort idCode;
 
-            if (sourceSettings.TryGetValue("phasorProtocol", out setting) && Enum.TryParse(setting, out protocol))
+            if (sourceSettings.TryGetValue("phasorProtocol", out setting) && Enum.TryParse(setting, out PhasorProtocol protocol))
                 comboBoxProtocol.SelectedIndex = (int)protocol;
             else
                 comboBoxProtocol.SelectedIndex = DefaultPhasorProtocol;
 
-            if (sourceSettings.TryGetValue("accessID", out setting) && ushort.TryParse(setting, out idCode))
+            if (sourceSettings.TryGetValue("accessID", out setting) && ushort.TryParse(setting, out ushort idCode))
                 textBoxIDCode.Text = idCode.ToString();
             else
                 textBoxIDCode.Text = "1";
 
             // Update proxy connection information
-            TransportProtocol proxyTransportProtocol;
 
-            if (!(proxySettings.TryGetValue("protocol", out setting) || proxySettings.TryGetValue("transportProtocol", out setting)) || !Enum.TryParse(setting, out proxyTransportProtocol) || (int)proxyTransportProtocol > 1)
+            if (!(proxySettings.TryGetValue("protocol", out setting) || proxySettings.TryGetValue("transportProtocol", out setting)) || !Enum.TryParse(setting, out TransportProtocol proxyTransportProtocol) || (int)proxyTransportProtocol > 1)
                 proxyTransportProtocol = TransportProtocol.Tcp;
 
             tabControlProxyDestinationType.SelectedIndex = (int)proxyTransportProtocol;
@@ -596,15 +563,8 @@ namespace StreamSplitter
                     break;
             }
 
-            if (allSettings.TryGetValue("enabled", out setting))
-                checkBoxEnabled.Checked = setting.ParseBoolean();
-            else
-                checkBoxEnabled.Checked = false;
-
-            if (allSettings.TryGetValue("name", out setting))
-                textBoxName.Text = setting;
-            else
-                textBoxName.Text = "New Proxy Connection";
+            checkBoxEnabled.Checked = allSettings.TryGetValue("enabled", out setting) && setting.ParseBoolean();
+            textBoxName.Text = allSettings.TryGetValue("name", out setting) ? setting : "New Proxy Connection";
 
             if (updateConnectionString)
                 BeginInvoke((Action)(UpdateConnectionString));
@@ -660,7 +620,7 @@ namespace StreamSplitter
 
         private void AddDestinationClient()
         {
-            TextBox newDestination = new TextBox
+            TextBox newDestination = new()
             {
                 Size = textBoxUdpRebroadcast0.Size,
                 Margin = textBoxUdpRebroadcast0.Margin,
@@ -707,9 +667,7 @@ namespace StreamSplitter
 
         private void HandleInt16Validation(object sender, CancelEventArgs e)
         {
-            TextBox textBox = sender as TextBox;
-
-            if ((object)textBox == null)
+            if (sender is not TextBox textBox)
                 return;
 
             if (IsValidInt16(textBox))
@@ -725,9 +683,7 @@ namespace StreamSplitter
 
         private void HandleHostPortValidation(object sender, CancelEventArgs e)
         {
-            TextBox textBox = sender as TextBox;
-
-            if ((object)textBox == null)
+            if (sender is not TextBox textBox)
                 return;
 
             if (IsValidHostPort(textBox))
@@ -821,30 +777,21 @@ namespace StreamSplitter
         /// <summary>
         /// Raises the <see cref="ConfigurationChanged"/> event.
         /// </summary>
-        protected virtual void OnConfigurationChanged()
-        {
-            if ((object)ConfigurationChanged != null)
-                ConfigurationChanged(this, EventArgs.Empty);
-        }
+        protected virtual void OnConfigurationChanged() => 
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
 
         /// <summary>
         /// Raise the <see cref="ApplyChanges"/> event.
         /// </summary>
-        protected virtual void OnApplyChanges()
-        {
-            if ((object)ApplyChanges != null)
-                ApplyChanges(this, EventArgs.Empty);
-        }
+        protected virtual void OnApplyChanges() => 
+            ApplyChanges?.Invoke(this, EventArgs.Empty);
 
         /// <summary>
         /// Raises the <see cref="EnabledStateChanged"/> event.
         /// </summary>
         /// <param name="newState">New enabled state.</param>
-        protected virtual void OnEnabledStateChanged(bool newState)
-        {
-            if ((object)EnabledStateChanged != null)
-                EnabledStateChanged(this, new EventArgs<bool>(newState));
-        }
+        protected virtual void OnEnabledStateChanged(bool newState) => 
+            EnabledStateChanged?.Invoke(this, new EventArgs<bool>(newState));
 
         #endregion
 
@@ -854,43 +801,32 @@ namespace StreamSplitter
 
         private static bool IsValidHostPort(object sender)
         {
-            TextBox textBox = sender as TextBox;
+            if (sender is not TextBox textBox)
+                return false;
 
-            if ((object)textBox != null)
-            {
-                string text = textBox.Text;
+            string text = textBox.Text;
 
-                if (string.IsNullOrWhiteSpace(text))
-                    return textBox.Name.StartsWith("textBoxUdpRebroadcast");
+            if (string.IsNullOrWhiteSpace(text))
+                return textBox.Name.StartsWith("textBoxUdpRebroadcast");
 
-                int lastColonIndex = text.LastIndexOf(':');
+            int lastColonIndex = text.LastIndexOf(':');
 
-                if (lastColonIndex > 0 && text.Length > 2)
-                    return IsValidInt16(text.Substring(lastColonIndex + 1));
-            }
+            if (lastColonIndex > 0 && text.Length > 2)
+                return IsValidInt16(text.Substring(lastColonIndex + 1));
 
             return false;
         }
 
         private static bool IsValidInt16(object sender)
         {
-            TextBox textBox = sender as TextBox;
-
-            if ((object)textBox != null)
+            if (sender is TextBox textBox)
                 return IsValidInt16(textBox.Text);
 
             return false;
         }
 
-        private static bool IsValidInt16(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return true;
-
-            ushort value;
-
-            return ushort.TryParse(text, out value);
-        }
+        private static bool IsValidInt16(string text) =>
+            string.IsNullOrWhiteSpace(text) || ushort.TryParse(text, out ushort _);
 
         #endregion
     }
