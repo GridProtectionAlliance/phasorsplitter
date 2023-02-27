@@ -105,6 +105,8 @@ namespace StreamSplitter
             m_refreshProxyStatusTimer.Interval = 2000;
             m_refreshProxyStatusTimer.AutoReset = true;
 
+            flowLayoutPanelProxyConnections.SetAutoScrollMargin(0, new ProxyConnectionEditor().Height);
+
             // Update version
             toolStripStatusLabelVersion.Text = AssemblyInfo.EntryAssembly.Version.ToString(3);
 
@@ -396,9 +398,12 @@ namespace StreamSplitter
             // Unselect all existing controls
             UnselectProxyConnectionEditorControls();
 
-            editorControl.Selected = true;
             flowLayoutPanelProxyConnections.ScrollControlIntoView(editorControl);
             flowLayoutPanelProxyConnections.Refresh();
+            editorControl.Selected = true;
+
+            if (bindingSource.Position == bindingSource.Count - 1)
+                flowLayoutPanelProxyConnections.VerticalScroll.Value = flowLayoutPanelProxyConnections.VerticalScroll.Maximum;
         }
 
         private void SuspendFlowLayout()
@@ -482,13 +487,13 @@ namespace StreamSplitter
 
         private void m_proxyConnections_ApplyChanges(object sender, EventArgs<ProxyConnection> e)
         {
-            if (m_serviceConnection is not null && e is not null && e.Argument is not null)
+            if (m_serviceConnection is not null && e?.Argument != null)
                 m_serviceConnection.SendCommand("UploadConnection", e.Argument);
         }
 
         private void m_proxyConnections_EnabledStateChanged(object sender, EventArgs<ProxyConnection, bool> e)
         {
-            if (m_serviceConnection is not null && e is not null && e.Argument1 is not null)
+            if (m_serviceConnection is not null && e?.Argument1 != null)
                 m_serviceConnection.SendCommand("UploadConnection", e.Argument1);
         }
 
@@ -689,7 +694,7 @@ namespace StreamSplitter
 
                     // Kick-off request for configuration download from another thread to let event
                     // handler the state change on the service connection complete gracefully
-                    ThreadPool.QueueUserWorkItem(state =>
+                    ThreadPool.QueueUserWorkItem(_ =>
                     {
                         if (m_serviceConnection is not null)
                         {
@@ -830,7 +835,8 @@ namespace StreamSplitter
 
         private void PostProxyConnectionsLoad(object state)
         {
-            Invoke((Action)bindingSource.MoveFirst);
+            if (state is null)
+                Invoke((Action)bindingSource.MoveFirst);
 
             if (bindingSource.Current is ProxyConnection proxyConnection)
             {
@@ -876,6 +882,5 @@ namespace StreamSplitter
         }
 
         #endregion
-
     }
 }
