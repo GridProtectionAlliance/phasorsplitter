@@ -26,13 +26,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Timers;
 using GSF;
 using GSF.Communication;
 using GSF.Configuration;
+using GSF.Diagnostics;
 using GSF.Parsing;
 using GSF.PhasorProtocols;
 using GSF.PhasorProtocols.IEEEC37_118;
@@ -192,7 +192,7 @@ namespace StreamSplitter
         {
             set
             {
-                if ((object)value == null)
+                if (value is null)
                     throw new ArgumentNullException(nameof(value), "Cannot update StreamSplitter configuration: provided ProxyConnection is null.");
 
                 // Validate that this is correct proxy connection
@@ -213,27 +213,15 @@ namespace StreamSplitter
         /// <summary>
         /// Gets the current proxy connection status.
         /// </summary>
-        public StreamProxyStatus StreamProxyStatus
-        {
-            get
-            {
-                return m_streamProxyStatus;
-            }
-        }
+        public StreamProxyStatus StreamProxyStatus => m_streamProxyStatus;
 
         /// <summary>
         /// Gets or sets name associated with the <see cref="StreamProxy"/>.
         /// </summary>
         public string Name
         {
-            get
-            {
-                return m_name.ToNonNullString("<undefined>");
-            }
-            set
-            {
-                m_name = value;
-            }
+            get => m_name.ToNonNullString("<undefined>");
+            set => m_name = value;
         }
 
         /// <summary>
@@ -241,14 +229,8 @@ namespace StreamSplitter
         /// </summary>
         public Guid ID
         {
-            get
-            {
-                return m_id;
-            }
-            set
-            {
-                m_id = value;
-            }
+            get => m_id;
+            set => m_id = value;
         }
 
         /// <summary>
@@ -256,14 +238,8 @@ namespace StreamSplitter
         /// </summary>
         public string SourceSettings
         {
-            get
-            {
-                return m_sourceSettings;
-            }
-            set
-            {
-                m_sourceSettings = value;
-            }
+            get => m_sourceSettings;
+            set => m_sourceSettings = value;
         }
 
         /// <summary>
@@ -271,14 +247,8 @@ namespace StreamSplitter
         /// </summary>
         public string ProxySettings
         {
-            get
-            {
-                return m_proxySettings;
-            }
-            set
-            {
-                m_proxySettings = value;
-            }
+            get => m_proxySettings;
+            set => m_proxySettings = value;
         }
 
         /// <summary>
@@ -291,10 +261,7 @@ namespace StreamSplitter
         /// </remarks>
         public virtual bool Enabled
         {
-            get
-            {
-                return m_enabled;
-            }
+            get => m_enabled;
             set
             {
                 if (value)
@@ -312,35 +279,17 @@ namespace StreamSplitter
         /// <summary>
         /// Gets the total number of bytes sent to clients of this <see cref="StreamProxy"/>.
         /// </summary>
-        public long TotalBytesSent
-        {
-            get
-            {
-                return m_totalBytesSent;
-            }
-        }
+        public long TotalBytesSent => m_totalBytesSent;
 
         /// <summary>
         /// Gets the UTC time the <see cref="StreamProxy"/> was started.
         /// </summary>
-        public Ticks StartTime
-        {
-            get
-            {
-                return m_startTime;
-            }
-        }
+        public Ticks StartTime => m_startTime;
 
         /// <summary>
         /// Gets the UTC time the <see cref="StreamProxy"/> was stopped.
         /// </summary>
-        public Ticks StopTime
-        {
-            get
-            {
-                return m_stopTime;
-            }
-        }
+        public Ticks StopTime => m_stopTime;
 
         /// <summary>
         /// Gets the total amount of time, in seconds, that the <see cref="StreamProxy"/> has been active.
@@ -382,28 +331,28 @@ namespace StreamSplitter
                 status.AppendFormat("          Total bytes sent: {0}", m_totalBytesSent);
                 status.AppendLine();
 
-                if ((object)m_dataStreamMonitor != null)
+                if (m_dataStreamMonitor is not null)
                 {
                     status.AppendFormat("No data reconnect interval: {0} seconds", Ticks.FromMilliseconds(m_dataStreamMonitor.Interval).ToSeconds().ToString("0.000"));
                     status.AppendLine();
                 }
 
-                if ((object)m_configurationFrame != null)
+                if (m_configurationFrame is not null)
                 {
                     status.AppendFormat("  Configuration frame size: {0} bytes", m_configurationFrame.BinaryLength);
                     status.AppendLine();
                 }
 
-                if ((object)m_configurationFrame3 != null)
+                if (m_configurationFrame3 is not null)
                 {
                     status.AppendFormat(" Configuration frame3 size: {0} bytes", m_configurationFrame3.BinaryLength);
                     status.AppendLine();
                 }
 
-                if ((object)m_frameParser != null)
+                if (m_frameParser is not null)
                     status.Append(m_frameParser.Status);
 
-                if ((object)m_publishChannel != null)
+                if (m_publishChannel is not null)
                 {
                     status.AppendLine();
                     status.AppendLine("Publication Channel Status".CenterText(50));
@@ -412,11 +361,11 @@ namespace StreamSplitter
 
                     TcpServer tcpPublishChannel = m_publishChannel as TcpServer;
 
-                    if ((object)tcpPublishChannel != null)
+                    if (tcpPublishChannel is not null)
                     {
                         Guid[] clientIDs = tcpPublishChannel.ClientIDs;
 
-                        if (clientIDs != null && clientIDs.Length > 0)
+                        if (clientIDs is not null && clientIDs.Length > 0)
                         {
                             status.AppendLine();
                             status.AppendFormat("TCP publish channel has {0} connected clients:\r\n\r\n", clientIDs.Length);
@@ -431,7 +380,7 @@ namespace StreamSplitter
                     }
                 }
 
-                if ((object)m_clientBasedPublishChannel != null)
+                if (m_clientBasedPublishChannel is not null)
                 {
                     status.AppendLine();
                     status.AppendLine("Publication Channel Status".CenterText(50));
@@ -448,25 +397,22 @@ namespace StreamSplitter
         /// </summary>
         protected UdpServer UdpPublishChannel
         {
-            get
-            {
-                return m_publishChannel as UdpServer;
-            }
+            get => m_publishChannel as UdpServer;
             set
             {
                 UdpServer udpPublishChannel = m_publishChannel as UdpServer;
 
-                if ((object)m_publishChannel != null && (object)udpPublishChannel == null)
+                if (m_publishChannel is not null && udpPublishChannel is null)
                 {
                     // Trying to dispose non-UDP publication channel - nothing to do...
-                    if ((object)value == null)
+                    if (value is null)
                         return;
 
                     // Publish channel is currently TCP, detach from TCP events
                     TcpPublishChannel = null;
                 }
 
-                if ((object)udpPublishChannel != null)
+                if (udpPublishChannel is not null)
                 {
                     // Detach from events on existing data channel reference
                     udpPublishChannel.ClientConnectingException -= udpPublishChannel_ClientConnectingException;
@@ -482,7 +428,7 @@ namespace StreamSplitter
                 // Assign new UDP publish channel reference
                 udpPublishChannel = value;
 
-                if ((object)udpPublishChannel != null)
+                if (udpPublishChannel is not null)
                 {
                     // Detach any existing client based publish channels
                     TcpClientPublishChannel = null;
@@ -504,25 +450,22 @@ namespace StreamSplitter
         /// </summary>
         protected TcpServer TcpPublishChannel
         {
-            get
-            {
-                return m_publishChannel as TcpServer;
-            }
+            get => m_publishChannel as TcpServer;
             set
             {
                 TcpServer tcpPublishChannel = m_publishChannel as TcpServer;
 
-                if ((object)m_publishChannel != null && (object)tcpPublishChannel == null)
+                if (m_publishChannel is not null && tcpPublishChannel is null)
                 {
                     // Trying to dispose non-TCP publication channel - nothing to do...
-                    if ((object)value == null)
+                    if (value is null)
                         return;
 
                     // Publish channel is currently UDP, detach from UDP events
                     UdpPublishChannel = null;
                 }
 
-                if ((object)tcpPublishChannel != null)
+                if (tcpPublishChannel is not null)
                 {
                     // Detach from events on existing command channel reference
                     tcpPublishChannel.ClientConnected -= tcpPublishChannel_ClientConnected;
@@ -540,7 +483,7 @@ namespace StreamSplitter
                 // Assign new TCP publish channel reference
                 tcpPublishChannel = value;
 
-                if ((object)tcpPublishChannel != null)
+                if (tcpPublishChannel is not null)
                 {
                     // Detach any existing client based publish channels
                     TcpClientPublishChannel = null;
@@ -564,13 +507,10 @@ namespace StreamSplitter
         /// </summary>
         protected TcpClient TcpClientPublishChannel
         {
-            get
-            {
-                return m_clientBasedPublishChannel;
-            }
+            get => m_clientBasedPublishChannel;
             set
             {
-                if ((object)m_clientBasedPublishChannel != null)
+                if (m_clientBasedPublishChannel is not null)
                 {
                     // Detach from events on existing command channel reference
                     m_clientBasedPublishChannel.ConnectionEstablished -= tcpClientBasedPublishChannel_ConnectionEstablished;
@@ -586,7 +526,7 @@ namespace StreamSplitter
                 // Assign new TCP client based publish channel reference
                 m_clientBasedPublishChannel = value;
 
-                if ((object)m_clientBasedPublishChannel != null)
+                if (m_clientBasedPublishChannel is not null)
                 {
                     // Detach any existing server based publish channels
                     UdpPublishChannel = null;
@@ -621,46 +561,45 @@ namespace StreamSplitter
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!m_disposed)
+            if (m_disposed)
+                return;
+
+            try
             {
-                try
+                if (disposing)
                 {
-                    if (disposing)
+                    TcpPublishChannel = null;
+                    UdpPublishChannel = null;
+                    TcpClientPublishChannel = null;
+
+                    if (m_frameParser is not null)
                     {
-                        TcpPublishChannel = null;
-                        UdpPublishChannel = null;
-                        TcpClientPublishChannel = null;
+                        m_frameParser.ConnectionAttempt -= m_frameParser_ConnectionAttempt;
+                        m_frameParser.ConnectionEstablished -= m_frameParser_ConnectionEstablished;
+                        m_frameParser.ConnectionException -= m_frameParser_ConnectionException;
+                        m_frameParser.ConnectionTerminated -= m_frameParser_ConnectionTerminated;
+                        m_frameParser.ConfigurationChanged -= m_frameParser_ConfigurationChanged;
+                        m_frameParser.ParsingException -= m_frameParser_ParsingException;
+                        m_frameParser.ExceededParsingExceptionThreshold -= m_frameParser_ExceededParsingExceptionThreshold;
+                        m_frameParser.ReceivedConfigurationFrame -= m_frameParser_ReceivedConfigurationFrame;
+                        m_frameParser.ReceivedFrameBufferImage -= m_frameParser_ReceivedFrameBufferImage;
+                        m_frameParser.Dispose();
+                        m_frameParser = null;
+                    }
 
-                        if ((object)m_frameParser != null)
-                        {
-                            m_frameParser.ConnectionAttempt -= m_frameParser_ConnectionAttempt;
-                            m_frameParser.ConnectionEstablished -= m_frameParser_ConnectionEstablished;
-                            m_frameParser.ConnectionException -= m_frameParser_ConnectionException;
-                            m_frameParser.ConnectionTerminated -= m_frameParser_ConnectionTerminated;
-                            m_frameParser.ConfigurationChanged -= m_frameParser_ConfigurationChanged;
-                            m_frameParser.ParsingException -= m_frameParser_ParsingException;
-                            m_frameParser.ExceededParsingExceptionThreshold -= m_frameParser_ExceededParsingExceptionThreshold;
-                            m_frameParser.ReceivedConfigurationFrame -= m_frameParser_ReceivedConfigurationFrame;
-                            m_frameParser.ReceivedFrameBufferImage -= m_frameParser_ReceivedFrameBufferImage;
-                            m_frameParser.Dispose();
-                            m_frameParser = null;
-                        }
-
-                        if ((object)m_dataStreamMonitor != null)
-                        {
-                            m_dataStreamMonitor.Elapsed -= m_dataStreamMonitor_Elapsed;
-                            m_dataStreamMonitor.Dispose();
-                            m_dataStreamMonitor = null;
-                        }
+                    if (m_dataStreamMonitor is not null)
+                    {
+                        m_dataStreamMonitor.Elapsed -= m_dataStreamMonitor_Elapsed;
+                        m_dataStreamMonitor.Dispose();
+                        m_dataStreamMonitor = null;
                     }
                 }
-                finally
-                {
-                    m_disposed = true;  // Prevent duplicate dispose.
+            }
+            finally
+            {
+                m_disposed = true;  // Prevent duplicate dispose.
 
-                    if ((object)Disposed != null)
-                        Disposed(this, EventArgs.Empty);
-                }
+                Disposed?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -674,11 +613,9 @@ namespace StreamSplitter
 
             Dictionary<string, string> sourceSettings = m_frameParser.ConnectionString.ParseKeyValuePairs();
             Dictionary<string, string> proxySettings = ProxySettings.ParseKeyValuePairs();
-            string setting;
-            double value;
 
             // Apply custom data monitoring interval
-            if (sourceSettings.TryGetValue("dataMonitorInterval", out setting) && double.TryParse(setting, out value) && (object)m_dataStreamMonitor != null)
+            if (sourceSettings.TryGetValue("dataMonitorInterval", out string setting) && double.TryParse(setting, out double value) && m_dataStreamMonitor is not null)
                 m_dataStreamMonitor.Interval = value;
 
             // TODO: These should be optionally picked up from connection string inside of MPFP
@@ -699,13 +636,37 @@ namespace StreamSplitter
             if (sourceSettings.TryGetValue("skipDisableRealTimeData", out setting))
                 m_frameParser.SkipDisableRealTimeData = setting.ParseBoolean();
 
+            const int DefaultMaxQueueSize = 1000;
+            int maxQueueSize;
+
+            try
+            {
+                // Make sure default service settings exist
+                ConfigurationFile configFile = ConfigurationFile.Current;
+
+                // System settings
+                CategorizedSettingsElementCollection systemSettings = configFile.Settings["systemSettings"];
+                systemSettings.Add("MaxSendQueueSize", DefaultMaxQueueSize.ToString(), "Maximum send queue size for TCP connections.");
+
+                if (!int.TryParse(systemSettings["MaxSendQueueSize"].ValueAsString(DefaultMaxQueueSize.ToString()), out maxQueueSize))
+                    maxQueueSize = DefaultMaxQueueSize;
+            }
+            catch (Exception ex)
+            {
+                Logger.SwallowException(ex);
+                maxQueueSize = DefaultMaxQueueSize;
+            }
+
             if (proxySettings.TryGetValue("useClientPublishChannel", out setting) && setting.ParseBoolean())
             {
                 // Create a new client based publication channel (for reverse TCP connections)
                 TcpClientPublishChannel = ClientBase.Create(ProxySettings) as TcpClient;
 
-                if ((object)m_clientBasedPublishChannel != null)
+                if (m_clientBasedPublishChannel is not null)
+                {
                     m_clientBasedPublishChannel.MaxConnectionAttempts = -1;
+                    m_clientBasedPublishChannel.MaxSendQueueSize = maxQueueSize;
+                }
             }
             else
             {
@@ -713,6 +674,9 @@ namespace StreamSplitter
                 IServer publicationServer = ServerBase.Create(ProxySettings);
                 TcpPublishChannel = publicationServer as TcpServer;
                 UdpPublishChannel = publicationServer as UdpServer;
+
+                if (TcpPublishChannel is not null)
+                    TcpPublishChannel.MaxSendQueueSize = maxQueueSize;
             }
         }
 
@@ -730,14 +694,14 @@ namespace StreamSplitter
                 try
                 {
                     // Start publication server
-                    if ((object)m_publishChannel != null)
+                    if (m_publishChannel is not null)
                         m_publishChannel.Start();
 
-                    if ((object)m_clientBasedPublishChannel != null)
+                    if (m_clientBasedPublishChannel is not null)
                         m_clientBasedPublishChannel.ConnectAsync();
 
                     // Start multi-protocol frame parser
-                    if ((object)m_frameParser != null)
+                    if (m_frameParser is not null)
                         m_frameParser.Start();
 
                     if (!m_enabled)
@@ -768,7 +732,7 @@ namespace StreamSplitter
                     m_streamProxyStatus.ConnectionState = ConnectionState.Disabled;
 
                     // Stop data stream monitor
-                    if ((object)m_dataStreamMonitor != null)
+                    if (m_dataStreamMonitor is not null)
                         m_dataStreamMonitor.Enabled = false;
 
                     if (m_enabled)
@@ -778,14 +742,14 @@ namespace StreamSplitter
                     }
 
                     // Stop multi-protocol frame parser
-                    if ((object)m_frameParser != null)
+                    if (m_frameParser is not null)
                         m_frameParser.Stop();
 
                     // Stop publication server
-                    if ((object)m_publishChannel != null)
+                    if (m_publishChannel is not null)
                         m_publishChannel.Stop();
 
-                    if ((object)m_clientBasedPublishChannel != null)
+                    if (m_clientBasedPublishChannel is not null)
                         m_clientBasedPublishChannel.Disconnect();
 
                     m_bytesReceived = 0;
@@ -804,9 +768,9 @@ namespace StreamSplitter
         /// <param name="command"><see cref="DeviceCommand"/> to send to connected device.</param>
         public void SendCommand(DeviceCommand command)
         {
-            if ((object)m_frameParser != null)
+            if (m_frameParser is not null)
             {
-                if ((object)m_frameParser.SendDeviceCommand(command) != null)
+                if (m_frameParser.SendDeviceCommand(command) is not null)
                     OnStatusMessage("Sent device command \"{0}\"...", command);
             }
             else
@@ -855,8 +819,7 @@ namespace StreamSplitter
             {
                 m_streamProxyStatus.AppendStatusMessage(status);
 
-                if ((object)StatusMessage != null)
-                    StatusMessage(this, new EventArgs<string>(status));
+                StatusMessage?.Invoke(this, new EventArgs<string>(status));
             }
             catch (Exception ex)
             {
@@ -881,8 +844,7 @@ namespace StreamSplitter
 
                 m_streamProxyStatus.AppendStatusMessage(status);
 
-                if ((object)StatusMessage != null)
-                    StatusMessage(this, new EventArgs<string>(status));
+                StatusMessage?.Invoke(this, new EventArgs<string>(status));
             }
             catch (Exception ex)
             {
@@ -902,8 +864,7 @@ namespace StreamSplitter
         {
             m_streamProxyStatus.AppendStatusMessage("ERROR: " + processException.Message);
 
-            if ((object)ProcessException != null)
-                ProcessException(this, new EventArgs<Exception>(processException));
+            ProcessException?.Invoke(this, new EventArgs<Exception>(processException));
         }
 
         /// <summary>
@@ -914,35 +875,32 @@ namespace StreamSplitter
         /// <returns>Connection ID (i.e., IP:Port) for specified <paramref name="clientID"/>.</returns>
         protected virtual string GetConnectionID(IServer server, Guid clientID)
         {
-            string connectionID;
 
-            if (((object)server == null || clientID.Equals(Guid.Empty)) && (object)m_clientBasedPublishChannel != null)
+            if ((server is null || clientID.Equals(Guid.Empty)) && m_clientBasedPublishChannel is not null)
                 return m_clientBasedPublishChannel.ServerUri;
 
-            if (!m_connectionIDCache.TryGetValue(clientID, out connectionID))
+            if (!m_connectionIDCache.TryGetValue(clientID, out string connectionID))
             {
                 // Attempt to lookup remote connection identification for logging purposes
                 try
                 {
                     IPEndPoint remoteEndPoint = null;
                     TcpServer commandChannel = server as TcpServer;
-                    TransportProvider<Socket> tcpClient;
-                    TransportProvider<EndPoint> udpClient;
 
-                    if ((object)commandChannel != null)
+                    if (commandChannel is not null)
                     {
-                        if (commandChannel.TryGetClient(clientID, out tcpClient))
+                        if (commandChannel.TryGetClient(clientID, out TransportProvider<Socket> tcpClient))
                             remoteEndPoint = tcpClient.Provider.RemoteEndPoint as IPEndPoint;
                     }
                     else
                     {
                         UdpServer dataChannel = server as UdpServer;
 
-                        if ((object)dataChannel != null && dataChannel.TryGetClient(clientID, out udpClient))
+                        if (dataChannel is not null && dataChannel.TryGetClient(clientID, out TransportProvider<EndPoint> udpClient))
                             remoteEndPoint = udpClient.Provider as IPEndPoint;
                     }
 
-                    if ((object)remoteEndPoint != null)
+                    if (remoteEndPoint is not null)
                     {
                         if (remoteEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
                             connectionID = "[" + remoteEndPoint.Address + "]:" + remoteEndPoint.Port;
@@ -993,28 +951,14 @@ namespace StreamSplitter
         {
             try
             {
-                ICommandFrame commandFrame;
-
-                // Attempt to interpret data received from a client as a command frame
-                switch (m_frameParser.PhasorProtocol)
+                ICommandFrame commandFrame = m_frameParser.PhasorProtocol switch
                 {
-                    case PhasorProtocol.IEEEC37_118V2:
-                    case PhasorProtocol.IEEEC37_118V1:
-                    case PhasorProtocol.IEEEC37_118D6:
-                        commandFrame = new GSF.PhasorProtocols.IEEEC37_118.CommandFrame(commandBuffer, 0, length);
-                        break;
-                    case PhasorProtocol.IEEE1344:
-                        commandFrame = new GSF.PhasorProtocols.IEEE1344.CommandFrame(commandBuffer, 0, length);
-                        break;
-                    case PhasorProtocol.SelFastMessage:
-                        commandFrame = new GSF.PhasorProtocols.SelFastMessage.CommandFrame(commandBuffer, 0, length);
-                        break;
-                    case PhasorProtocol.IEC61850_90_5:
-                        commandFrame = new GSF.PhasorProtocols.IEC61850_90_5.CommandFrame(commandBuffer, 0, length);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"Protocol \"{m_frameParser.PhasorProtocol}\" does not support commands.");
-                }
+                    PhasorProtocol.IEEEC37_118V2 or PhasorProtocol.IEEEC37_118V1 or PhasorProtocol.IEEEC37_118D6 => new GSF.PhasorProtocols.IEEEC37_118.CommandFrame(commandBuffer, 0, length),
+                    PhasorProtocol.IEEE1344 => new GSF.PhasorProtocols.IEEE1344.CommandFrame(commandBuffer, 0, length),
+                    PhasorProtocol.SelFastMessage => new GSF.PhasorProtocols.SelFastMessage.CommandFrame(commandBuffer, 0, length),
+                    PhasorProtocol.IEC61850_90_5 => new GSF.PhasorProtocols.IEC61850_90_5.CommandFrame(commandBuffer, 0, length),
+                    _ => throw new ArgumentOutOfRangeException($"Protocol \"{m_frameParser.PhasorProtocol}\" does not support commands."),
+                };
 
                 switch (commandFrame.Command)
                 {
@@ -1023,11 +967,11 @@ namespace StreamSplitter
                         // Reset received configuration frame counter
                         m_receivedConfigurationFrames = 0;
 
-                        if ((object)m_configurationFrame != null)
+                        if (m_configurationFrame is not null)
                         {
-                            if ((object)m_publishChannel != null)
+                            if (m_publishChannel is not null)
                                 m_publishChannel.SendToAsync(clientID, m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
-                            else if ((object)m_clientBasedPublishChannel != null)
+                            else if (m_clientBasedPublishChannel is not null)
                                 m_clientBasedPublishChannel.SendAsync(m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
 
                             OnStatusMessage("Received request for \"{0}\" from \"{1}\" - frame was returned.", commandFrame.Command, connectionID);
@@ -1037,13 +981,13 @@ namespace StreamSplitter
                         // Reset received configuration frame counter
                         m_receivedConfigurationFrames = 0;
 
-                        if ((object)m_configurationFrame3 != null)
+                        if (m_configurationFrame3 is not null)
                         {
                             void publishFrame(byte[] frameImage)
                             {
-                                if ((object)m_publishChannel != null)
+                                if (m_publishChannel is not null)
                                     m_publishChannel.SendToAsync(clientID, frameImage, 0, frameImage.Length);
-                                else if ((object)m_clientBasedPublishChannel != null)
+                                else if (m_clientBasedPublishChannel is not null)
                                     m_clientBasedPublishChannel.SendAsync(frameImage, 0, frameImage.Length);
                             }
                             
@@ -1074,7 +1018,7 @@ namespace StreamSplitter
         {
             EventArgs<Guid, byte[], int> e = state as EventArgs<Guid, byte[], int>;
 
-            if ((object)e != null)
+            if (e is not null)
                 DeviceCommandHandler(e.Argument1, GetConnectionID(m_publishChannel, e.Argument1), e.Argument2, e.Argument3);
         }
 
@@ -1095,7 +1039,7 @@ namespace StreamSplitter
         {
             SocketException socketEx = ex as SocketException;
 
-            if ((object)socketEx != null)
+            if (socketEx is not null)
             {
                 if (m_lastSocketErrorNumber == socketEx.ErrorCode)
                 {
@@ -1107,7 +1051,7 @@ namespace StreamSplitter
                 m_lastSocketErrorNumber = socketEx.ErrorCode;
                 m_lastSocketErrorTime = DateTime.UtcNow.Ticks;
             }
-            else if ((object)ex.InnerException != null)
+            else if (ex.InnerException is not null)
             {
                 return HandleException(ex.InnerException);
             }
@@ -1120,7 +1064,7 @@ namespace StreamSplitter
         // Redistribute received data.
         private void m_frameParser_ReceivedFrameBufferImage(object sender, EventArgs<FundamentalFrameType, byte[], int, int> e)
         {
-            if ((object)m_publishChannel == null && (object)m_clientBasedPublishChannel == null)
+            if (m_publishChannel is null && m_clientBasedPublishChannel is null)
                 return;
 
             byte[] image;
@@ -1131,9 +1075,9 @@ namespace StreamSplitter
                 m_receivedConfigurationFrames++;
 
             // As soon as we start receiving data frames and a config frame exists, we change proxy connection status to "Connected" instead of "ConnectedNoData"
-            if (m_streamProxyStatus.ConnectionState == ConnectionState.ConnectedNoData && e.Argument1 == FundamentalFrameType.DataFrame && (object)m_configurationFrame != null)
+            if (m_streamProxyStatus.ConnectionState == ConnectionState.ConnectedNoData && e.Argument1 == FundamentalFrameType.DataFrame && m_configurationFrame is not null)
             {
-                if ((object)m_clientBasedPublishChannel != null)
+                if (m_clientBasedPublishChannel is not null)
                 {
                     if (m_clientBasedPublishChannel.CurrentState == ClientState.Connected)
                         m_streamProxyStatus.ConnectionState = ConnectionState.Connected;
@@ -1145,7 +1089,7 @@ namespace StreamSplitter
             }
 
             // Send the configuration frame at the top of each minute if publication channel is UDP and source is not auto-sending configuration frames
-            if (m_receivedConfigurationFrames < 2 && m_publishChannel is UdpServer && (object)m_configurationFrame != null)
+            if (m_receivedConfigurationFrames < 2 && m_publishChannel is UdpServer && m_configurationFrame is not null)
             {
                 DateTime currentTime = DateTime.UtcNow;
 
@@ -1188,7 +1132,7 @@ namespace StreamSplitter
             length = e.Argument4;
 
             // We republish exactly what we receive to the current destinations
-            if ((object)m_publishChannel != null)
+            if (m_publishChannel is not null)
             {
                 try
                 {
@@ -1199,7 +1143,7 @@ namespace StreamSplitter
                     OnProcessException(new InvalidOperationException($"Server based publication channel exception during proxy output: {ex.Message}", ex));
                 }
             }
-            else if ((object)m_clientBasedPublishChannel != null && m_clientBasedPublishChannel.CurrentState == ClientState.Connected)
+            else if (m_clientBasedPublishChannel is not null && m_clientBasedPublishChannel.CurrentState == ClientState.Connected)
             {
                 try
                 {
@@ -1258,11 +1202,11 @@ namespace StreamSplitter
             m_streamProxyStatus.ConnectionState = ConnectionState.ConnectedNoData;
 
             // Enable data stream monitor for connections that support commands
-            if ((object)m_dataStreamMonitor != null)
+            if (m_dataStreamMonitor is not null)
                 m_dataStreamMonitor.Enabled = m_frameParser.DeviceSupportsCommands;
 
             // Reinitialize proxy connection if needed...
-            if (m_enabled && (object)m_clientBasedPublishChannel != null && m_clientBasedPublishChannel.CurrentState != ClientState.Connected)
+            if (m_enabled && m_clientBasedPublishChannel is not null && m_clientBasedPublishChannel.CurrentState != ClientState.Connected)
             {
                 ThreadPool.QueueUserWorkItem(state =>
                 {
@@ -1293,7 +1237,7 @@ namespace StreamSplitter
             OnStatusMessage("NOTICE: Configuration has changed, requesting new configuration frame...");
 
             // Reset data stream monitor to allow time for non-cached reception of new configuration frame...
-            if ((object)m_dataStreamMonitor != null && m_dataStreamMonitor.Enabled)
+            if (m_dataStreamMonitor is not null && m_dataStreamMonitor.Enabled)
             {
                 m_dataStreamMonitor.Stop();
                 m_dataStreamMonitor.Start();
@@ -1335,7 +1279,7 @@ namespace StreamSplitter
             // Queue up device command handling on a different thread since this will often
             // engage sending data back on the same command channel and we want this async
             // thread to complete gracefully...
-            if ((object)m_publishChannel == null)
+            if (m_publishChannel is null)
                 ThreadPool.QueueUserWorkItem(DeviceCommandHandlerProc, e);
         }
 
@@ -1374,11 +1318,10 @@ namespace StreamSplitter
         private void tcpPublishChannel_ClientDisconnected(object sender, EventArgs<Guid> e)
         {
             Guid clientID = e.Argument;
-            string connectionID;
 
             OnStatusMessage("Client \"{0}\" disconnected from TCP publication channel.", GetConnectionID(m_publishChannel, clientID));
 
-            m_connectionIDCache.TryRemove(clientID, out connectionID);
+            m_connectionIDCache.TryRemove(clientID, out string connectionID);
         }
 
         private void tcpPublishChannel_ClientConnectingException(object sender, EventArgs<Exception> e)
