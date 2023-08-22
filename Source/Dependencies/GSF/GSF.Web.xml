@@ -85,12 +85,31 @@
             <param name="postData"><see cref="T:GSF.Web.Model.ModelController`1.PostData"/> containing the search and sort parameters</param>
             <returns><see cref="T:System.Web.Http.IHttpActionResult"/> containing <see cref="T:System.Collections.Generic.IEnumerable`1"/> or <see cref="T:System.Exception"/></returns>
         </member>
+        <member name="M:GSF.Web.Model.ModelController`1.GetPagedList(GSF.Web.Model.ModelController{`0}.PostData,System.Int32)">
+            <summary>
+            Gets a subset of records from associated table, filtered and sorted as defined in <paramref name="postData"/>.
+            based on <see cref="P:GSF.Web.Model.ModelController`1.Take" /> and 0-based <paramref name="page"/> index
+            </summary>
+            <param name="postData"><see cref="T:GSF.Web.Model.ModelController`1.PostData"/> containing the search and sort parameters</param>
+            <param name="page">The 0-based index of the page to be retrieved</param>
+            <returns><see cref="T:System.Web.Http.IHttpActionResult"/> containing <see cref="T:System.Collections.Generic.IEnumerable`1"/> or <see cref="T:System.Exception"/></returns>
+        </member>
         <member name="M:GSF.Web.Model.ModelController`1.GetSearchableList(GSF.Web.Model.ModelController{`0}.PostData,System.String)">
             <summary>
             Gets all records from associated table, filtered and sorted as defined in <paramref name="postData"/>.
             </summary>
             <param name="parentID">Parent ID to be used if Table has a set Parent Key</param>
             <param name="postData"><see cref="T:GSF.Web.Model.ModelController`1.PostData"/> containing the search and sort parameters</param>
+            <returns><see cref="T:System.Web.Http.IHttpActionResult"/> containing <see cref="T:System.Collections.Generic.IEnumerable`1"/> or <see cref="T:System.Exception"/></returns>
+        </member>
+        <member name="M:GSF.Web.Model.ModelController`1.GetPagedList(GSF.Web.Model.ModelController{`0}.PostData,System.Int32,System.String)">
+            <summary>
+            Gets a subset of records from associated table, filtered and sorted as defined in <paramref name="postData"/>.
+            based on <see cref="P:GSF.Web.Model.ModelController`1.Take" /> and 0-based <paramref name="page"/> index
+            </summary>
+            <param name="postData"><see cref="T:GSF.Web.Model.ModelController`1.PostData"/> containing the search and sort parameters</param>
+            <param name="page">The 0-based index of the page to be retrieved</param>
+            <param name="parentID"> Parent ID to be used if Table has a set Parent Key</param>
             <returns><see cref="T:System.Web.Http.IHttpActionResult"/> containing <see cref="T:System.Collections.Generic.IEnumerable`1"/> or <see cref="T:System.Exception"/></returns>
         </member>
         <member name="M:GSF.Web.Model.ModelController`1.GetAuthCheck">
@@ -117,11 +136,20 @@
             </summary>
             <returns>True if User is authorized for DELETE requests</returns>
         </member>
-        <member name="M:GSF.Web.Model.ModelController`1.GetSearchResults(GSF.Web.Model.ModelController{`0}.PostData)">
+        <member name="M:GSF.Web.Model.ModelController`1.GetSearchResults(GSF.Web.Model.ModelController{`0}.PostData,System.Nullable{System.Int32})">
             <summary>
             Gets the <see cref="T:System.Data.DataTable"/> with the SearchResults as specified in <see cref="T:GSF.Web.Model.ModelController`1.PostData"/>. 
             </summary>
-            <returns>A <see cref="T:System.Data.DataTable"/>.</returns>
+            <param name="postData"><see cref="T:GSF.Web.Model.ModelController`1.PostData"/> containing the search and sort parameters</param>
+            <param name="page">The 0-based index of the page to be retrieved</param>
+            <returns>A <see cref="T:System.Data.DataTable"/> containing the results of the search.</returns>
+        </member>
+        <member name="M:GSF.Web.Model.ModelController`1.CountSearchResults(GSF.Web.Model.ModelController{`0}.PostData)">
+            <summary>
+            Counts the number of records with the SearchResults as specified in <see cref="T:GSF.Web.Model.ModelController`1.PostData"/>.
+            </summary>
+            <param name="postData"><see cref="T:GSF.Web.Model.ModelController`1.PostData"/> containing the search and sort parameters</param>
+            <returns>The number of records that match the search filters.</returns>
         </member>
         <member name="T:GSF.Web.Model.DataContext">
             <summary>
@@ -4784,10 +4812,68 @@
              </code>
              </remarks>
         </member>
+        <member name="T:GSF.Web.Hosting.IWebPageControllerBuilder">
+            <summary>
+            Configures the <see cref="T:GSF.Web.Hosting.WebPageController"/> when adding it to the Owin pipeline.
+            </summary>
+        </member>
+        <member name="M:GSF.Web.Hosting.IWebPageControllerBuilder.UseDefaultWebPage(System.String)">
+            <summary>
+            Use the given page as the default page to display on the default path.
+            </summary>
+            <param name="defaultWebPage">The default page to display on the default path.</param>
+            <returns>The web page controller builder.</returns>
+        </member>
+        <member name="M:GSF.Web.Hosting.IWebPageControllerBuilder.UseModel``1(``0)">
+            <summary>
+            Use the given model as the model to use when rendering Razor templates.
+            </summary>
+            <typeparam name="T">Type of <paramref name="model"/>.</typeparam>
+            <param name="model">Reference to model to use when rendering Razor templates.</param>
+            <returns>The web page controller builder.</returns>
+        </member>
+        <member name="M:GSF.Web.Hosting.IWebPageControllerBuilder.UseAuthenticationOptions(GSF.Web.Security.AuthenticationOptions)">
+            <summary>
+            Use the given authentication options for enabling sessions.
+            </summary>
+            <param name="authenticationOptions">Authentication options for enabling sessions.</param>
+            <returns>The web page controller builder.</returns>
+        </member>
+        <member name="M:GSF.Web.Hosting.IWebPageControllerBuilder.UseCustomRoutes(System.Action{System.Web.Http.HttpRouteCollection})">
+             <summary>
+             Use the given function to configure custom routes for selecting pages.
+             </summary>
+             <param name="routeConfig">Function that configures the custom routes.</param>
+             <returns>The web page controller builder.</returns>
+             <remarks>
+             The routes should set the controller, action, and pageName as in the following example.
+            
+             <code>
+             routes.MapHttpRoute(
+                 name: "MyCustomRoute",
+                 routeTemplate: "my/custom/route",
+                 defaults: new
+                 {
+                     controller = "WebPage",
+                     action = "GetPage",
+                     pageName = "Index.html"
+                 }
+             );
+             </code>
+             </remarks>
+        </member>
         <member name="T:GSF.Web.Hosting.WebPageControllerAppBuilderExtensions">
             <summary>
             Defines extension function for registering <see cref="T:GSF.Web.Hosting.WebPageController"/> in web server pipeline.
             </summary>
+        </member>
+        <member name="M:GSF.Web.Hosting.WebPageControllerAppBuilderExtensions.UseWebPageController(Owin.IAppBuilder,GSF.Web.Hosting.WebServer,System.Action{GSF.Web.Hosting.IWebPageControllerBuilder})">
+            <summary>
+            Registers web page controller in web server pipeline.
+            </summary>
+            <param name="app">The app builder for the web server pipeline.</param>
+            <param name="webServer"><see cref="T:GSF.Web.Hosting.WebServer"/> instance to use for controller.</param>
+            <param name="webPageControllerConfig">Function used to configure the web page controller.</param>
         </member>
         <member name="M:GSF.Web.Hosting.WebPageControllerAppBuilderExtensions.UseWebPageController(Owin.IAppBuilder,GSF.Web.Hosting.WebServer,System.String,System.Object,System.Type,GSF.Web.Security.AuthenticationOptions)">
             <summary>
