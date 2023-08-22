@@ -485,9 +485,7 @@ namespace StreamSplitter
 
                 // Parse updated connection strings in proxy connections
                 foreach (ProxyConnection proxyConnection in proxyConnections)
-                {
-                    proxyConnection.ParseConnectionString(proxyConnection.ConnectionString);
-                }
+                    proxyConnection.ConnectionString = proxyConnection.ParseConnectionString(proxyConnection.ConnectionString);
             }
 
             return proxyConnections;

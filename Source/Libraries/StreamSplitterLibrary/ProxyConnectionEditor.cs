@@ -29,6 +29,8 @@ using System.Linq;
 using System.Windows.Forms;
 using GSF;
 using GSF.Communication;
+using GSF.Configuration;
+using GSF.Diagnostics;
 using GSF.PhasorProtocols;
 
 namespace StreamSplitter
@@ -84,9 +86,7 @@ namespace StreamSplitter
 
             // Initialize phasor protocol selection list
             foreach (object protocol in Enum.GetValues(typeof(PhasorProtocol)))
-            {
                 comboBoxProtocol.Items.Add(((PhasorProtocol)protocol).GetFormattedProtocolName());
-            }
 
             comboBoxProtocol.SelectedIndex = DefaultPhasorProtocol;
 
@@ -388,6 +388,9 @@ namespace StreamSplitter
                     break;
             }
 
+            InjectMaxSendQueueSize(sourceSettings);
+            InjectMaxSendQueueSize(proxySettings);
+
             allSettings.Clear();
             allSettings["sourceSettings"] = sourceSettings.JoinKeyValuePairs();
             allSettings["proxySettings"] = proxySettings.JoinKeyValuePairs();
@@ -405,6 +408,7 @@ namespace StreamSplitter
                 {
                     Dictionary<string, string> settings = setting.ParseKeyValuePairs();
                     settings["server"] = textBoxAlternateTcpConnection.Text;
+                    InjectMaxSendQueueSize(settings);
                     sourceSettings["commandChannel"] = settings.JoinKeyValuePairs();
                 }
                 else
@@ -439,6 +443,9 @@ namespace StreamSplitter
             Dictionary<string, string> allSettings = textBoxConnectionString.Text.ToNonNullString().ParseKeyValuePairs();
             Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out string setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             Dictionary<string, string> proxySettings = allSettings.TryGetValue("proxySettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+
+            InjectMaxSendQueueSize(sourceSettings);
+            InjectMaxSendQueueSize(proxySettings);
 
             // Update source connection information
 
@@ -797,8 +804,10 @@ namespace StreamSplitter
 
         #region [ Static ]
 
-        // Static Methods
+        // Static Fields
+        private static string s_maxSendQueueSize;
 
+        // Static Methods
         private static bool IsValidHostPort(object sender)
         {
             if (sender is not TextBox textBox)
@@ -827,6 +836,31 @@ namespace StreamSplitter
 
         private static bool IsValidInt16(string text) =>
             string.IsNullOrWhiteSpace(text) || ushort.TryParse(text, out ushort _);
+
+        internal static void InjectMaxSendQueueSize(Dictionary<string, string> settings)
+        {
+            if (s_maxSendQueueSize is null)
+            {
+                const string DefaultMaxSendQueueSize = "10000";
+
+                try
+                {
+                    // Make sure setting exists within system settings section of config file
+                    ConfigurationFile configFile = ConfigurationFile.Current;
+                    CategorizedSettingsElementCollection systemSettings = configFile.Settings["systemSettings"];
+                    systemSettings.Add("MaxSendQueueSize", DefaultMaxSendQueueSize, "Defines the max send queue size for socket connections. Set to -1 for no limit.");
+
+                    s_maxSendQueueSize = systemSettings["MaxSendQueueSize"].ValueAs(DefaultMaxSendQueueSize);
+                }
+                catch (Exception ex)
+                {
+                    Logger.SwallowException(ex);
+                    s_maxSendQueueSize = DefaultMaxSendQueueSize;
+                }
+            }
+
+            settings["maxSendQueueSize"] = s_maxSendQueueSize;
+        }
 
         #endregion
     }

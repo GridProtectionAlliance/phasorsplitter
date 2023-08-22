@@ -114,12 +114,9 @@ namespace StreamSplitter
                 // If no associated proxy connection editor control is available yet, we temporarily
                 // cache any connection string until a control is referenced
                 if (m_proxyConnectionEditor is not null)
-                    m_proxyConnectionEditor.ConnectionString = value;
+                    m_proxyConnectionEditor.ConnectionString = ParseConnectionString(value);
                 else
-                    m_temporaryConnectionString = value;
-
-                // Parse primary values from connection string
-                ParseConnectionString(value);
+                    m_temporaryConnectionString = ParseConnectionString(value);
 
                 OnProperyChanged("ConnectionString");
             }
@@ -233,7 +230,7 @@ namespace StreamSplitter
         /// Parse primary values for proxy connection from updated connection string. 
         /// </summary>
         /// <param name="connectionString">New connection string to parse.</param>
-        public void ParseConnectionString(string connectionString)
+        public string ParseConnectionString(string connectionString)
         {
             // Reset fields to their default value
             m_name = m_id.ToString();
@@ -242,7 +239,7 @@ namespace StreamSplitter
             ProxySettings = null;
 
             if (string.IsNullOrWhiteSpace(connectionString))
-                return;
+                return string.Empty;
 
             Dictionary<string, string> settings = connectionString.ParseKeyValuePairs();
 
@@ -253,10 +250,22 @@ namespace StreamSplitter
                 Enabled = setting.ParseBoolean();
 
             if (settings.TryGetValue("sourceSettings", out setting))
-                SourceSettings = setting;
+            {
+                Dictionary<string, string> sourceSettings = setting.ParseKeyValuePairs();
+                ProxyConnectionEditor.InjectMaxSendQueueSize(sourceSettings);
+                SourceSettings = sourceSettings.JoinKeyValuePairs();
+                settings["sourceSettings"] = SourceSettings;
+            }
 
             if (settings.TryGetValue("proxySettings", out setting))
-                ProxySettings = setting;
+            {
+                Dictionary<string, string> proxySettings = setting.ParseKeyValuePairs();
+                ProxyConnectionEditor.InjectMaxSendQueueSize(proxySettings);
+                ProxySettings = proxySettings.JoinKeyValuePairs();
+                settings["proxySettings"] = ProxySettings;
+            }
+
+            return settings.JoinKeyValuePairs();
         }
 
         /// <summary>
