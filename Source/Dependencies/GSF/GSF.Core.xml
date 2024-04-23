@@ -1971,6 +1971,379 @@
             </returns>
             <filterpriority>2</filterpriority>
         </member>
+        <member name="T:GSF.Collections.OrderedDictionary`2">
+            <summary>
+            Represents an ordered collection of keys and values with the same performance as <see cref="T:System.Collections.Generic.Dictionary`2"/> with O(1) lookups and adds but with O(n) inserts and removes.
+            </summary>
+            <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
+            <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.Count">
+            <summary>
+            Gets the number of key/value pairs contained in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.
+            </summary>
+            <returns>The number of key/value pairs contained in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</returns>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.Comparer">
+            <summary>
+            Gets the <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> that is used to determine equality of keys for the dictionary.
+            </summary>
+            <returns>The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> generic interface implementation that is used to determine equality of keys for the current <see cref="T:GSF.Collections.OrderedDictionary`2" /> and to provide hash values for the keys.</returns>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.Keys">
+            <summary>
+            Gets a collection containing the keys in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.
+            </summary>
+            <returns>An <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection" /> containing the keys in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</returns>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.Values">
+            <summary>
+            Gets a collection containing the values in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.
+            </summary>
+            <returns>An <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection" /> containing the values in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</returns>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.Item(`0)">
+            <summary>
+            Gets or sets the value associated with the specified key as an O(1) operation.
+            </summary>
+            <param name="key">The key of the value to get or set.</param>
+            <returns>The value associated with the specified key. If the specified key is not found, a get operation throws a <see cref="T:System.Collections.Generic.KeyNotFoundException" />, and a set operation creates a new element with the specified key.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+            <exception cref="T:System.Collections.Generic.KeyNotFoundException">The property is retrieved and <paramref name="key" /> does not exist in the collection.</exception>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.Item(System.Int32)">
+            <summary>
+            Gets or sets the value at the specified index as an O(1) operation.
+            </summary>
+            <param name="index">The zero-based index of the element to get or set.</param>
+            <returns>The value at the specified index.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> is less than 0.-or-<paramref name="index" /> is equal to or greater than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:GSF.Collections.OrderedDictionary`2" /> class that is empty, has the default initial capacity, and uses the default equality comparer for the key type.
+            </summary>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:GSF.Collections.OrderedDictionary`2" /> class that is empty, has the specified initial capacity, and uses the default equality comparer for the key type.
+            </summary>
+            <param name="capacity">The initial number of elements that the <see cref="T:GSF.Collections.OrderedDictionary`2" /> can contain.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="capacity" /> is less than 0.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.#ctor(System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:GSF.Collections.OrderedDictionary`2" /> class that is empty, has the default initial capacity, and uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer`1" />.
+            </summary>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or null to use the default <see cref="T:System.Collections.Generic.EqualityComparer`1" /> for the type of the key.</param>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.#ctor(System.Int32,System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:GSF.Collections.OrderedDictionary`2" /> class that is empty, has the specified initial capacity, and uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer`1" />.
+            </summary>
+            <param name="capacity">The initial number of elements that the <see cref="T:GSF.Collections.OrderedDictionary`2" /> can contain.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or null to use the default <see cref="T:System.Collections.Generic.EqualityComparer`1" /> for the type of the key.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="capacity" /> is less than 0.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.#ctor(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{`0,`1}})">
+            <summary>
+            Initializes a new instance of the <see cref="T:GSF.Collections.OrderedDictionary`2" /> class that contains elements copied from the specified <see cref="!:IEnumerable&lt;KeyValuePair&lt;TKey, TValue&gt;&gt;" /> and uses the default equality comparer for the key type.
+            </summary>
+            <param name="collection">The <see cref="!:IEnumerable&lt;KeyValuePair&lt;TKey, TValue&gt;&gt;" /> whose elements are copied to the new <see cref="T:GSF.Collections.OrderedDictionary`2" />.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="collection" /> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="collection" /> contains one or more duplicate keys.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.#ctor(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{`0,`1}},System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:GSF.Collections.OrderedDictionary`2" /> class that contains elements copied from the specified <see cref="!:IEnumerable&lt;KeyValuePair&lt;TKey, TValue&gt;&gt;" /> and uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer`1" />.
+            </summary>
+            <param name="collection">The <see cref="!:IEnumerable&lt;KeyValuePair&lt;TKey, TValue&gt;&gt;" /> whose elements are copied to the new <see cref="T:GSF.Collections.OrderedDictionary`2" />.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1" /> implementation to use when comparing keys, or null to use the default <see cref="T:System.Collections.Generic.EqualityComparer`1" /> for the type of the key.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="collection" /> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="collection" /> contains one or more duplicate keys.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.Add(`0,`1)">
+            <summary>
+            Adds the specified key and value to the dictionary as an O(1) operation.
+            </summary>
+            <param name="key">The key of the element to add.</param>
+            <param name="value">The value of the element to add. The value can be null for reference types.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+            <exception cref="T:System.ArgumentException">An element with the same key already exists in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.Clear">
+            <summary>
+            Removes all keys and values from the <see cref="T:GSF.Collections.OrderedDictionary`2" />.
+            </summary>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.ContainsKey(`0)">
+            <summary>
+            Determines whether the <see cref="T:GSF.Collections.OrderedDictionary`2" /> contains the specified key as an O(1) operation.
+            </summary>
+            <param name="key">The key to locate in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</param>
+            <returns>true if the <see cref="T:GSF.Collections.OrderedDictionary`2" /> contains an element with the specified key; otherwise, false.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.EnsureCapacity(System.Int32)">
+            <summary>
+            Resizes the internal data structure if necessary to ensure no additional resizing to support the specified capacity.
+            </summary>
+            <param name="capacity">The number of elements that the <see cref="T:GSF.Collections.OrderedDictionary`2" /> must be able to contain.</param>
+            <returns>The capacity of the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="capacity" /> is less than 0.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the <see cref="T:GSF.Collections.OrderedDictionary`2" />.
+            </summary>
+            <returns>An <see cref="T:GSF.Collections.OrderedDictionary`2.Enumerator" /> structure for the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</returns>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.GetOrAdd(`0,`1)">
+            <summary>
+            Adds a key/value pair to the <see cref="T:GSF.Collections.OrderedDictionary`2" /> if the key does not already exist as an O(1) operation.
+            </summary>
+            <param name="key">The key of the element to add.</param>
+            <param name="value">The value to be added, if the key does not already exist.</param>
+            <returns>The value for the key. This will be either the existing value for the key if the key is already in the dictionary, or the new value if the key was not in the dictionary.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.GetOrAdd(`0,System.Func{`1})">
+            <summary>
+            Adds a key/value pair to the <see cref="T:GSF.Collections.OrderedDictionary`2" /> by using the specified function, if the key does not already exist as an O(1) operation.
+            </summary>
+            <param name="key">The key of the element to add.</param>
+            <param name="valueFactory">The function used to generate a value for the key.</param>
+            <returns>The value for the key. This will be either the existing value for the key if the key is already in the dictionary, or the new value for the key as returned by valueFactory if the key was not in the dictionary.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.-or-<paramref name="valueFactory"/> is null.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.IndexOf(`0)">
+            <summary>
+            Returns the zero-based index of the element with the specified key within the <see cref="T:GSF.Collections.OrderedDictionary`2" /> as an O(1) operation.
+            </summary>
+            <param name="key">The key of the element to locate.</param>
+            <returns>The zero-based index of the element with the specified key within the <see cref="T:GSF.Collections.OrderedDictionary`2" />, if found; otherwise, -1.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.Insert(System.Int32,`0,`1)">
+            <summary>
+            Inserts the specified key/value pair into the <see cref="T:GSF.Collections.OrderedDictionary`2" /> at the specified index as an O(n) operation.
+            </summary>
+            <param name="index">The zero-based index of the key/value pair to insert.</param>
+            <param name="key">The key of the element to insert.</param>
+            <param name="value">The value of the element to insert.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+            <exception cref="T:System.ArgumentException">An element with the same key already exists in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> is less than 0.-or-<paramref name="index" /> is greater than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.Move(System.Int32,System.Int32)">
+            <summary>
+            Moves the element at the specified fromIndex to the specified toIndex while re-arranging the elements in between.
+            </summary>
+            <param name="fromIndex">The zero-based index of the element to move.</param>
+            <param name="toIndex">The zero-based index to move the element to.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="fromIndex"/> is less than 0.
+            -or-
+            <paramref name="fromIndex"/> is equal to or greater than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />
+            -or-
+            <paramref name="toIndex"/> is less than 0.
+            -or-
+            <paramref name="toIndex"/> is equal to or greater than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />
+            </exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.MoveRange(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Moves the specified number of elements at the specified fromIndex to the specified toIndex while re-arranging the elements in between.
+            </summary>
+            <param name="fromIndex">The zero-based index of the elements to move.</param>
+            <param name="toIndex">The zero-based index to move the elements to.</param>
+            <param name="count">The number of elements to move.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="fromIndex"/> is less than 0.
+            -or-
+            <paramref name="fromIndex"/> is equal to or greater than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />.
+            -or-
+            <paramref name="toIndex"/> is less than 0.
+            -or-
+            <paramref name="toIndex"/> is equal to or greater than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />.
+            -or-
+            <paramref name="count"/> is less than 0.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="fromIndex"/> + <paramref name="count"/> is greater than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />.
+            -or-
+            <paramref name="toIndex"/> + <paramref name="count"/> is greater than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.Remove(`0)">
+            <summary>
+            Removes the value with the specified key from the <see cref="T:GSF.Collections.OrderedDictionary`2" /> as an O(n) operation.
+            </summary>
+            <param name="key">The key of the element to remove.</param>
+            <returns>true if the element is successfully found and removed; otherwise, false. This method returns false if <paramref name="key" /> is not found in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.Remove(`0,`1@)">
+            <summary>
+            Removes the value with the specified key from the <see cref="T:GSF.Collections.OrderedDictionary`2" /> and returns the value as an O(n) operation.
+            </summary>
+            <param name="key">The key of the element to remove.</param>
+            <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the <paramref name="value" /> parameter. This parameter is passed uninitialized.</param>
+            <returns>true if the element is successfully found and removed; otherwise, false. This method returns false if <paramref name="key" /> is not found in the <see cref="T:GSF.Collections.OrderedDictionary`2" />.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.RemoveAt(System.Int32)">
+            <summary>
+            Removes the value at the specified index from the <see cref="T:GSF.Collections.OrderedDictionary`2" /> as an O(n) operation.
+            </summary>
+            <param name="index">The zero-based index of the element to remove.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> is less than 0.-or-<paramref name="index" /> is equal to or greater than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.TrimExcess">
+            <summary>
+            Sets the capacity of an <see cref="T:GSF.Collections.OrderedDictionary`2" /> object to the actual number of elements it contains, rounded up to a nearby, implementation-specific value.
+            </summary>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.TrimExcess(System.Int32)">
+            <summary>
+            Sets the capacity of an <see cref="T:GSF.Collections.OrderedDictionary`2" /> object to the specified capacity, rounded up to a nearby, implementation-specific value.
+            </summary>
+            <param name="capacity">The number of elements that the <see cref="T:GSF.Collections.OrderedDictionary`2" /> must be able to contain.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="capacity"/> is less than <see cref="P:GSF.Collections.OrderedDictionary`2.Count" />.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.TryAdd(`0,`1)">
+            <summary>
+            Tries to add the specified key and value to the dictionary as an O(1) operation.
+            </summary>
+            <param name="key">The key of the element to add.</param>
+            <param name="value">The value of the element to add. The value can be null for reference types.</param>
+            <returns>true if the element was added to the <see cref="T:GSF.Collections.OrderedDictionary`2" />; false if the <see cref="T:GSF.Collections.OrderedDictionary`2" /> already contained an element with the specified key.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.TryGetValue(`0,`1@)">
+            <summary>
+            Gets the value associated with the specified key as an O(1) operation.
+            </summary>
+            <param name="key">The key of the value to get.</param>
+            <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the <paramref name="value" /> parameter. This parameter is passed uninitialized.</param>
+            <returns>true if the <see cref="T:GSF.Collections.OrderedDictionary`2" /> contains an element with the specified key; otherwise, false.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is null.</exception>
+        </member>
+        <member name="T:GSF.Collections.OrderedDictionary`2.Enumerator">
+            <summary>
+            Enumerates the elements of a <see cref="T:GSF.Collections.OrderedDictionary`2" />.
+            </summary>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.Enumerator.Current">
+            <summary>
+            Gets the element at the current position of the enumerator.
+            </summary>
+            <returns>The element in the <see cref="T:GSF.Collections.OrderedDictionary`2" /> at the current position of the enumerator.</returns>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.Enumerator.Dispose">
+            <summary>
+            Releases all resources used by the <see cref="T:GSF.Collections.OrderedDictionary`2.Enumerator" />.
+            </summary>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.Enumerator.MoveNext">
+            <summary>
+            Advances the enumerator to the next element of the <see cref="T:GSF.Collections.OrderedDictionary`2" />.
+            </summary>
+            <returns>true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.</returns>
+            <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created.</exception>
+        </member>
+        <member name="T:GSF.Collections.OrderedDictionary`2.KeyCollection">
+            <summary>
+            Represents the collection of keys in a <see cref="T:GSF.Collections.OrderedDictionary`2" />. This class cannot be inherited.
+            </summary>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.KeyCollection.Count">
+            <summary>
+            Gets the number of elements contained in the <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection" />.
+            </summary>
+            <returns>The number of elements contained in the <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection" />.</returns>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.KeyCollection.Item(System.Int32)">
+            <summary>
+            Gets the key at the specified index as an O(1) operation.
+            </summary>
+            <param name="index">The zero-based index of the key to get.</param>
+            <returns>The key at the specified index.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> is less than 0.-or-<paramref name="index" /> is equal to or greater than <see cref="P:GSF.Collections.OrderedDictionary`2.KeyCollection.Count" />.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.KeyCollection.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection" />.
+            </summary>
+            <returns>A <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection.Enumerator" /> for the <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection" />.</returns>
+        </member>
+        <member name="T:GSF.Collections.OrderedDictionary`2.KeyCollection.Enumerator">
+            <summary>
+            Enumerates the elements of a <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection" />.
+            </summary>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.KeyCollection.Enumerator.Current">
+            <summary>
+            Gets the element at the current position of the enumerator.
+            </summary>
+            <returns>The element in the <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection" /> at the current position of the enumerator.</returns>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.KeyCollection.Enumerator.Dispose">
+            <summary>
+            Releases all resources used by the <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection.Enumerator" />.
+            </summary>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.KeyCollection.Enumerator.MoveNext">
+            <summary>
+            Advances the enumerator to the next element of the <see cref="T:GSF.Collections.OrderedDictionary`2.KeyCollection" />.
+            </summary>
+            <returns>true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.</returns>
+            <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created.</exception>
+        </member>
+        <member name="T:GSF.Collections.OrderedDictionary`2.ValueCollection">
+            <summary>
+            Represents the collection of values in a <see cref="T:GSF.Collections.OrderedDictionary`2" />. This class cannot be inherited.
+            </summary>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.ValueCollection.Count">
+            <summary>
+            Gets the number of elements contained in the <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection" />.
+            </summary>
+            <returns>The number of elements contained in the <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection" />.</returns>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.ValueCollection.Item(System.Int32)">
+            <summary>
+            Gets the value at the specified index as an O(1) operation.
+            </summary>
+            <param name="index">The zero-based index of the value to get.</param>
+            <returns>The value at the specified index.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> is less than 0.-or-<paramref name="index" /> is equal to or greater than <see cref="P:GSF.Collections.OrderedDictionary`2.ValueCollection.Count" />.</exception>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.ValueCollection.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection" />.
+            </summary>
+            <returns>A <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection.Enumerator" /> for the <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection" />.</returns>
+        </member>
+        <member name="T:GSF.Collections.OrderedDictionary`2.ValueCollection.Enumerator">
+            <summary>
+            Enumerates the elements of a <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection" />.
+            </summary>
+        </member>
+        <member name="P:GSF.Collections.OrderedDictionary`2.ValueCollection.Enumerator.Current">
+            <summary>
+            Gets the element at the current position of the enumerator.
+            </summary>
+            <returns>The element in the <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection" /> at the current position of the enumerator.</returns>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.ValueCollection.Enumerator.Dispose">
+            <summary>
+            Releases all resources used by the <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection.Enumerator" />.
+            </summary>
+        </member>
+        <member name="M:GSF.Collections.OrderedDictionary`2.ValueCollection.Enumerator.MoveNext">
+            <summary>
+            Advances the enumerator to the next element of the <see cref="T:GSF.Collections.OrderedDictionary`2.ValueCollection" />.
+            </summary>
+            <returns>true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.</returns>
+            <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created.</exception>
+        </member>
         <member name="T:GSF.Collections.RollingWindow`1">
             <summary>
             Represents a rolling window of data with FIFO semantics that will
@@ -8444,6 +8817,78 @@
             Creates a new <see cref="T:GSF.Data.Model.ReturnLimitAttribute"/>.
             </summary>
             <param name="limit">Number of top records to return.</param>
+        </member>
+        <member name="T:GSF.Data.Model.SQLSearchFilter">
+            <summary>
+            Defines a Filter to be applied to a Query
+            </summary>
+        </member>
+        <member name="P:GSF.Data.Model.SQLSearchFilter.FieldName">
+            <summary>
+            Gets or sets the Name of the field to be searched.
+            </summary>
+        </member>
+        <member name="P:GSF.Data.Model.SQLSearchFilter.SearchText">
+            <summary>
+            Gets or sets the value to be searched for.
+            </summary>
+        </member>
+        <member name="P:GSF.Data.Model.SQLSearchFilter.Operator">
+             <summary>
+             Gets or sets the Operator to be used for the Search.
+             </summary>
+             <remarks>
+             <para>The list of supported operators includes:</para>
+            
+             <list type="bullet">
+               <item>=</item>
+               <item><![CDATA[<>]]></item>
+               <item><![CDATA[<]]></item>
+               <item><![CDATA[>]]></item>
+               <item>IN</item>
+               <item>NOT IN</item>
+               <item>LIKE</item>
+               <item>NOT LIKE</item>
+               <item><![CDATA[<=]]></item>
+               <item><![CDATA[>=]]></item>
+             </list>
+             </remarks>
+             <exception cref="T:System.NotSupportedException">Attempted to assign an operator that is not supported.</exception>
+        </member>
+        <member name="P:GSF.Data.Model.SQLSearchFilter.Type">
+             <summary>
+             Gets or sets the type of the field to be searched.
+             </summary>
+             <remarks>
+             <para>The list of supported types includes:</para>
+            
+             <list type="bullet">
+               <item>integer</item>
+               <item>number</item>
+               <item>boolean</item>
+               <item>datetime</item>
+               <item>string</item>
+             </list>
+             </remarks>
+             <exception cref="T:System.NotSupportedException">Attempted to assign a type that is not supported.</exception>
+        </member>
+        <member name="P:GSF.Data.Model.SQLSearchFilter.IsPivotColumn">
+            <summary>
+            Gets or sets a flag indicating whether this is a pivot column
+            in which case the <see cref="T:GSF.Data.Model.SearchableAttribute"/> should be used.
+            </summary>
+        </member>
+        <member name="M:GSF.Data.Model.SQLSearchFilter.GenerateConditional(System.Collections.Generic.List{System.Object})">
+            <summary>
+            Generates the conditional statement to be used in the WHERE clause of the SQL statement.
+            </summary>
+            <param name="parameters">A list of the parameters to be substituted into the full query.</param>
+            <returns>The conditional statement with format string syntax for parameter substitution."</returns>
+        </member>
+        <member name="T:GSF.Data.Model.SQLSearchModifierAttribute">
+            <summary>
+            Defines an attribute that translates Search Queries to more complex SQL Queries 
+            </summary>
         </member>
         <member name="T:GSF.Data.Model.ViewOnlyAttribute">
             <summary>
@@ -15038,13 +15483,21 @@
         </member>
         <member name="T:GSF.Diagnostics.ProcessUtilizationCalculator">
             <summary>
-            Represents a utilization calculator for a <see cref="T:System.Diagnostics.Process"/>.
+            Represents a utilization calculator for a related <see cref="T:System.Diagnostics.Process"/> set.
             </summary>
         </member>
         <member name="F:GSF.Diagnostics.ProcessUtilizationCalculator.DefaultUpdateInterval">
             <summary>
             Default value for the <see cref="P:GSF.Diagnostics.ProcessUtilizationCalculator.UpdateInterval"/> property.
             </summary>
+        </member>
+        <member name="E:GSF.Diagnostics.ProcessUtilizationCalculator.StatusMessage">
+            <summary>
+            Provides status messages to consumer.
+            </summary>
+            <remarks>
+            <see cref="F:GSF.EventArgs`1.Argument"/> is new status message.
+            </remarks>
         </member>
         <member name="M:GSF.Diagnostics.ProcessUtilizationCalculator.#ctor">
             <summary>
@@ -15053,7 +15506,7 @@
         </member>
         <member name="P:GSF.Diagnostics.ProcessUtilizationCalculator.Utilization">
             <summary>
-            Gets the current processor utilization of the associated <see cref="T:System.Diagnostics.Process"/>.
+            Gets the current processor utilization, percent between 0.0 and 1.0, of the associated <see cref="T:System.Diagnostics.Process"/> set.
             </summary>
         </member>
         <member name="P:GSF.Diagnostics.ProcessUtilizationCalculator.UpdateInterval">
@@ -15061,25 +15514,32 @@
             Gets or sets the interval, in milliseconds, over which <see cref="P:GSF.Diagnostics.ProcessUtilizationCalculator.Utilization"/> will be calculated.
             </summary>
         </member>
-        <member name="P:GSF.Diagnostics.ProcessUtilizationCalculator.AssociatedProcess">
+        <member name="P:GSF.Diagnostics.ProcessUtilizationCalculator.AssociatedProcesses">
             <summary>
-            Gets associated process for this <see cref="T:GSF.Diagnostics.ProcessUtilizationCalculator"/>.
+            Gets associated processes for this <see cref="T:GSF.Diagnostics.ProcessUtilizationCalculator"/>.
             </summary>
-            <remarks>
-            The <see cref="T:GSF.Diagnostics.ProcessUtilizationCalculator"/> maintains a <see cref="T:System.WeakReference`1"/> to the associated
-            <see cref="T:System.Diagnostics.Process"/> so this property can be <c>null</c> if the process is no longer available.
-            </remarks>
         </member>
         <member name="M:GSF.Diagnostics.ProcessUtilizationCalculator.Dispose">
             <summary>
             Releases all the resources used by the <see cref="T:GSF.Diagnostics.ProcessUtilizationCalculator"/> object.
             </summary>
         </member>
-        <member name="M:GSF.Diagnostics.ProcessUtilizationCalculator.Initialize(System.Diagnostics.Process)">
+        <member name="M:GSF.Diagnostics.ProcessUtilizationCalculator.Initialize(System.Diagnostics.Process[])">
             <summary>
-            Starts calculating the processor utilization of the specified <paramref name="process"/>.
+            Starts calculating the total processor utilization of the specified <paramref name="processes"/>.
             </summary>
-            <param name="process">The <see cref="T:System.Diagnostics.Process"/> to monitor for processor utilization.</param>
+            <param name="processes">The <see cref="T:System.Diagnostics.Process"/> set, e.g., parent and child processes, to monitor for total processor utilization.</param>
+        </member>
+        <member name="M:GSF.Diagnostics.ProcessUtilizationCalculator.Initialize(System.Collections.Generic.IEnumerable{System.Diagnostics.Process})">
+            <summary>
+            Starts calculating the total processor utilization of the specified <paramref name="processes"/>.
+            </summary>
+            <param name="processes">The <see cref="T:System.Diagnostics.Process"/> set, e.g., parent and child processes, to monitor for total processor utilization.</param>
+        </member>
+        <member name="M:GSF.Diagnostics.ProcessUtilizationCalculator.Refresh">
+            <summary>
+            Refreshes the processor utilization of the associated <see cref="T:System.Diagnostics.Process"/> set.
+            </summary>
         </member>
         <member name="T:GSF.Diagnostics.SystemPerformanceMonitor">
             <summary>
@@ -22990,11 +23450,12 @@
             </summary>
             <returns>The text read from the <see cref="T:GSF.IO.LogFile"/>.</returns>
         </member>
-        <member name="M:GSF.IO.LogFile.ReadLines">
+        <member name="M:GSF.IO.LogFile.ReadLines(System.Boolean)">
             <summary>
             Reads text from the <see cref="T:GSF.IO.LogFile"/> and returns a list of lines created by separating the text by the "newline"
             characters if and where present.
             </summary>
+            <param name="removeEmptyLines"><c>true</c>, if empty lines are to be removed from the list; otherwise, <c>false</c>>.</param>
             <returns>A list of lines from the text read from the <see cref="T:GSF.IO.LogFile"/>.</returns>
         </member>
         <member name="M:GSF.IO.LogFile.OnFileFull">
@@ -41470,6 +41931,25 @@
             <remarks>
             Unless input <paramref name="type"/> is <see cref="T:System.Object"/> or <see cref="T:System.MarshalByRefObject"/>, the returned type will never 
             be <see cref="T:System.Object"/> or <see cref="T:System.MarshalByRefObject"/>, even though all types ultimately inherit from either one of them.
+            </remarks>
+        </member>
+        <member name="M:GSF.TypeExtensions.GetReflectedTypeName(System.Type,System.Boolean)">
+            <summary>
+            Gets a C#-compatible proper type name, resolving generic type names using reflection with no backticks (`), for the specified <paramref name="type"/>.
+            </summary>
+            <param name="type">The <see cref="T:System.Type"/> whose name is to be resolved.</param>
+            <param name="includeNamespaces">Flag that indicates if namespaces should be included in the type name.</param>
+            <returns>
+            A C#-compatible proper type name, resolving generic type names using reflection with no backticks (`), for the specified <paramref name="type"/>.
+            </returns>
+            <remarks>
+            This method will return a C#-compatible proper type name, resolving generic type names using reflection, which creates a valid,
+            useable type name versus what <see cref="P:System.Type.FullName"/> returns. For example, <see cref="P:System.Type.FullName"/> will return something like:
+            <c>System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]</c>
+            with a backtick (`) to indicate a generic type and noisy assembly info. Even <c>Type.Name</c> returns <c>List`1</c> with a backtick (`). For the
+            same type, this method would instead return: <c>System.Collections.Generic.List&lt;System.String&gt;</c> which is a valid, usable C# type name.
+            You can also set the <paramref name="includeNamespaces"/> parameter to <c>false</c> to remove namespaces from the type name, which yields:
+            <c>List&lt;String&gt;</c> for the same example.
             </remarks>
         </member>
         <member name="T:GSF.USTimeZones">
