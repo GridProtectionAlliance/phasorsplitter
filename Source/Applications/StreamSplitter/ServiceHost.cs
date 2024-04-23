@@ -342,11 +342,10 @@ namespace StreamSplitter
             try
             {
                 Ticks startTime = DateTime.UtcNow.Ticks;
-                ProxyConnectionCollection currentConfiguration;
                 string configurationFile = FilePath.GetAbsolutePath(ConfigurationFileName);
 
                 // Attempt to load current configuration
-                currentConfiguration = ProxyConnectionCollection.LoadConfiguration(configurationFile);
+                ProxyConnectionCollection currentConfiguration = ProxyConnectionCollection.LoadConfiguration(configurationFile);
 
                 DisplayStatusMessage("Loaded {0} connections from \"{1}\".", UpdateType.Information, currentConfiguration.Count, configurationFile);
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30011.22
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Applications", "{9D60B828-E0D2-49C2-BFCA-A22D33495898}"
 EndProject
@@ -53,6 +53,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WiX", "WiX", "{59B1811E-D12
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamSplitter", "Applications\StreamSplitter\StreamSplitter.csproj", "{7E475E71-0956-4FB9-81A7-543C3D8A4C21}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90} = {E4A3FC2E-4D4C-4A9B-A1D5-1B95BBC33E90}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamSplitterConsole", "Applications\StreamSplitterConsole\StreamSplitterConsole.csproj", "{514C1869-C4FE-4E5C-9578-02FE97B82AD1}"
 EndProject

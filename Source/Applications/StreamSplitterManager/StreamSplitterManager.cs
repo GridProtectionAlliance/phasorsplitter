@@ -360,7 +360,6 @@ namespace StreamSplitter
             bindingSource.MoveLast();
 
             ConfigurationSaved = false;
-            //Application.DoEvents();
         }
 
         private void RemoveProxyConnectionEditorControl(ProxyConnection connection)
@@ -374,7 +373,6 @@ namespace StreamSplitter
             }
 
             ConfigurationSaved = false;
-            //Application.DoEvents();
         }
 
         // Unselect all existing controls
@@ -390,20 +388,24 @@ namespace StreamSplitter
         // Select specified control
         private void SelectProxyConnectionEditorControl(ProxyConnectionEditor editorControl)
         {
-            if (editorControl is null || editorControl.Selected)
-                return;
+            lock (this)
+            {
+                if (editorControl is null || editorControl.Selected)
+                    return;
 
-            editorControl.SelectionFocus = toolStripTextBoxSearch.Focused;
+                editorControl.SelectionFocus = toolStripTextBoxSearch.Focused;
 
-            // Unselect all existing controls
-            UnselectProxyConnectionEditorControls();
+                // Unselect all existing controls
+                UnselectProxyConnectionEditorControls();
 
-            flowLayoutPanelProxyConnections.ScrollControlIntoView(editorControl);
-            flowLayoutPanelProxyConnections.Refresh();
-            editorControl.Selected = true;
+                editorControl.Selected = true;
 
-            if (bindingSource.Position == bindingSource.Count - 1)
-                flowLayoutPanelProxyConnections.VerticalScroll.Value = flowLayoutPanelProxyConnections.VerticalScroll.Maximum;
+                flowLayoutPanelProxyConnections.ScrollControlIntoView(editorControl);
+                flowLayoutPanelProxyConnections.Refresh();
+
+                if (bindingSource.Position == bindingSource.Count - 1)
+                    flowLayoutPanelProxyConnections.VerticalScroll.Value = flowLayoutPanelProxyConnections.VerticalScroll.Maximum;
+            }
         }
 
         private void SuspendFlowLayout()
@@ -499,18 +501,23 @@ namespace StreamSplitter
 
         private void m_proxyConnections_RemovingItem(object sender, EventArgs<ProxyConnection, bool> e)
         {
-            if (e is null)
+            if (e is null || !e.Argument2)
+                return;
+
+            ProxyConnection connection = e.Argument1;
+
+            if (!m_proxyConnections.Contains(connection))
                 return;
 
             string connectionName;
 
-            if (e.Argument1 is null || string.IsNullOrWhiteSpace(e.Argument1.Name))
+            if (connection is null || string.IsNullOrWhiteSpace(connection.Name))
                 connectionName = "<unnamed proxy connection>";
             else
-                connectionName = e.Argument1.Name;
+                connectionName = connection.Name;
 
             if (MessageBox.Show($"Are you sure you want to delete \"{connectionName}\"?", Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                RemoveProxyConnectionEditorControl(e.Argument1);
+                RemoveProxyConnectionEditorControl(connection);
             else
                 e.Argument2 = false;
         }
@@ -611,6 +618,35 @@ namespace StreamSplitter
             process.Start();
         }
 
+        private void bindingNavigatorAddNewItem_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (m_proxyConnections is null || bindingSource.DataSource == m_proxyConnections)
+                return;
+
+            toolStripButtonClearSearch_Click(this, EventArgs.Empty);
+            MessageBox.Show("Clearing search...", Tag.ToNonNullString(Text), MessageBoxButtons.OK);
+            bindingSource.AddNew();
+        }
+
+        private void bindingNavigatorDeleteItem_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (m_proxyConnections is null || bindingSource.DataSource == m_proxyConnections)
+                return;
+
+            // Handle removal of proxy connection from read-only search results
+            ProxyConnection selectedItem = m_proxyConnections.SearchList[bindingSource.Position];
+
+            EventArgs<ProxyConnection, bool> args = new(selectedItem, true);
+
+            m_proxyConnections_RemovingItem(this, args);
+
+            if (!args.Argument2)
+                return;
+            
+            m_proxyConnections.Remove(selectedItem);
+            toolStripButtonSearch_Click(sender, EventArgs.Empty);
+        }
+
         private void bindingNavigatorDeleteItem_MouseEnter(object sender, EventArgs e)
         {
             if (m_proxyConnections is null)
@@ -618,6 +654,24 @@ namespace StreamSplitter
 
             // Make sure it is obvious which item is currently selected when hovering over the Delete button
             m_proxyConnections.TransparentPanelEnabled = true;
+            flowLayoutPanelProxyConnections.Refresh();
+
+            if (m_proxyConnections is null || bindingSource.DataSource != m_proxyConnections)
+                return;
+
+            int selectedIndex = bindingSource.Position;
+
+            if (selectedIndex < 0 || selectedIndex >= m_proxyConnections.Count)
+                return;
+
+            ProxyConnectionEditor editorControl = m_proxyConnections[selectedIndex].ProxyConnectionEditor;
+
+            if (editorControl is null)
+                return;
+
+            editorControl.Selected = true;
+
+            flowLayoutPanelProxyConnections.ScrollControlIntoView(editorControl);
             flowLayoutPanelProxyConnections.Refresh();
         }
 
@@ -628,21 +682,54 @@ namespace StreamSplitter
 
             m_proxyConnections.TransparentPanelEnabled = false;
             flowLayoutPanelProxyConnections.Refresh();
+
+            if (m_proxyConnections is null || bindingSource.DataSource != m_proxyConnections)
+                return;
+
+            int selectedIndex = bindingSource.Position;
+
+            if (selectedIndex < 0 || selectedIndex >= m_proxyConnections.Count)
+                return;
+
+            ProxyConnectionEditor editorControl = m_proxyConnections[selectedIndex].ProxyConnectionEditor;
+
+            if (editorControl is null)
+                return;
+
+            editorControl.Selected = true;
+
+            flowLayoutPanelProxyConnections.ScrollControlIntoView(editorControl);
+            flowLayoutPanelProxyConnections.Refresh();
         }
 
-        private void toolStripTextBoxSearch_TextChanged(object sender, EventArgs e)
+        private void toolStripTextBoxSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Enter:
+                    toolStripButtonSearch_Click(sender, EventArgs.Empty);
+                    break;
+                case Keys.Escape:
+                    toolStripButtonClearSearch_Click(sender, EventArgs.Empty);
+                    break;
+            }
+        }
+
+        private void toolStripButtonSearch_Click(object sender, EventArgs e)
         {
             if (m_proxyConnections is null)
                 return;
-            
+
+            bindingSource.Position = 0;
             m_proxyConnections.SearchText = toolStripTextBoxSearch.Text;
         }
 
         private void toolStripButtonClearSearch_Click(object sender, EventArgs e)
         {
-            toolStripTextBoxSearch.Text = "";
+            bindingSource.Position = 0;
+            m_proxyConnections.SearchText = toolStripTextBoxSearch.Text = "";
         }
-        
+
         private void m_serviceConnection_ConnectionState(object sender, EventArgs<bool> e)
         {
             bool connected = e.Argument;

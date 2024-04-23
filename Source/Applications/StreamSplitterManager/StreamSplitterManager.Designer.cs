@@ -104,13 +104,14 @@ namespace StreamSplitter
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.toolTipEx = new StreamSplitter.ToolTipEx(this.components);
             this.toolTipNewHelp = new System.Windows.Forms.ToolTip(this.components);
             this.panel = new System.Windows.Forms.Panel();
             this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripLabelSearch = new System.Windows.Forms.ToolStripLabel();
             this.toolStripTextBoxSearch = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripButtonSearch = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonClearSearch = new System.Windows.Forms.ToolStripButton();
+            this.toolTipEx = new StreamSplitter.ToolTipEx(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator)).BeginInit();
             this.bindingNavigator.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).BeginInit();
@@ -172,6 +173,7 @@ namespace StreamSplitter
             this.bindingNavigatorAddNewItem.Size = new System.Drawing.Size(23, 22);
             this.bindingNavigatorAddNewItem.Text = "&Add New Proxy Connection";
             this.bindingNavigatorAddNewItem.ToolTipText = "Add New Proxy Connection";
+            this.bindingNavigatorAddNewItem.MouseDown += new System.Windows.Forms.MouseEventHandler(this.bindingNavigatorAddNewItem_MouseDown);
             // 
             // bindingSource
             // 
@@ -195,6 +197,7 @@ namespace StreamSplitter
             this.bindingNavigatorDeleteItem.Size = new System.Drawing.Size(23, 22);
             this.bindingNavigatorDeleteItem.Text = "D&elete Selected Proxy Connection";
             this.bindingNavigatorDeleteItem.ToolTipText = "Delete Selected Proxy Connection";
+            this.bindingNavigatorDeleteItem.MouseDown += new System.Windows.Forms.MouseEventHandler(this.bindingNavigatorDeleteItem_MouseDown);
             this.bindingNavigatorDeleteItem.MouseEnter += new System.EventHandler(this.bindingNavigatorDeleteItem_MouseEnter);
             this.bindingNavigatorDeleteItem.MouseLeave += new System.EventHandler(this.bindingNavigatorDeleteItem_MouseLeave);
             // 
@@ -309,6 +312,7 @@ namespace StreamSplitter
             // 
             this.bindingNavigatorPositionItem.AccessibleName = "Position";
             this.bindingNavigatorPositionItem.AutoSize = false;
+            this.bindingNavigatorPositionItem.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.bindingNavigatorPositionItem.Name = "bindingNavigatorPositionItem";
             this.bindingNavigatorPositionItem.Size = new System.Drawing.Size(30, 23);
             this.bindingNavigatorPositionItem.Text = "0";
@@ -357,7 +361,7 @@ namespace StreamSplitter
             this.toolStripButtonConnectTo.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonConnectTo.Image")));
             this.toolStripButtonConnectTo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButtonConnectTo.Name = "toolStripButtonConnectTo";
-            this.toolStripButtonConnectTo.Size = new System.Drawing.Size(89, 22);
+            this.toolStripButtonConnectTo.Size = new System.Drawing.Size(87, 22);
             this.toolStripButtonConnectTo.Text = "&Connect To";
             this.toolStripButtonConnectTo.ToolTipText = "Connect to Service";
             this.toolStripButtonConnectTo.Click += new System.EventHandler(this.toolStripButtonConnectTo_Click);
@@ -434,9 +438,9 @@ namespace StreamSplitter
             this.flowLayoutPanelProxyConnections.AutoSize = true;
             this.flowLayoutPanelProxyConnections.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanelProxyConnections.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanelProxyConnections.Location = new System.Drawing.Point(0, 25);
+            this.flowLayoutPanelProxyConnections.Location = new System.Drawing.Point(0, 68);
             this.flowLayoutPanelProxyConnections.Name = "flowLayoutPanelProxyConnections";
-            this.flowLayoutPanelProxyConnections.Size = new System.Drawing.Size(761, 379);
+            this.flowLayoutPanelProxyConnections.Size = new System.Drawing.Size(761, 336);
             this.flowLayoutPanelProxyConnections.TabIndex = 3;
             // 
             // openFileDialog
@@ -458,6 +462,72 @@ namespace StreamSplitter
             this.imageList.Images.SetKeyName(0, "ServiceConnected.png");
             this.imageList.Images.SetKeyName(1, "ServiceDisconnected.png");
             // 
+            // toolTipNewHelp
+            // 
+            this.toolTipNewHelp.AutomaticDelay = 1;
+            this.toolTipNewHelp.IsBalloon = true;
+            this.toolTipNewHelp.ShowAlways = true;
+            // 
+            // panel
+            // 
+            this.panel.Controls.Add(this.toolStrip);
+            this.panel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel.Location = new System.Drawing.Point(0, 25);
+            this.panel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.panel.Name = "panel";
+            this.panel.Size = new System.Drawing.Size(761, 43);
+            this.panel.TabIndex = 0;
+            // 
+            // toolStrip
+            // 
+            this.toolStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabelSearch,
+            this.toolStripTextBoxSearch,
+            this.toolStripButtonSearch,
+            this.toolStripButtonClearSearch});
+            this.toolStrip.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip.Name = "toolStrip";
+            this.toolStrip.Padding = new System.Windows.Forms.Padding(0, 9, 3, 0);
+            this.toolStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            this.toolStrip.Size = new System.Drawing.Size(761, 41);
+            this.toolStrip.TabIndex = 0;
+            this.toolStrip.TabStop = true;
+            // 
+            // toolStripLabelSearch
+            // 
+            this.toolStripLabelSearch.Margin = new System.Windows.Forms.Padding(6, 2, 0, 3);
+            this.toolStripLabelSearch.Name = "toolStripLabelSearch";
+            this.toolStripLabelSearch.Size = new System.Drawing.Size(45, 27);
+            this.toolStripLabelSearch.Text = "Search:";
+            // 
+            // toolStripTextBoxSearch
+            // 
+            this.toolStripTextBoxSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.toolStripTextBoxSearch.Name = "toolStripTextBoxSearch";
+            this.toolStripTextBoxSearch.Size = new System.Drawing.Size(200, 32);
+            this.toolStripTextBoxSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBoxSearch_KeyDown);
+            // 
+            // toolStripButtonSearch
+            // 
+            this.toolStripButtonSearch.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonSearch.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonSearch.Margin = new System.Windows.Forms.Padding(10, 1, 0, 2);
+            this.toolStripButtonSearch.Name = "toolStripButtonSearch";
+            this.toolStripButtonSearch.Size = new System.Drawing.Size(26, 29);
+            this.toolStripButtonSearch.Text = "&Go";
+            this.toolStripButtonSearch.Click += new System.EventHandler(this.toolStripButtonSearch_Click);
+            // 
+            // toolStripButtonClearSearch
+            // 
+            this.toolStripButtonClearSearch.AutoSize = false;
+            this.toolStripButtonClearSearch.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonClearSearch.Name = "toolStripButtonClearSearch";
+            this.toolStripButtonClearSearch.Size = new System.Drawing.Size(60, 29);
+            this.toolStripButtonClearSearch.Text = "Clear";
+            this.toolStripButtonClearSearch.Click += new System.EventHandler(this.toolStripButtonClearSearch_Click);
+            // 
             // toolTipEx
             // 
             this.toolTipEx.AutomaticDelay = 10;
@@ -469,61 +539,6 @@ namespace StreamSplitter
             this.toolTipEx.OwnerDraw = true;
             this.toolTipEx.ReshowDelay = 2;
             this.toolTipEx.ShowAlways = true;
-            // 
-            // toolTipNewHelp
-            // 
-            this.toolTipNewHelp.AutomaticDelay = 1;
-            this.toolTipNewHelp.IsBalloon = true;
-            this.toolTipNewHelp.ShowAlways = true;
-            // 
-            // panel
-            // 
-            this.panel.Controls.Add(this.toolStrip);
-            this.panel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel.Location = new System.Drawing.Point(0, 34);
-            this.panel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.panel.Name = "panel";
-            this.panel.Size = new System.Drawing.Size(1142, 69);
-            this.panel.TabIndex = 0;
-            // 
-            // toolStrip
-            // 
-            this.toolStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.toolStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabelSearch,
-            this.toolStripTextBoxSearch,
-            this.toolStripButtonClearSearch});
-            this.toolStrip.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Padding = new System.Windows.Forms.Padding(0, 9, 3, 0);
-            this.toolStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip.Size = new System.Drawing.Size(1142, 43);
-            this.toolStrip.TabIndex = 0;
-            this.toolStrip.TabStop = true;
-            // 
-            // toolStripLabelSearch
-            // 
-            this.toolStripLabelSearch.Margin = new System.Windows.Forms.Padding(6, 2, 0, 3);
-            this.toolStripLabelSearch.Name = "toolStripLabelSearch";
-            this.toolStripLabelSearch.Size = new System.Drawing.Size(68, 29);
-            this.toolStripLabelSearch.Text = "Search:";
-            // 
-            // toolStripTextBoxSearch
-            // 
-            this.toolStripTextBoxSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.toolStripTextBoxSearch.Name = "toolStripTextBoxSearch";
-            this.toolStripTextBoxSearch.Size = new System.Drawing.Size(200, 34);
-            this.toolStripTextBoxSearch.TextChanged += new System.EventHandler(this.toolStripTextBoxSearch_TextChanged);
-            // 
-            // toolStripButtonClearSearch
-            // 
-            this.toolStripButtonClearSearch.AutoSize = false;
-            this.toolStripButtonClearSearch.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButtonClearSearch.Name = "toolStripButtonClearSearch";
-            this.toolStripButtonClearSearch.Size = new System.Drawing.Size(60, 29);
-            this.toolStripButtonClearSearch.Text = "Clear";
-            this.toolStripButtonClearSearch.Click += new System.EventHandler(this.toolStripButtonClearSearch_Click);
             // 
             // StreamSplitterManager
             // 
@@ -603,6 +618,7 @@ namespace StreamSplitter
         private System.Windows.Forms.ToolStripLabel toolStripLabelSearch;
         private System.Windows.Forms.ToolStripTextBox toolStripTextBoxSearch;
         private System.Windows.Forms.ToolStripButton toolStripButtonClearSearch;
+        private System.Windows.Forms.ToolStripButton toolStripButtonSearch;
     }
 }
 

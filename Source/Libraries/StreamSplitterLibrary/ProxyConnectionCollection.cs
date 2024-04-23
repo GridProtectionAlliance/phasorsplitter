@@ -31,6 +31,7 @@ using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.Threading;
 using GSF;
+using GSF.Diagnostics;
 using GSF.Threading;
 
 namespace StreamSplitter
@@ -218,7 +219,7 @@ namespace StreamSplitter
             UpdateVisibility();
         }
 
-        private void UpdateVisibility() => (m_updateVisibilityOperation ??= new DelayedSynchronizedOperation(UpdateConnectionVisibility) { Delay = 1000 }).RunOnceAsync();
+        private void UpdateVisibility() => (m_updateVisibilityOperation ??= new DelayedSynchronizedOperation(UpdateConnectionVisibility) { Delay = 100 }).RunOnceAsync();
 
         private void UpdateConnectionVisibility()
         {
@@ -227,6 +228,7 @@ namespace StreamSplitter
                 try
                 {
                     m_suspend?.Invoke();
+                    StateChangeInProgress = true;
 
                     HashSet<ProxyConnection> visibleConnections = m_visibleConnections;               
 
@@ -235,9 +237,34 @@ namespace StreamSplitter
                 }
                 finally
                 {
+                    StateChangeInProgress = false;
                     m_resume?.Invoke();
+                    
+                    ProxyConnection firstVisible = this.FirstOrDefault(connection => connection.Visible);
+
+                    if (firstVisible is not null)
+                        firstVisible.ProxyConnectionEditor.Selected = true;
                 }
             }));
+        }
+
+        private bool StateChangeInProgress
+        {
+            set
+            {
+                foreach (ProxyConnection connection in this)
+                {
+                    try
+                    {
+                        if (connection?.ProxyConnectionEditor is not null)
+                            connection.ProxyConnectionEditor.StateChangeInProgress = value;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.SwallowException(ex);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -378,7 +405,7 @@ namespace StreamSplitter
         /// <param name="connection"><see cref="ProxyConnection"/> object about to be removed.</param>
         protected virtual bool OnRemovingItem(ProxyConnection connection)
         {
-            EventArgs<ProxyConnection, bool> e = new(connection, true);
+            EventArgs<ProxyConnection, bool> e = new(connection, m_visibleConnections is null);
 
             if (RemovingItem is not null)
                 RemovingItem(this, e);
@@ -467,15 +494,13 @@ namespace StreamSplitter
         /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="sourceStream"/>.</returns>
         public static ProxyConnectionCollection DeserializeConfiguration(Stream sourceStream, Func<Delegate, object> invoke = null, Action suspend = null, Action resume = null)
         {
-            ProxyConnectionCollection proxyConnections;
-
             SoapFormatter formatter = new()
             {
                 AssemblyFormat = FormatterAssemblyStyle.Simple,
                 TypeFormat = FormatterTypeStyle.TypesWhenNeeded
             };
 
-            proxyConnections = formatter.Deserialize(sourceStream) as ProxyConnectionCollection;
+            ProxyConnectionCollection proxyConnections = formatter.Deserialize(sourceStream) as ProxyConnectionCollection;
 
             if (proxyConnections is not null)
             {

@@ -35,15 +35,13 @@ namespace StreamSplitter
         [STAThread]
         static void Main()
         {
-            StreamSplitterManager manager;
-
             SplashScreen.ShowSplashScreen();
             Application.DoEvents();
 
             SplashScreen.SetStatus("Loading existing configuration...");
             Thread.Sleep(1000);
 
-            manager = new StreamSplitterManager();
+            StreamSplitterManager manager = new();
 
             SplashScreen.CloseForm();
 

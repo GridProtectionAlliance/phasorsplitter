@@ -116,6 +116,11 @@ namespace StreamSplitter
         }
 
         /// <summary>
+        /// Gets or sets flag that determines if a state change is actively in progress.
+        /// </summary>
+        public bool StateChangeInProgress { get; set; }
+
+        /// <summary>
         /// Gets or sets property that determines if focus should be applied upon selection.
         /// </summary>
         public bool SelectionFocus { get; set; } = true;
@@ -306,7 +311,8 @@ namespace StreamSplitter
 
         private void control_GotFocus(object sender, EventArgs e)
         {
-            OnGotFocus(e);
+            if (!StateChangeInProgress)
+                OnGotFocus(e);
         }
 
         // Handle connection string manipulations

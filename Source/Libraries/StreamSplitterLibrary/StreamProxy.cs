@@ -1068,7 +1068,6 @@ namespace StreamSplitter
                 return;
 
             byte[] image;
-            int offset, length;
 
             // Track total number of received configuration frames - data source could be auto-sending config frames every minute
             if (e.Argument1 == FundamentalFrameType.ConfigurationFrame)
@@ -1128,8 +1127,8 @@ namespace StreamSplitter
 
             // Publish binary image for frame 
             image = e.Argument2;
-            offset = e.Argument3;
-            length = e.Argument4;
+            int offset = e.Argument3;
+            int length = e.Argument4;
 
             // We republish exactly what we receive to the current destinations
             if (m_publishChannel is not null)
