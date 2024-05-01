@@ -82,7 +82,6 @@ namespace StreamSplitter
         private bool m_lastConnectedState;
         private bool m_configRequested;
         private bool m_loaded;
-        private readonly int m_nameColumnIndex;
         private readonly int m_connectionStateColumnIndex;
         private readonly int m_enabledColumnIndex;
 
@@ -120,10 +119,9 @@ namespace StreamSplitter
             dataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Name", DataPropertyName = "Name", ReadOnly = false, HeaderText = "Name", SortMode = DataGridViewColumnSortMode.Programmatic, AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, FillWeight = 150 });
             dataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "SourceSettings", DataPropertyName = "SourceSettings", ReadOnly = true, HeaderText = "Source Settings", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, FillWeight = 75 });
             dataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "ProxySettings", DataPropertyName = "ProxySettings", ReadOnly = true, HeaderText = "Proxy Settings", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, FillWeight = 75 });
-            dataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "ConnectionState", DataPropertyName = "ConnectionStateDescription", ReadOnly = true, HeaderText = "\u00a0          Connection", SortMode = DataGridViewColumnSortMode.Automatic, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 140, DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }});
-            dataGridView.Columns.Add(new DataGridViewCheckBoxColumn { Name= "Enabled", DataPropertyName = "Enabled", ReadOnly = false, HeaderText = "Enabled", SortMode = DataGridViewColumnSortMode.Automatic, AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader, DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter } });
+            dataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "ConnectionState", DataPropertyName = "ConnectionStateDescription", ReadOnly = true, HeaderText = "\u00a0          Connection", SortMode = DataGridViewColumnSortMode.Programmatic, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 140, DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }});
+            dataGridView.Columns.Add(new DataGridViewCheckBoxColumn { Name= "Enabled", DataPropertyName = "Enabled", ReadOnly = false, HeaderText = "Enabled", SortMode = DataGridViewColumnSortMode.Programmatic, AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader, DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter } });
 
-            m_nameColumnIndex = dataGridView.Columns["Name"]!.Index;
             m_connectionStateColumnIndex = dataGridView.Columns["ConnectionState"]!.Index;
             m_enabledColumnIndex = dataGridView.Columns["Enabled"]!.Index;
 
@@ -488,6 +486,7 @@ namespace StreamSplitter
 
             e.CellStyle.Font = connectionState switch
             {
+                ConnectionState.Connected => new Font(e.CellStyle.Font, FontStyle.Bold),
                 ConnectionState.ConnectedNoData => new Font(e.CellStyle.Font, FontStyle.Bold),
                 _ => new Font(e.CellStyle.Font, FontStyle.Regular),
             };
@@ -503,18 +502,27 @@ namespace StreamSplitter
 
         private void dataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            DataGridViewColumn nameColumn = dataGridView.Columns[m_nameColumnIndex];
+            DataGridViewColumn sortColumn = dataGridView.Columns[e.ColumnIndex];
 
-            if (e.ColumnIndex == 0)
+            if (sortColumn.SortMode != DataGridViewColumnSortMode.Programmatic)
             {
-                SortOrder sortOrder = nameColumn.HeaderCell.SortGlyphDirection == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
-                m_proxyConnections.SortByName(sortOrder == SortOrder.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending);
-                nameColumn.HeaderCell.SortGlyphDirection = sortOrder;
+                sortColumn.HeaderCell.SortGlyphDirection = SortOrder.None;
+                return;
             }
-            else
-            {
-                nameColumn.HeaderCell.SortGlyphDirection = SortOrder.None;
-            }
+
+            SortOrder sortOrder = sortColumn.HeaderCell.SortGlyphDirection == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+            
+            m_proxyConnections.Sort(sortColumn.Name, sortOrder == SortOrder.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending);
+
+            // Rebind data source to apply sort (in case target was search list)
+            bindingSource.DataSource = m_proxyConnections.SearchList ?? m_proxyConnections;
+
+            foreach (DataGridViewColumn gridColumn in dataGridView.Columns)
+                gridColumn.HeaderCell.SortGlyphDirection = SortOrder.None;
+
+            sortColumn.HeaderCell.SortGlyphDirection = sortOrder;
+
+            dataGridView.Refresh();
         }
 
         private void m_proxyConnections_ConfigurationChanged(object sender, EventArgs<ProxyConnection> e)

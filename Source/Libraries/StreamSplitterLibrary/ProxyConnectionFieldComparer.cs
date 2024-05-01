@@ -48,10 +48,10 @@ namespace StreamSplitter
             if (x.Enabled != y.Enabled)
                 return false;
 
-            if (string.Compare(x.SourceSettings, y.SourceSettings, StringComparison.InvariantCulture) != 0)
+            if (string.Compare(x.SourceSettings, y.SourceSettings, StringComparison.Ordinal) != 0)
                 return false;
 
-            if (string.Compare(x.ProxySettings, y.ProxySettings, StringComparison.InvariantCulture) != 0)
+            if (string.Compare(x.ProxySettings, y.ProxySettings, StringComparison.Ordinal) != 0)
                 return false;
 
             return true;

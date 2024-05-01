@@ -232,7 +232,7 @@ namespace StreamSplitter
             set
             {
                 // Don't update controls unless text has changed
-                if (string.Compare(textBoxConnectionStatus.Text, value, StringComparison.InvariantCulture) == 0)
+                if (string.Compare(textBoxConnectionStatus.Text, value, StringComparison.Ordinal) == 0)
                     return;
 
                 textBoxConnectionStatus.Text = value;
@@ -241,7 +241,6 @@ namespace StreamSplitter
                 textBoxConnectionStatus.ScrollToCaret();
 
                 textBoxConnectionStatus.Refresh();
-                toolTipEx.SetToolTip(textBoxConnectionStatus, textBoxConnectionStatus.Text);
             }
         }
 
@@ -254,8 +253,8 @@ namespace StreamSplitter
         private string GenerateConnectionString()
         {
             Dictionary<string, string> allSettings = textBoxConnectionString.Text.ToNonNullString().ParseKeyValuePairs();
-            Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out string setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-            Dictionary<string, string> proxySettings = allSettings.TryGetValue("proxySettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out string setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> proxySettings = allSettings.TryGetValue("proxySettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             // Update source connection information
             TransportProtocol sourceTransportProtocol = (TransportProtocol)tabControlSourceConnectionType.SelectedIndex;
@@ -381,8 +380,8 @@ namespace StreamSplitter
             bool updateConnectionString = false;
 
             Dictionary<string, string> allSettings = textBoxConnectionString.Text.ToNonNullString().ParseKeyValuePairs();
-            Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out string setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-            Dictionary<string, string> proxySettings = allSettings.TryGetValue("proxySettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            Dictionary<string, string> sourceSettings = allSettings.TryGetValue("sourceSettings", out string setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> proxySettings = allSettings.TryGetValue("proxySettings", out setting) ? setting.ParseKeyValuePairs() : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             InjectMaxSendQueueSize(sourceSettings);
             InjectMaxSendQueueSize(proxySettings);

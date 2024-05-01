@@ -292,21 +292,21 @@
   <data name="toolStripButtonConnectTo.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         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
-        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
+        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
 </value>
   </data>
   <data name="toolStripButtonRestartService.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
@@ -346,6 +346,9 @@
   <metadata name="statusStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>728, 17</value>
   </metadata>
+  <metadata name="toolTipEx.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>876, 17</value>
+  </metadata>
   <data name="toolStripStatusLabelState.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAA1pJREFUOE91
@@ -366,9 +369,6 @@
         B/LmS/IXmaIo8hkAbwaPyH5XKwAAAABJRU5ErkJggg==
 </value>
   </data>
-  <metadata name="toolTipEx.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>876, 17</value>
-  </metadata>
   <metadata name="openFileDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>1005, 17</value>
   </metadata>
@@ -383,7 +383,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACg
-        CgAAAk1TRnQBSQFMAgEBAgEAATgBAgE4AQIBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
+        CgAAAk1TRnQBSQFMAgEBAgEAAWABAgFgAQIBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
         AwABQAMAARADAAEBAQABCAYAAQQYAAGAAgABgAMAAoABAAGAAwABgAEAAYABAAKAAgADwAEAAcAB3AHA
         AQAB8AHKAaYBAAEzBQABMwEAATMBAAEzAQACMwIAAxYBAAMcAQADIgEAAykBAANVAQADTQEAA0IBAAM5
         AQABgAF8Af8BAAJQAf8BAAGTAQAB1gEAAf8B7AHMAQABxgHWAe8BAAHWAucBAAGQAakBrQIAAf8BMwMA
@@ -437,9 +437,15 @@
   <metadata name="toolStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>416, 17</value>
   </metadata>
+  <metadata name="toolStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>416, 17</value>
+  </metadata>
   <data name="proxyConnectionEditor.ConnectionString" xml:space="preserve">
     <value>sourceSettings={transportProtocol=Tcp; interface=0.0.0.0; server=localhost:4712; phasorProtocol=IEEEC37_118V1; accessID=1; maxSendQueueSize=10000}; proxySettings={protocol=Tcp; interface=0.0.0.0; port=4712; maxSendQueueSize=10000}; enabled=False; name=</value>
   </data>
+  <metadata name="toolTipEx.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>876, 17</value>
+  </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>161</value>
   </metadata>

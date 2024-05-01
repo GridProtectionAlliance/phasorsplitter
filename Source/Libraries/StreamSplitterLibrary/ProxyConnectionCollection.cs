@@ -112,7 +112,7 @@ namespace StreamSplitter
         /// </remarks>
         public event EventHandler<EventArgs<ProxyConnection, bool>> RemovingItem;
 
-        private HashSet<ProxyConnection> m_visibleConnections;
+        private List<ProxyConnection> m_visibleConnections;
         private ShortSynchronizedOperation m_searchOperation;
         private string m_searchText;
 
@@ -210,7 +210,7 @@ namespace StreamSplitter
                         visibleConnections.Add(connection);
                 }
 
-                Interlocked.Exchange(ref m_visibleConnections, visibleConnections);
+                Interlocked.Exchange(ref m_visibleConnections, visibleConnections.ToList());
             }
 
             foreach (ProxyConnection connection in this)
@@ -226,10 +226,10 @@ namespace StreamSplitter
         {
             get
             {
-                HashSet<ProxyConnection> visibleConnections = m_visibleConnections;
+                List<ProxyConnection> visibleConnections = m_visibleConnections;
 
                 return visibleConnections is null || visibleConnections.Count == 0 ? null : 
-                    new BindingList<ProxyConnection>(visibleConnections.ToArray());
+                    new BindingList<ProxyConnection>(visibleConnections);
             }
         }
 
@@ -240,10 +240,11 @@ namespace StreamSplitter
         /// <summary>
         /// Sorts the items in the list by name in the specified <paramref name="direction"/>.
         /// </summary>
+        /// <param name="fieldName">Field name to sort on.</param>
         /// <param name="direction">Sort direction.</param>
-        public void SortByName(ListSortDirection direction)
+        public void Sort(string fieldName, ListSortDirection direction)
         {
-            ApplySortCore(new LocalPropertyDescriptor("Name"), direction);
+            ApplySortCore(new LocalPropertyDescriptor(fieldName), direction);
         }
 
         /// <summary>
@@ -276,6 +277,9 @@ namespace StreamSplitter
         {
             if (Items is not List<ProxyConnection> items)
                 return;
+
+            if (m_visibleConnections is not null)
+                items = m_visibleConnections;
 
             switch (prop.Name)
             {
@@ -310,7 +314,10 @@ namespace StreamSplitter
             if (Items is not List<ProxyConnection> items)
                 return;
 
-            //items.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+            if (m_visibleConnections is not null)
+                items = m_visibleConnections;
+
+            items.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
 
             OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
         }
