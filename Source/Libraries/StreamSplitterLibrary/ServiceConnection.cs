@@ -106,14 +106,14 @@ namespace StreamSplitter
         {
             get
             {
-                if ((object)m_clientHelper != null)
+                if (m_clientHelper is not null)
                     return m_clientHelper.Enabled;
 
                 return false;
             }
             set
             {
-                if ((object)m_clientHelper != null)
+                if (m_clientHelper is not null)
                     m_clientHelper.Enabled = value;
             }
         }
@@ -128,14 +128,14 @@ namespace StreamSplitter
         {
             get
             {
-                if ((object)m_remotingClient != null)
+                if (m_remotingClient is not null)
                     return m_remotingClient.MaxConnectionAttempts;
 
                 return -1;
             }
             set
             {
-                if ((object)m_remotingClient != null)
+                if (m_remotingClient is not null)
                     m_remotingClient.MaxConnectionAttempts = value;
             }
         }
@@ -147,14 +147,11 @@ namespace StreamSplitter
         {
             get
             {
-                if ((object)m_remotingClient != null)
-                    return m_remotingClient.ConnectionString;
-
-                return null;
+                return m_remotingClient?.ConnectionString;
             }
             set
             {
-                if ((object)m_remotingClient != null)
+                if (m_remotingClient is not null)
                     m_remotingClient.ConnectionString = value;
             }
         }
@@ -184,7 +181,7 @@ namespace StreamSplitter
                 {
                     if (disposing)
                     {
-                        if ((object)m_clientHelper != null)
+                        if (m_clientHelper is not null)
                         {
                             m_clientHelper.ReceivedServiceUpdate -= m_clientHelper_ReceivedServiceUpdate;
                             m_clientHelper.ReceivedServiceResponse -= m_clientHelper_ReceivedServiceResponse;
@@ -192,7 +189,7 @@ namespace StreamSplitter
                             m_clientHelper = null;
                         }
 
-                        if ((object)m_remotingClient != null)
+                        if (m_remotingClient is not null)
                         {
                             m_remotingClient.ConnectionEstablished -= m_remotingClient_ConnectionEstablished;
                             m_remotingClient.ConnectionException -= m_remotingClient_ConnectionException;
@@ -216,7 +213,7 @@ namespace StreamSplitter
         {
             try
             {
-                if ((object)m_clientHelper != null && (object)m_remotingClient != null)
+                if (m_clientHelper is not null && m_remotingClient is not null)
                 {
                     // Disconnect if currently connected to allow actual "reconnect"
                     if (m_remotingClient.CurrentState == ClientState.Connected)
@@ -251,7 +248,7 @@ namespace StreamSplitter
         /// <param name="attachments">Optional attachments to send with command.</param>
         public void SendCommand(string command, params object[] attachments)
         {
-            if ((object)m_clientHelper == null || (object)m_remotingClient == null)
+            if (m_clientHelper is null || m_remotingClient is null)
                 throw new NullReferenceException("Client helper is not established - cannot send service command.");
 
             if (m_remotingClient.CurrentState == ClientState.Connected)
@@ -259,7 +256,7 @@ namespace StreamSplitter
                 ClientRequest request = ClientRequest.Parse(command);
 
                 // Add any attachments to the client request
-                if ((object)attachments != null && attachments.Length > 0)
+                if (attachments is not null && attachments.Length > 0)
                     request.Attachments.AddRange(attachments);
 
                 m_clientHelper.SendRequest(request);
@@ -273,8 +270,7 @@ namespace StreamSplitter
         /// <param name="message">Status message.</param>
         protected virtual void OnStatusMessage(UpdateType updateType, string message)
         {
-            if ((object)StatusMessage != null)
-                StatusMessage(this, new EventArgs<UpdateType, string>(updateType, message));
+            StatusMessage?.Invoke(this, new EventArgs<UpdateType, string>(updateType, message));
         }
 
         /// <summary>
@@ -285,8 +281,7 @@ namespace StreamSplitter
         /// <param name="responseSuccess">Response success flag.</param>
         protected virtual void OnServiceResponse(ServiceResponse serviceResponse, string sourceCommand, bool responseSuccess)
         {
-            if ((object)ServiceResponse != null)
-                ServiceResponse(this, new EventArgs<ServiceResponse, string, bool>(serviceResponse, sourceCommand, responseSuccess));
+            ServiceResponse?.Invoke(this, new EventArgs<ServiceResponse, string, bool>(serviceResponse, sourceCommand, responseSuccess));
         }
 
         /// <summary>
@@ -295,8 +290,7 @@ namespace StreamSplitter
         /// <param name="connected">Connected flag.</param>
         protected virtual void OnConnectionState(bool connected)
         {
-            if ((object)ConnectionState != null)
-                ConnectionState(this, new EventArgs<bool>(connected));
+            ConnectionState?.Invoke(this, new EventArgs<bool>(connected));
         }
 
         // Client helper service update reception handler
@@ -308,10 +302,7 @@ namespace StreamSplitter
         // Client helper service response reception handler
         private void m_clientHelper_ReceivedServiceResponse(object sender, EventArgs<ServiceResponse> e)
         {
-            string sourceCommand;
-            bool responseSuccess;
-
-            if (ClientHelper.TryParseActionableResponse(e.Argument, out sourceCommand, out responseSuccess))
+            if (ClientHelper.TryParseActionableResponse(e.Argument, out string sourceCommand, out bool responseSuccess))
                 OnServiceResponse(e.Argument, sourceCommand, responseSuccess);
         }
 

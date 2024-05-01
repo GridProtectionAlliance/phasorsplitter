@@ -31,7 +31,6 @@ using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.Threading;
 using GSF;
-using GSF.Diagnostics;
 using GSF.Threading;
 
 namespace StreamSplitter
@@ -51,15 +50,28 @@ namespace StreamSplitter
     {
         #region [ Members ]
 
-        // Events
+        private class LocalPropertyDescriptor : PropertyDescriptor
+        {
+            public LocalPropertyDescriptor(string name) : base(name, null)
+            {
+            }
 
-        /// <summary>
-        /// Sends notification that the <see cref="ProxyConnection"/> associated editor control has focus.
-        /// </summary>
-        /// <remarks>
-        /// This event will only be raised if the proxy connection is associated with an editor control.
-        /// </remarks>
-        public event EventHandler<EventArgs<ProxyConnection>> GotFocus;
+            public override bool CanResetValue(object component) => throw new NotImplementedException();
+
+            public override object GetValue(object component) => throw new NotImplementedException();
+
+            public override void ResetValue(object component) => throw new NotImplementedException();
+
+            public override void SetValue(object component, object value) => throw new NotImplementedException();
+
+            public override bool ShouldSerializeValue(object component) => throw new NotImplementedException();
+
+            public override Type ComponentType { get; }
+            public override bool IsReadOnly { get; }
+            public override Type PropertyType { get; }
+        }
+
+        // Events
 
         /// <summary>
         /// Sends notification that the <see cref="ProxyConnection"/> has changed and should be saved.
@@ -86,6 +98,11 @@ namespace StreamSplitter
         public event EventHandler<EventArgs<ProxyConnection, bool>> EnabledStateChanged;
 
         /// <summary>
+        /// Sends notification that a search operation has completed.
+        /// </summary>
+        public event EventHandler SearchOperationCompleted;
+
+        /// <summary>
         /// Sends notification that the specified <see cref="ProxyConnection"/> is about to be removed.
         /// </summary>
         /// <remarks>
@@ -95,15 +112,9 @@ namespace StreamSplitter
         /// </remarks>
         public event EventHandler<EventArgs<ProxyConnection, bool>> RemovingItem;
 
-        private DelayedSynchronizedOperation m_updateVisibilityOperation;
         private HashSet<ProxyConnection> m_visibleConnections;
-
         private ShortSynchronizedOperation m_searchOperation;
         private string m_searchText;
-
-        private Func<Delegate, object> m_invoke;
-        private Action m_suspend;
-        private Action m_resume;
 
         #endregion
 
@@ -114,6 +125,9 @@ namespace StreamSplitter
         /// </summary>
         public ProxyConnectionCollection()
         {
+            AllowEdit = true;
+            AllowNew = true;
+            AllowRemove = true;
         }
 
         /// <summary>
@@ -164,23 +178,6 @@ namespace StreamSplitter
         }
 
         /// <summary>
-        /// Sets a flag that determines if transparent panels should be enabled for use on <see cref="ProxyConnectionEditor"/> controls.
-        /// </summary>
-        public bool TransparentPanelEnabled
-        {
-            set
-            {
-                foreach (ProxyConnection connection in this)
-                {
-                    ProxyConnectionEditor editorControl = connection.ProxyConnectionEditor;
-
-                    if (editorControl is not null)
-                        editorControl.TransparentPanelEnabled = value;
-                }
-            }
-        }
-
-        /// <summary>
         /// Sets search text.
         /// </summary>
         public string SearchText
@@ -215,56 +212,11 @@ namespace StreamSplitter
 
                 Interlocked.Exchange(ref m_visibleConnections, visibleConnections);
             }
-            
-            UpdateVisibility();
-        }
 
-        private void UpdateVisibility() => (m_updateVisibilityOperation ??= new DelayedSynchronizedOperation(UpdateConnectionVisibility) { Delay = 100 }).RunOnceAsync();
+            foreach (ProxyConnection connection in this)
+                connection.Visible = m_visibleConnections?.Contains(connection) ?? true;
 
-        private void UpdateConnectionVisibility()
-        {
-            m_invoke((Action)(() =>
-            {
-                try
-                {
-                    m_suspend?.Invoke();
-                    StateChangeInProgress = true;
-
-                    HashSet<ProxyConnection> visibleConnections = m_visibleConnections;               
-
-                    foreach (ProxyConnection connection in this)
-                        connection.Visible = visibleConnections?.Contains(connection) ?? true;
-                }
-                finally
-                {
-                    StateChangeInProgress = false;
-                    m_resume?.Invoke();
-                    
-                    ProxyConnection firstVisible = this.FirstOrDefault(connection => connection.Visible);
-
-                    if (firstVisible is not null)
-                        firstVisible.ProxyConnectionEditor.Selected = true;
-                }
-            }));
-        }
-
-        private bool StateChangeInProgress
-        {
-            set
-            {
-                foreach (ProxyConnection connection in this)
-                {
-                    try
-                    {
-                        if (connection?.ProxyConnectionEditor is not null)
-                            connection.ProxyConnectionEditor.StateChangeInProgress = value;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.SwallowException(ex);
-                    }
-                }
-            }
+            SearchOperationCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -286,6 +238,15 @@ namespace StreamSplitter
         #region [ Methods ]
 
         /// <summary>
+        /// Sorts the items in the list by name in the specified <paramref name="direction"/>.
+        /// </summary>
+        /// <param name="direction">Sort direction.</param>
+        public void SortByName(ListSortDirection direction)
+        {
+            ApplySortCore(new LocalPropertyDescriptor("Name"), direction);
+        }
+
+        /// <summary>
         /// Populates a <see cref="SerializationInfo"/> with the data needed to serialize the target object.
         /// </summary>
         /// <param name="info">The <see cref="SerializationInfo"/> to populate with data.</param>
@@ -299,38 +260,7 @@ namespace StreamSplitter
                 info.AddValue("item" + x, this[x], typeof(ProxyConnection));
         }
 
-        /// <summary>
-        /// Inserts the specified item in the list at the specified index.
-        /// </summary>
-        /// <param name="index">The zero-based index where the item is to be inserted.</param>
-        /// <param name="connection">The item to insert in the list.</param>
-        protected override void InsertItem(int index, ProxyConnection connection)
-        {
-            if (connection is null)
-                return;
-
-            ProxyConnectionEditor editorControl = connection.ProxyConnectionEditor;
-
-            // Attach to proxy connection events
-            connection.PropertyChanged += item_PropertyChanged;
-
-            // Attach to editor control events
-            if (editorControl is not null)
-            {
-                editorControl.GotFocus += editorControl_GotFocus;
-                editorControl.ConfigurationChanged += editorControl_ConfigurationChanged;
-                editorControl.ApplyChanges += editorControl_ApplyChanges;
-                editorControl.EnabledStateChanged += editorControl_EnabledStateChanged;
-            }
-
-            base.InsertItem(index, connection);
-        }
-
-        /// <summary>
-        /// Removes the item at the specified index.
-        /// </summary>
-        /// <param name="index">The zero-based index of the item to remove.</param>
-        /// <exception cref="System.NotSupportedException">You are removing a newly added item and <see cref="System.ComponentModel.IBindingList.AllowRemove"/> is set to false.</exception>
+        /// <inheritdoc />
         protected override void RemoveItem(int index)
         {
             ProxyConnection connection = this[index];
@@ -338,35 +268,55 @@ namespace StreamSplitter
             // Raise event notifying consumers about the item about to be removed - this affords
             // an opportunity to cancel this activity if the deletion was accidental
             if (OnRemovingItem(connection))
-            {
-                // Detach from editor control events
-                ProxyConnectionEditor editorControl = connection.ProxyConnectionEditor;
-
-                if (editorControl is not null)
-                {
-                    editorControl.GotFocus -= editorControl_GotFocus;
-                    editorControl.ConfigurationChanged -= editorControl_ConfigurationChanged;
-                    editorControl.ApplyChanges -= editorControl_ApplyChanges;
-                    editorControl.EnabledStateChanged -= editorControl_EnabledStateChanged;
-                }
-
-                // Detach from proxy connection events
-                connection.PropertyChanged -= item_PropertyChanged;
-
-                // Remove item from list
                 base.RemoveItem(index);
-            }
         }
 
-        /// <summary>
-        /// Raises the <see cref="GotFocus"/> event.
-        /// </summary>
-        /// <param name="connection"><see cref="ProxyConnection"/> object that has been selected.</param>
-        protected virtual void OnGotFocus(ProxyConnection connection)
+        /// <inheritdoc />
+        protected override void ApplySortCore(PropertyDescriptor prop, ListSortDirection direction)
         {
-            if (GotFocus is not null)
-                GotFocus(this, new EventArgs<ProxyConnection>(connection));
+            if (Items is not List<ProxyConnection> items)
+                return;
+
+            switch (prop.Name)
+            {
+                case "Name":
+                    if (direction == ListSortDirection.Ascending)
+                        items.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+                    else
+                        items.Sort((a, b) => string.Compare(b.Name, a.Name, StringComparison.OrdinalIgnoreCase));
+                    break;
+                case "ConnectionState":
+                    if (direction == ListSortDirection.Ascending)
+                        items.Sort((a, b) => a.ConnectionState.CompareTo(b.ConnectionState));
+                    else
+                        items.Sort((a, b) => b.ConnectionState.CompareTo(a.ConnectionState));
+                    break;
+                case "Enabled":
+                    if (direction == ListSortDirection.Ascending)
+                        items.Sort((a, b) => a.Enabled.CompareTo(b.Enabled));
+                    else
+                        items.Sort((a, b) => b.Enabled.CompareTo(a.Enabled));
+                    break;
+                default:
+                    return;
+            }
+
+            OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
         }
+
+        /// <inheritdoc />
+        protected override void RemoveSortCore()
+        {
+            if (Items is not List<ProxyConnection> items)
+                return;
+
+            //items.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+
+            OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
+        }
+
+        /// <inheritdoc />
+        protected override bool SupportsSortingCore => true;
 
         /// <summary>
         /// Raises the <see cref="ConfigurationChanged"/> event.
@@ -374,8 +324,7 @@ namespace StreamSplitter
         /// <param name="connection"><see cref="ProxyConnection"/> object that has changed.</param>
         protected virtual void OnConfigurationChanged(ProxyConnection connection)
         {
-            if (ConfigurationChanged is not null)
-                ConfigurationChanged(this, new EventArgs<ProxyConnection>(connection));
+            ConfigurationChanged?.Invoke(this, new EventArgs<ProxyConnection>(connection));
         }
 
         /// <summary>
@@ -384,8 +333,7 @@ namespace StreamSplitter
         /// <param name="connection"><see cref="ProxyConnection"/> object that has requested that changes be applied.</param>
         protected virtual void OnApplyChanges(ProxyConnection connection)
         {
-            if (ApplyChanges is not null)
-                ApplyChanges(this, new EventArgs<ProxyConnection>(connection));
+            ApplyChanges?.Invoke(this, new EventArgs<ProxyConnection>(connection));
         }
 
         /// <summary>
@@ -395,8 +343,7 @@ namespace StreamSplitter
         /// <param name="newState">New enabled state.</param>
         protected virtual void OnEnabledStateChanged(ProxyConnection connection, bool newState)
         {
-            if (EnabledStateChanged is not null)
-                EnabledStateChanged(this, new EventArgs<ProxyConnection, bool>(connection, newState));
+            EnabledStateChanged?.Invoke(this, new EventArgs<ProxyConnection, bool>(connection, newState));
         }
 
         /// <summary>
@@ -407,56 +354,25 @@ namespace StreamSplitter
         {
             EventArgs<ProxyConnection, bool> e = new(connection, m_visibleConnections is null);
 
-            if (RemovingItem is not null)
-                RemovingItem(this, e);
+            RemovingItem?.Invoke(this, e);
 
             return e.Argument2;
         }
 
-        private void item_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            // When proxy connection instances are added at during start-up, items are deserialized first then assigned
-            // an editing control afterwards so we must handle attaching to events when the property has changed. During
-            // post-load normal run-time a new connection will be associated with its editing control during creation
-            // before the collection has even attached to this event (since item won't be in list yet) and the InsertItem
-            // event attachment will be executed.
-            if (e.PropertyName != "ProxyConnectionEditor")
-                return;
-
-            if (sender is not ProxyConnection item)
-                return;
-
-            ProxyConnectionEditor editorControl = item.ProxyConnectionEditor;
-
-            if (editorControl is null)
-                return;
-
-            editorControl.GotFocus += editorControl_GotFocus;
-            editorControl.ConfigurationChanged += editorControl_ConfigurationChanged;
-            editorControl.ApplyChanges += editorControl_ApplyChanges;
-            editorControl.EnabledStateChanged += editorControl_EnabledStateChanged;
-        }
-
         // Bubble up proxy editor control events
-        private void editorControl_GotFocus(object sender, EventArgs e)
-        {
-            if (sender is ProxyConnectionEditor editorControl)
-                OnGotFocus(editorControl.ProxyConnection);
-        }
-
-        private void editorControl_ConfigurationChanged(object sender, EventArgs e)
+        internal void EditorControl_ConfigurationChanged(object sender, EventArgs e)
         {
             if (sender is ProxyConnectionEditor editorControl)
                 OnConfigurationChanged(editorControl.ProxyConnection);
         }
 
-        private void editorControl_ApplyChanges(object sender, EventArgs e)
+        internal void EditorControl_ApplyChanges(object sender, EventArgs e)
         {
             if (sender is ProxyConnectionEditor editorControl)
                 OnApplyChanges(editorControl.ProxyConnection);
         }
 
-        private void editorControl_EnabledStateChanged(object sender, EventArgs<bool> e)
+        internal void EditorControl_EnabledStateChanged(object sender, EventArgs<bool> e)
         {
             if (sender is ProxyConnectionEditor editorControl)
                 OnEnabledStateChanged(editorControl.ProxyConnection, e.Argument);
@@ -504,10 +420,6 @@ namespace StreamSplitter
 
             if (proxyConnections is not null)
             {
-                proxyConnections.m_invoke = invoke;
-                proxyConnections.m_suspend = suspend;
-                proxyConnections.m_resume = resume;
-
                 // Parse updated connection strings in proxy connections
                 foreach (ProxyConnection proxyConnection in proxyConnections)
                     proxyConnection.ConnectionString = proxyConnection.ParseConnectionString(proxyConnection.ConnectionString);
@@ -563,11 +475,8 @@ namespace StreamSplitter
         /// Loads proxy connections from a previously saved configuration file.
         /// </summary>
         /// <param name="fileName">Configuration file to load.</param>
-        /// <param name="invoke">Defines any invoke function that may be needed to update UI controls, if applicable.</param>
-        /// <param name="suspend">Defines suspend UI function.</param>
-        /// <param name="resume">Defines resume UI function.</param>
         /// <returns>New <see cref="ProxyConnectionCollection"/> instance from specified <paramref name="fileName"/>.</returns>
-        public static ProxyConnectionCollection LoadConfiguration(string fileName, Func<Delegate, object> invoke = null, Action suspend = null, Action resume = null)
+        public static ProxyConnectionCollection LoadConfiguration(string fileName)
         {
             ProxyConnectionCollection proxyConnections = null;
 
@@ -576,19 +485,14 @@ namespace StreamSplitter
             if (File.Exists(fileName))
             {
                 using FileStream settingsFile = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-                proxyConnections = DeserializeConfiguration(settingsFile, invoke, suspend, resume);
+                proxyConnections = DeserializeConfiguration(settingsFile);
             }
 
             if (proxyConnections is not null)
                 return proxyConnections;
             
             // Create an empty proxy connection list if none exists
-            return new ProxyConnectionCollection()
-            {
-                m_invoke = invoke,
-                m_suspend = suspend,
-                m_resume = resume
-            };
+            return new ProxyConnectionCollection();
         }
 
         #endregion

@@ -36,7 +36,7 @@ namespace StreamSplitter
         private int m_iIndex = 1;
         private int m_iActualTicks = 0;
         private ArrayList m_alPreviousCompletionFraction;
-        private ArrayList m_alActualTimes = new ArrayList();
+        private ArrayList m_alActualTimes = new();
         private DateTime m_dtStart;
         private bool m_bFirstLaunch = false;
         private bool m_bDTSet = false;
@@ -61,13 +61,13 @@ namespace StreamSplitter
         static public void ShowSplashScreen()
         {
             // Make sure it's only launched once.
-            if (ms_frmSplash != null)
+            if (ms_frmSplash is not null)
                 return;
             ms_oThread = new Thread(new ThreadStart(SplashScreen.ShowForm));
             ms_oThread.IsBackground = true;
             ms_oThread.SetApartmentState(ApartmentState.STA);
             ms_oThread.Start();
-            while (ms_frmSplash == null || ms_frmSplash.IsHandleCreated == false)
+            while (ms_frmSplash is null || ms_frmSplash.IsHandleCreated == false)
             {
                 System.Threading.Thread.Sleep(TIMER_INTERVAL);
             }
@@ -76,7 +76,7 @@ namespace StreamSplitter
         // Close the form without setting the parent.
         static public void CloseForm()
         {
-            if (ms_frmSplash != null && ms_frmSplash.IsDisposed == false)
+            if (ms_frmSplash is not null && ms_frmSplash.IsDisposed == false)
             {
                 // Make it start going away.
                 ms_frmSplash.m_dblOpacityIncrement = -ms_frmSplash.m_dblOpacityDecrement;
@@ -96,7 +96,7 @@ namespace StreamSplitter
         // set of status string updates.  In that case, don't set the reference.
         static public void SetStatus(string newStatus, bool setReference)
         {
-            if (ms_frmSplash == null)
+            if (ms_frmSplash is null)
                 return;
 
             ms_frmSplash.m_sStatus = newStatus;
@@ -110,9 +110,7 @@ namespace StreamSplitter
         // you are using a lot of status strings.
         static public void SetReferencePoint()
         {
-            if (ms_frmSplash == null)
-                return;
-            ms_frmSplash.SetReferenceInternal();
+            ms_frmSplash?.SetReferenceInternal();
 
         }
         #endregion Public Static Methods
@@ -138,10 +136,10 @@ namespace StreamSplitter
             double dblMilliseconds = ElapsedMilliSeconds();
             m_alActualTimes.Add(dblMilliseconds);
             m_dblLastCompletionFraction = m_dblCompletionFraction;
-            if (m_alPreviousCompletionFraction != null && m_iIndex < m_alPreviousCompletionFraction.Count)
+            if (m_alPreviousCompletionFraction is not null && m_iIndex < m_alPreviousCompletionFraction.Count)
                 m_dblCompletionFraction = (double)m_alPreviousCompletionFraction[m_iIndex++];
             else
-                m_dblCompletionFraction = (m_iIndex > 0) ? 1 : 0;
+                m_dblCompletionFraction = m_iIndex > 0 ? 1 : 0;
         }
 
         // Utility function to return elapsed Milliseconds since the 
@@ -157,9 +155,8 @@ namespace StreamSplitter
         private void ReadIncrements()
         {
             string sPBIncrementPerTimerInterval = SplashScreenXMLStorage.Interval;
-            double dblResult;
 
-            if (Double.TryParse(sPBIncrementPerTimerInterval, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.InvariantInfo, out dblResult) == true)
+            if (double.TryParse(sPBIncrementPerTimerInterval, System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.InvariantInfo, out double dblResult) == true)
                 m_dblPBIncrementPerTimerInterval = dblResult;
             else
                 m_dblPBIncrementPerTimerInterval = .0015;
@@ -173,8 +170,7 @@ namespace StreamSplitter
 
                 for (int i = 0; i < aTimes.Length; i++)
                 {
-                    double dblVal;
-                    if (Double.TryParse(aTimes[i], System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.InvariantInfo, out dblVal) == true)
+                    if (double.TryParse(aTimes[i], System.Globalization.NumberStyles.Float, System.Globalization.NumberFormatInfo.InvariantInfo, out double dblVal) == true)
                         m_alPreviousCompletionFraction.Add(dblVal);
                     else
                         m_alPreviousCompletionFraction.Add(1.0);
@@ -198,7 +194,7 @@ namespace StreamSplitter
 
             SplashScreenXMLStorage.Percents = sPercent;
 
-            m_dblPBIncrementPerTimerInterval = 1.0 / (double)m_iActualTicks;
+            m_dblPBIncrementPerTimerInterval = 1.0 / m_iActualTicks;
 
             SplashScreenXMLStorage.Interval = m_dblPBIncrementPerTimerInterval.ToString("#.000000", System.Globalization.NumberFormatInfo.InvariantInfo);
         }
@@ -249,12 +245,12 @@ namespace StreamSplitter
                     if (!pnlStatus.IsDisposed)
                     {
                         Graphics g = pnlStatus.CreateGraphics();
-                        LinearGradientBrush brBackground = new LinearGradientBrush(m_rProgress, Color.FromArgb(58, 96, 151), Color.FromArgb(181, 237, 254), LinearGradientMode.Horizontal);
+                        LinearGradientBrush brBackground = new(m_rProgress, Color.FromArgb(58, 96, 151), Color.FromArgb(181, 237, 254), LinearGradientMode.Horizontal);
                         g.FillRectangle(brBackground, m_rProgress);
                         g.Dispose();
                     }
                     int iSecondsLeft = 1 + (int)(TIMER_INTERVAL * ((1.0 - m_dblLastCompletionFraction) / m_dblPBIncrementPerTimerInterval)) / 1000;
-                    m_sTimeRemaining = (iSecondsLeft == 1) ? string.Format("1 second remaining") : string.Format("{0} seconds remaining", iSecondsLeft);
+                    m_sTimeRemaining = iSecondsLeft == 1 ? string.Format("1 second remaining") : string.Format("{0} seconds remaining", iSecondsLeft);
                 }
             }
             lblTimeRemaining.Text = m_sTimeRemaining;
@@ -283,21 +279,18 @@ namespace StreamSplitter
         // Get or set the string storing the percentage complete at each checkpoint.
         static public string Percents
         {
-            get { return GetValue("Percents", ms_DefaultPercents); }
-            set { SetValue("Percents", value); }
+            get => GetValue("Percents", ms_DefaultPercents);
+            set => SetValue("Percents", value);
         }
         // Get or set how much time passes between updates.
         static public string Interval
         {
-            get { return GetValue("Interval", ms_DefaultIncrement); }
-            set { SetValue("Interval", value); }
+            get => GetValue("Interval", ms_DefaultIncrement);
+            set => SetValue("Interval", value);
         }
 
         // Store the file in a location where it can be written with only User rights. (Don't use install directory).
-        static private string StoragePath
-        {
-            get { return Path.Combine(Application.UserAppDataPath, ms_StoredValues); }
-        }
+        static private string StoragePath => Path.Combine(Application.UserAppDataPath, ms_StoredValues);
 
         // Helper method for getting inner text of named element.
         static private string GetValue(string name, string defaultValue)
@@ -307,10 +300,9 @@ namespace StreamSplitter
 
             try
             {
-                XmlDocument docXML = new XmlDocument();
+                XmlDocument docXML = new();
                 docXML.Load(StoragePath);
-                XmlElement elValue = docXML.DocumentElement.SelectSingleNode(name) as XmlElement;
-                return (elValue == null) ? defaultValue : elValue.InnerText;
+                return docXML.DocumentElement.SelectSingleNode(name) is not XmlElement elValue ? defaultValue : elValue.InnerText;
             }
             catch
             {
@@ -322,7 +314,7 @@ namespace StreamSplitter
         static public void SetValue(string name,
              string stringValue)
         {
-            XmlDocument docXML = new XmlDocument();
+            XmlDocument docXML = new();
             XmlElement elRoot = null;
             if (!File.Exists(StoragePath))
             {
@@ -334,8 +326,8 @@ namespace StreamSplitter
                 docXML.Load(StoragePath);
                 elRoot = docXML.DocumentElement;
             }
-            XmlElement value = docXML.DocumentElement.SelectSingleNode(name) as XmlElement;
-            if (value == null)
+
+            if (docXML.DocumentElement.SelectSingleNode(name) is not XmlElement value)
             {
                 value = docXML.CreateElement(name);
                 elRoot.AppendChild(value);

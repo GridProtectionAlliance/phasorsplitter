@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -81,6 +82,9 @@ namespace StreamSplitter
         private bool m_lastConnectedState;
         private bool m_configRequested;
         private bool m_loaded;
+        private readonly int m_nameColumnIndex;
+        private readonly int m_connectionStateColumnIndex;
+        private readonly int m_enabledColumnIndex;
 
         #endregion
 
@@ -105,23 +109,56 @@ namespace StreamSplitter
             m_refreshProxyStatusTimer.Interval = 2000;
             m_refreshProxyStatusTimer.AutoReset = true;
 
-            flowLayoutPanelProxyConnections.SetAutoScrollMargin(0, new ProxyConnectionEditor().Height);
-
             // Update version
             toolStripStatusLabelVersion.Text = AssemblyInfo.EntryAssembly.Version.ToString(3);
 
             // Set initial save state
             ConfigurationSaved = true;
 
-            // Attempt to load last configuration
-            string lastConfigurationFileName = ConfigurationFile.Current.Settings.General["LastConfiguration", true].ValueAs("");
+            // Initialize data grid view columns
 
-            if (!string.IsNullOrEmpty(lastConfigurationFileName) && File.Exists(lastConfigurationFileName))
-                LoadConfiguration(lastConfigurationFileName);
+            dataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "Name", DataPropertyName = "Name", ReadOnly = false, HeaderText = "Name", SortMode = DataGridViewColumnSortMode.Programmatic, AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, FillWeight = 150 });
+            dataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "SourceSettings", DataPropertyName = "SourceSettings", ReadOnly = true, HeaderText = "Source Settings", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, FillWeight = 75 });
+            dataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "ProxySettings", DataPropertyName = "ProxySettings", ReadOnly = true, HeaderText = "Proxy Settings", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, FillWeight = 75 });
+            dataGridView.Columns.Add(new DataGridViewTextBoxColumn { Name = "ConnectionState", DataPropertyName = "ConnectionStateDescription", ReadOnly = true, HeaderText = "\u00a0          Connection", SortMode = DataGridViewColumnSortMode.Automatic, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 140, DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }});
+            dataGridView.Columns.Add(new DataGridViewCheckBoxColumn { Name= "Enabled", DataPropertyName = "Enabled", ReadOnly = false, HeaderText = "Enabled", SortMode = DataGridViewColumnSortMode.Automatic, AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader, DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter } });
 
-            // If no existing configuration was loaded, create a new one
-            if (string.IsNullOrEmpty(m_configurationFileName))
-                NewConfiguration();
+            m_nameColumnIndex = dataGridView.Columns["Name"]!.Index;
+            m_connectionStateColumnIndex = dataGridView.Columns["ConnectionState"]!.Index;
+            m_enabledColumnIndex = dataGridView.Columns["Enabled"]!.Index;
+
+            // See if command line parameter was passed for configuration file
+            string[] args = Environment.GetCommandLineArgs();
+            bool configLoaded = false;
+
+            if (args.Length > 1)
+            {
+                string configurationFile = FilePath.GetAbsolutePath(args[1]);
+
+                if (File.Exists(configurationFile))
+                {
+                    LoadConfiguration(configurationFile);
+                    configLoaded = true;
+                }
+            }
+
+            if (!configLoaded)
+            {
+                // Attempt to load last configuration
+                string lastConfigurationFileName = ConfigurationFile.Current.Settings.General["LastConfiguration", true].ValueAs("");
+
+                if (!string.IsNullOrEmpty(lastConfigurationFileName) && File.Exists(lastConfigurationFileName))
+                    LoadConfiguration(lastConfigurationFileName);
+
+                // If no existing configuration was loaded, create a new one
+                if (string.IsNullOrEmpty(m_configurationFileName))
+                    NewConfiguration();
+            }
+
+            // Attach to editor control events
+            proxyConnectionEditor.ConfigurationChanged += m_proxyConnections.EditorControl_ConfigurationChanged;
+            proxyConnectionEditor.ApplyChanges += m_proxyConnections.EditorControl_ApplyChanges;
+            proxyConnectionEditor.EnabledStateChanged += m_proxyConnections.EditorControl_EnabledStateChanged;
         }
 
         #endregion
@@ -136,17 +173,13 @@ namespace StreamSplitter
                 if (m_proxyConnections is not null)
                 {
                     // Detach from events on existing proxy connection collection
-                    m_proxyConnections.GotFocus -= m_proxyConnections_GotFocus;
                     m_proxyConnections.EnabledStateChanged -= m_proxyConnections_EnabledStateChanged;
                     m_proxyConnections.ApplyChanges -= m_proxyConnections_ApplyChanges;
                     m_proxyConnections.ConfigurationChanged -= m_proxyConnections_ConfigurationChanged;
                     m_proxyConnections.RemovingItem -= m_proxyConnections_RemovingItem;
+                    m_proxyConnections.SearchOperationCompleted -= m_proxyConnections_SearchOperationCompleted;
 
-                    // Remove controls for existing collection
-                    foreach (ProxyConnection connection in m_proxyConnections)
-                    {
-                        RemoveProxyConnectionEditorControl(connection);
-                    }
+                    ConfigurationSaved = false;
                 }
 
                 // Assign new proxy connection collection
@@ -155,11 +188,11 @@ namespace StreamSplitter
                 if (m_proxyConnections is not null)
                 {
                     // Attach to events on new proxy connection collection
-                    m_proxyConnections.GotFocus += m_proxyConnections_GotFocus;
                     m_proxyConnections.EnabledStateChanged += m_proxyConnections_EnabledStateChanged;
                     m_proxyConnections.ApplyChanges += m_proxyConnections_ApplyChanges;
                     m_proxyConnections.ConfigurationChanged += m_proxyConnections_ConfigurationChanged;
                     m_proxyConnections.RemovingItem += m_proxyConnections_RemovingItem;
+                    m_proxyConnections.SearchOperationCompleted += m_proxyConnections_SearchOperationCompleted;
 
                     // Make sure new proxy connection collection gets assigned to binding source
                     bindingSource.DataSource = m_proxyConnections;
@@ -173,9 +206,12 @@ namespace StreamSplitter
             set
             {
                 m_configurationSaved = value;
-                toolStripButtonSaveConfig.Enabled = (!m_configurationSaved || (m_proxyConnections is not null && m_proxyConnections.Count > 0 && string.IsNullOrEmpty(m_configurationFileName)));
+                toolStripButtonSaveConfig.Enabled = !m_configurationSaved || (m_proxyConnections is not null && m_proxyConnections.Count > 0 && string.IsNullOrEmpty(m_configurationFileName));
             }
         }
+
+        // Gets the current proxy connection list, this could be the full list or a search result list
+        private IList<ProxyConnection> ProxyConnectionList => bindingSource.DataSource as IList<ProxyConnection> ?? m_proxyConnections;
 
         #endregion
 
@@ -207,10 +243,15 @@ namespace StreamSplitter
 
         private void StreamSplitterManager_Activated(object sender, EventArgs e)
         {
-            if (bindingSource.Current is ProxyConnection currentItem && currentItem.ProxyConnectionEditor is not null)
-                SelectProxyConnectionEditorControl(currentItem.ProxyConnectionEditor);
+            if (bindingSource.Current is ProxyConnection currentItem)
+                SelectProxyConnection(currentItem);
 
             toolTipNewHelp.Hide(this);
+        }
+
+        private void StreamSplitterManager_Resize(object sender, EventArgs e)
+        {
+            StreamSplitterManager_Activated(sender, e);
         }
 
         private void ShowToolTipHelpForEmptyConfiguration()
@@ -227,7 +268,7 @@ namespace StreamSplitter
                 return;
 
             m_configurationFileName = null;
-            ProxyConnections = ProxyConnectionCollection.LoadConfiguration(null, Invoke, SuspendFlowLayout, ResumeFlowLayout);
+            ProxyConnections = ProxyConnectionCollection.LoadConfiguration(null);
             ConfigurationSaved = true;
 
             // Change form title to include working file name
@@ -261,17 +302,12 @@ namespace StreamSplitter
             try
             {
                 Cursor = Cursors.WaitCursor;
-                ProxyConnections = ProxyConnectionCollection.LoadConfiguration(m_configurationFileName, Invoke, SuspendFlowLayout, ResumeFlowLayout);
+                ProxyConnections = ProxyConnectionCollection.LoadConfiguration(m_configurationFileName);
 
-                // Establish an editing user control for each proxy connection
                 foreach (ProxyConnection connection in m_proxyConnections)
                 {
                     if (!m_loaded)
                         SplashScreen.SetStatus("Loading " + connection.Name + "...", true);
-
-                    // Editing-control creation happens after proxy connection exists and is in the binding list,
-                    // so we depend on the PropertyChanged event to attach to needed control events
-                    AddProxyConnectionEditorControl(connection);
                 }
 
                 ConfigurationSaved = true;
@@ -345,81 +381,27 @@ namespace StreamSplitter
             return SaveState.Canceled;
         }
 
-        private void AddProxyConnectionEditorControl(ProxyConnection connection)
+        private void SelectProxyConnection(ProxyConnection connection)
         {
-            toolTipNewHelp.Hide(this);
+            proxyConnectionEditor.ProxyConnection = connection;
+            proxyConnectionEditor.SelectionFocus = toolStripTextBoxSearch.Focused;
+            proxyConnectionEditor.Selected = true;
 
-            // Create a new editing control for the proxy connection
-            ProxyConnectionEditor editorControl = new()
-            {
-                ProxyConnection = connection
-            };
+            int selectedIndex = ProxyConnectionList.IndexOf(connection);
 
-            flowLayoutPanelProxyConnections.Controls.Add(editorControl);
-            editorControl.buttonApply.Enabled = m_lastConnectedState;
-            bindingSource.MoveLast();
-
-            ConfigurationSaved = false;
-        }
-
-        private void RemoveProxyConnectionEditorControl(ProxyConnection connection)
-        {
-            ProxyConnectionEditor editorControl = connection?.ProxyConnectionEditor;
-
-            if (editorControl != null)
-            {
-                flowLayoutPanelProxyConnections.Controls.Remove(editorControl);
-                editorControl.Dispose();
-            }
-
-            ConfigurationSaved = false;
-        }
-
-        // Unselect all existing controls
-        private void UnselectProxyConnectionEditorControls()
-        {
-            if (flowLayoutPanelProxyConnections.Controls.Count <= 1)
+            if (selectedIndex <= -1 || selectedIndex >= dataGridView.RowCount)
                 return;
 
-            foreach (ProxyConnectionEditor control in flowLayoutPanelProxyConnections.Controls)
-                control.Selected = false;
-        }
+            dataGridView.ClearSelection();
+            dataGridView.Rows[selectedIndex].Selected = true;
 
-        // Select specified control
-        private void SelectProxyConnectionEditorControl(ProxyConnectionEditor editorControl)
-        {
-            lock (this)
-            {
-                if (editorControl is null || editorControl.Selected)
-                    return;
-
-                editorControl.SelectionFocus = toolStripTextBoxSearch.Focused;
-
-                // Unselect all existing controls
-                UnselectProxyConnectionEditorControls();
-
-                editorControl.Selected = true;
-
-                flowLayoutPanelProxyConnections.ScrollControlIntoView(editorControl);
-                flowLayoutPanelProxyConnections.Refresh();
-
-                if (bindingSource.Position == bindingSource.Count - 1)
-                    flowLayoutPanelProxyConnections.VerticalScroll.Value = flowLayoutPanelProxyConnections.VerticalScroll.Maximum;
-            }
-        }
-
-        private void SuspendFlowLayout()
-        {
-            Cursor = Cursors.WaitCursor;           
-            flowLayoutPanelProxyConnections.SuspendLayout();
-        }
-
-        private void ResumeFlowLayout()
-        {
-            flowLayoutPanelProxyConnections.ResumeLayout();           
-            bindingSource.DataSource = m_proxyConnections.SearchList ?? m_proxyConnections;
-            PostProxyConnectionsLoad(toolStripTextBoxSearch.Focused);
-            Cursor = Cursors.Default;
+            int countVisible = dataGridView.DisplayedRowCount(false);
+            int firstVisible = dataGridView.FirstDisplayedScrollingRowIndex;
+            
+            if (selectedIndex < firstVisible)
+                dataGridView.FirstDisplayedScrollingRowIndex = selectedIndex;
+            else if (selectedIndex >= firstVisible + countVisible) 
+                dataGridView.FirstDisplayedScrollingRowIndex = selectedIndex - countVisible + 1;
         }
         
         private void UpdateToolTip(string status)
@@ -429,11 +411,11 @@ namespace StreamSplitter
 
             try
             {
-                string currentToolTip = Invoke((Func<string>)(() => toolTipEx.GetToolTip(statusStrip))) as string;
+                string currentToolTip = Invoke(() => toolTipEx.GetToolTip(statusStrip)) as string;
 
                 if (string.IsNullOrWhiteSpace(currentToolTip))
                 {
-                    Invoke((Action)(() => toolTipEx.SetToolTip(statusStrip, ToolTipEx.WordWrapStatus(status))));
+                    BeginInvoke(() => toolTipEx.SetToolTip(statusStrip, ToolTipEx.WordWrapStatus(status)));
                     return;
                 }
 
@@ -443,7 +425,7 @@ namespace StreamSplitter
                 if (currentToolTip.Length > MaximumToolTipSize)
                     currentToolTip = currentToolTip.Substring(currentToolTip.Length - MaximumToolTipSize);
 
-                Invoke((Action)(() => toolTipEx.SetToolTip(statusStrip, currentToolTip)));
+                BeginInvoke(() => toolTipEx.SetToolTip(statusStrip, currentToolTip));
             }
             catch (ObjectDisposedException)
             {
@@ -451,7 +433,7 @@ namespace StreamSplitter
             }
         }
 
-        private void bindingSource_AddingNew(object sender, System.ComponentModel.AddingNewEventArgs e)
+        private void bindingSource_AddingNew(object sender, AddingNewEventArgs e)
         {
             ProxyConnection connection = new()
             {
@@ -462,40 +444,94 @@ namespace StreamSplitter
 
             // Adding editing control happens before item is added to binding list so
             // control will be available when connection is inserted
-            AddProxyConnectionEditorControl(connection);
+            toolTipNewHelp.Hide(this);
+
+            // Create a new editing control for the proxy connection
+            ProxyConnectionEditor editorControl = new()
+            {
+                ProxyConnection = connection
+            };
+
+            editorControl.buttonApply.Enabled = m_lastConnectedState;
+
+            bindingSource.MoveLast();
+
+            ConfigurationSaved = false;
         }
 
         private void bindingSource_PositionChanged(object sender, EventArgs e)
         {
             if (bindingSource.Current is ProxyConnection currentItem)
-                SelectProxyConnectionEditorControl(currentItem.ProxyConnectionEditor);
+                SelectProxyConnection(currentItem);
         }
 
-        private void m_proxyConnections_GotFocus(object sender, EventArgs<ProxyConnection> e)
+        private void dataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e?.Argument is null)
+            if (e.ColumnIndex != m_connectionStateColumnIndex)
                 return;
 
-            int position = bindingSource.IndexOf(e.Argument);
+            IList<ProxyConnection> proxyConnectionList = ProxyConnectionList;
 
-            if (position > -1 && bindingSource.Position != position)
-                bindingSource.Position = position;
+            if (e.RowIndex < 0 || e.RowIndex >= proxyConnectionList.Count)
+                return;
+
+            ProxyConnection connection = proxyConnectionList[e.RowIndex];
+            ConnectionState connectionState = connection.ConnectionState;
+
+            e.CellStyle.ForeColor = connectionState switch
+            {
+                ConnectionState.Disconnected => Color.Red,
+                ConnectionState.ConnectedNoData => Color.DarkGoldenrod,
+                ConnectionState.Connected => Color.Green,
+                _ => Color.Gray
+            };
+
+            e.CellStyle.Font = connectionState switch
+            {
+                ConnectionState.ConnectedNoData => new Font(e.CellStyle.Font, FontStyle.Bold),
+                _ => new Font(e.CellStyle.Font, FontStyle.Regular),
+            };
+        }
+
+        private void dataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex != m_enabledColumnIndex || e.RowIndex < 0)
+                return;
+
+            proxyConnectionEditor.checkBoxEnabled.Checked = !proxyConnectionEditor.checkBoxEnabled.Checked;
+        }
+
+        private void dataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            DataGridViewColumn nameColumn = dataGridView.Columns[m_nameColumnIndex];
+
+            if (e.ColumnIndex == 0)
+            {
+                SortOrder sortOrder = nameColumn.HeaderCell.SortGlyphDirection == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+                m_proxyConnections.SortByName(sortOrder == SortOrder.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending);
+                nameColumn.HeaderCell.SortGlyphDirection = sortOrder;
+            }
+            else
+            {
+                nameColumn.HeaderCell.SortGlyphDirection = SortOrder.None;
+            }
         }
 
         private void m_proxyConnections_ConfigurationChanged(object sender, EventArgs<ProxyConnection> e)
         {
             ConfigurationSaved = false;
+            dataGridView.Refresh();
         }
 
         private void m_proxyConnections_ApplyChanges(object sender, EventArgs<ProxyConnection> e)
         {
-            if (m_serviceConnection is not null && e?.Argument != null)
+            if (m_serviceConnection is not null && e?.Argument is not null)
                 m_serviceConnection.SendCommand("UploadConnection", e.Argument);
         }
 
         private void m_proxyConnections_EnabledStateChanged(object sender, EventArgs<ProxyConnection, bool> e)
         {
-            if (m_serviceConnection is not null && e?.Argument1 != null)
+            if (m_serviceConnection is not null && e?.Argument1 is not null)
                 m_serviceConnection.SendCommand("UploadConnection", e.Argument1);
         }
 
@@ -517,9 +553,21 @@ namespace StreamSplitter
                 connectionName = connection.Name;
 
             if (MessageBox.Show($"Are you sure you want to delete \"{connectionName}\"?", Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                RemoveProxyConnectionEditorControl(connection);
+                ConfigurationSaved = false;
             else
                 e.Argument2 = false;
+        }
+
+        private void m_proxyConnections_SearchOperationCompleted(object sender, EventArgs e)
+        {
+            BeginInvoke(() =>
+            {
+                bindingSource.DataSource = m_proxyConnections.SearchList ?? m_proxyConnections;
+                dataGridView.Refresh();
+
+                if (bindingSource.Current is ProxyConnection currentItem)
+                    SelectProxyConnection(currentItem);
+            });
         }
 
         private void toolStripButtonNewConfig_Click(object sender, EventArgs e) => 
@@ -635,71 +683,15 @@ namespace StreamSplitter
 
             // Handle removal of proxy connection from read-only search results
             ProxyConnection selectedItem = m_proxyConnections.SearchList[bindingSource.Position];
-
             EventArgs<ProxyConnection, bool> args = new(selectedItem, true);
 
             m_proxyConnections_RemovingItem(this, args);
 
             if (!args.Argument2)
                 return;
-            
+
             m_proxyConnections.Remove(selectedItem);
             toolStripButtonSearch_Click(sender, EventArgs.Empty);
-        }
-
-        private void bindingNavigatorDeleteItem_MouseEnter(object sender, EventArgs e)
-        {
-            if (m_proxyConnections is null)
-                return;
-
-            // Make sure it is obvious which item is currently selected when hovering over the Delete button
-            m_proxyConnections.TransparentPanelEnabled = true;
-            flowLayoutPanelProxyConnections.Refresh();
-
-            if (m_proxyConnections is null || bindingSource.DataSource != m_proxyConnections)
-                return;
-
-            int selectedIndex = bindingSource.Position;
-
-            if (selectedIndex < 0 || selectedIndex >= m_proxyConnections.Count)
-                return;
-
-            ProxyConnectionEditor editorControl = m_proxyConnections[selectedIndex].ProxyConnectionEditor;
-
-            if (editorControl is null)
-                return;
-
-            editorControl.Selected = true;
-
-            flowLayoutPanelProxyConnections.ScrollControlIntoView(editorControl);
-            flowLayoutPanelProxyConnections.Refresh();
-        }
-
-        private void bindingNavigatorDeleteItem_MouseLeave(object sender, EventArgs e)
-        {
-            if (m_proxyConnections is null)
-                return;
-
-            m_proxyConnections.TransparentPanelEnabled = false;
-            flowLayoutPanelProxyConnections.Refresh();
-
-            if (m_proxyConnections is null || bindingSource.DataSource != m_proxyConnections)
-                return;
-
-            int selectedIndex = bindingSource.Position;
-
-            if (selectedIndex < 0 || selectedIndex >= m_proxyConnections.Count)
-                return;
-
-            ProxyConnectionEditor editorControl = m_proxyConnections[selectedIndex].ProxyConnectionEditor;
-
-            if (editorControl is null)
-                return;
-
-            editorControl.Selected = true;
-
-            flowLayoutPanelProxyConnections.ScrollControlIntoView(editorControl);
-            flowLayoutPanelProxyConnections.Refresh();
         }
 
         private void toolStripTextBoxSearch_KeyDown(object sender, KeyEventArgs e)
@@ -750,27 +742,17 @@ namespace StreamSplitter
             BeginInvoke((Action)(() => toolStripButtonUploadConfig.Enabled = connected));
             BeginInvoke((Action)(() => toolStripButtonRestartService.Enabled = connected));
 
-            // Apply changes to proxy connection editors based on service connectivity state
-            if (m_proxyConnections is not null)
+            // Apply changes to proxy connection editor based on service connectivity state
+            // Reset all connection indication bubbles to gray when disconnected
+            if (!connected)
             {
-                lock (m_proxyConnections)
-                {
-                    foreach (ProxyConnection proxyConnection in m_proxyConnections)
-                    {
-                        ProxyConnectionEditor editorControl = proxyConnection.ProxyConnectionEditor;
-
-                        if (editorControl is not null)
-                        {
-                            // Reset all connection indication bubbles to gray when disconnected
-                            if (!connected)
-                                BeginInvoke((Action)(() => editorControl.ConnectionState = ConnectionState.Disabled));
-
-                            // The apply button should only be enabled when service is connected
-                            BeginInvoke((Action)(() => editorControl.buttonApply.Enabled = connected));
-                        }
-                    }
-                }
+                BeginInvoke((Action)(() => proxyConnectionEditor.ConnectionState = ConnectionState.Disabled));
+                StreamProxyStatus[] disabledProxyStatusArray = ProxyConnectionList.Select(connection => new StreamProxyStatus(connection.ID) { ConnectionState = ConnectionState.Disabled }).ToArray();
+                ThreadPool.QueueUserWorkItem(ApplyStreamProxyStatusUpdates, disabledProxyStatusArray);
             }
+
+            // The apply button should only be enabled when service is connected
+            BeginInvoke((Action)(() => proxyConnectionEditor.buttonApply.Enabled = connected));
 
             // If we are now connected and no configuration is loaded - we download config from the server
             if (connected)
@@ -783,11 +765,11 @@ namespace StreamSplitter
                     // handler the state change on the service connection complete gracefully
                     ThreadPool.QueueUserWorkItem(_ =>
                     {
-                        if (m_serviceConnection is not null)
-                        {
-                            if (MessageBox.Show("Connected to service. Would you like to download the current running configuration?", Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                                m_serviceConnection.SendCommand("DownloadConfig");
-                        }
+                        if (m_serviceConnection is null)
+                            return;
+
+                        if (MessageBox.Show("Connected to service. Would you like to download the current running configuration?", Tag.ToNonNullString(Text), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                            m_serviceConnection.SendCommand("DownloadConfig");
                     });
                 }
             }
@@ -796,7 +778,7 @@ namespace StreamSplitter
                 m_configRequested = false;
             }
 
-            BeginInvoke((Action)Refresh);
+            BeginInvoke(Refresh);
         }
 
         private void m_serviceConnection_StatusMessage(object sender, EventArgs<UpdateType, string> e)
@@ -814,7 +796,7 @@ namespace StreamSplitter
                     break;
             }
 
-            BeginInvoke((Action)(() => toolStripStatusLabelStatus.Text = e.Argument2.Replace("\r\n", "  ")));
+            BeginInvoke((Action)(() => toolStripStatusLabelStatus.Text = e.Argument2.Replace(Environment.NewLine, "  ")));
             UpdateToolTip(e.Argument2);
         }
 
@@ -839,7 +821,7 @@ namespace StreamSplitter
 
             // If command has attachments, they will be first followed by an attachment with the original command arguments
             List<object> attachments = response.Attachments;
-            bool attachmentsExist = (attachments is not null && attachments.Count > 1);
+            bool attachmentsExist = attachments is not null && attachments.Count > 1;
 
             // Handle command responses
             if (string.Compare(sourceCommand, "GetStreamProxyStatus", StringComparison.OrdinalIgnoreCase) == 0)
@@ -850,15 +832,12 @@ namespace StreamSplitter
             else if (string.Compare(sourceCommand, "DownloadConfig", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 if (responseSuccess && attachmentsExist)
-                    ThreadPool.QueueUserWorkItem(ApplyDownloadedProxyConnections, ProxyConnectionCollection.DeserializeConfiguration(attachments[0] as byte[], Invoke, SuspendFlowLayout, ResumeFlowLayout));
+                    ThreadPool.QueueUserWorkItem(ApplyDownloadedProxyConnections, ProxyConnectionCollection.DeserializeConfiguration(attachments[0] as byte[]));
             }
         }
 
         private void ApplyStreamProxyStatusUpdates(object state)
         {
-            ProxyConnection proxyConnection;
-            ProxyConnectionEditor editorControl;
-
             if (state is not StreamProxyStatus[] streamProxies || m_proxyConnections is null || m_proxyConnections.Count == 0)
                 return;
 
@@ -866,29 +845,34 @@ namespace StreamSplitter
             foreach (StreamProxyStatus proxyStatus in streamProxies)
             {
                 // Attempt to find associated proxy connection
+                ProxyConnection proxyConnection;
+                
                 lock (m_proxyConnections)
                     proxyConnection = m_proxyConnections.FirstOrDefault(connection => connection.ID == proxyStatus.ID);
 
                 if (proxyConnection is null)
                     continue;
 
-                // Get associated editor control for proxy connection
-                editorControl = proxyConnection.ProxyConnectionEditor;
+                proxyConnection.ConnectionState = proxyStatus.ConnectionState;
 
-                if (editorControl is not null)
-                    BeginInvoke((Action<ProxyConnectionEditor, StreamProxyStatus>)ApplyStreamProxyStatusUpdate, editorControl, proxyStatus);
+                if (proxyConnectionEditor.ID != proxyConnection.ID)
+                    continue;
+
+                BeginInvoke(ApplyStreamProxyStatusUpdate, proxyStatus);
             }
+
+            BeginInvoke(dataGridView.Refresh);
         }
 
-        private void ApplyStreamProxyStatusUpdate(ProxyConnectionEditor editorControl, StreamProxyStatus proxyStatus)
+        private void ApplyStreamProxyStatusUpdate(StreamProxyStatus proxyStatus)
         {
-            editorControl.ConnectionState = proxyStatus.ConnectionState;
-            editorControl.ConnectionStatus = proxyStatus.RecentStatusMessages;
+            proxyConnectionEditor.ConnectionState = proxyStatus.ConnectionState;
+            proxyConnectionEditor.ConnectionStatus = proxyStatus.RecentStatusMessages;
         }
 
         private void ApplyDownloadedProxyConnections(object state)
         {
-            Invoke((Action)(() =>
+            Invoke(() =>
             {
                 ProxyConnections = state as ProxyConnectionCollection;
 
@@ -896,16 +880,7 @@ namespace StreamSplitter
                 {
                     if (m_proxyConnections.Count > 0)
                     {
-                        // Establish an editing user control for each proxy connection
-                        foreach (ProxyConnection connection in m_proxyConnections)
-                        {
-                            // Editing-control creation happens after proxy connection exists and is in the binding list,
-                            // so we depend on the PropertyChanged event to attach to needed control events
-                            AddProxyConnectionEditorControl(connection);
-                        }
-
                         ConfigurationSaved = false;
-
                         ThreadPool.QueueUserWorkItem(PostProxyConnectionsLoad);
                     }
                     else
@@ -917,28 +892,29 @@ namespace StreamSplitter
                 // Mark new configuration as unsaved
                 m_configurationFileName = null;
                 UpdateFormTitle();
-            }));
+            });
         }
 
         private void PostProxyConnectionsLoad(object state)
         {
             if (state is null)
-                Invoke((Action)bindingSource.MoveFirst);
+                Invoke(bindingSource.MoveFirst);
 
             if (bindingSource.Current is ProxyConnection proxyConnection)
             {
-                Invoke((Action)(() => {
+                Invoke(() =>
+                {
                     Activate();
-                    SelectProxyConnectionEditorControl(proxyConnection.ProxyConnectionEditor);
-                    
+                    SelectProxyConnection(proxyConnection);
+
                     if (state is not null && state.ToString().ParseBoolean())
                         toolStripTextBoxSearch.Focus();
-                }));
+                });
             }
             else
             {
-                Invoke((Action)Activate);
-                Invoke((Action)ShowToolTipHelpForEmptyConfiguration);
+                Invoke(Activate);
+                Invoke(ShowToolTipHelpForEmptyConfiguration);
             }
         }
 
@@ -959,13 +935,11 @@ namespace StreamSplitter
         private void UpdateFormTitle()
         {
             if (InvokeRequired)
-                Invoke((Action)UpdateFormTitle);
+                BeginInvoke(UpdateFormTitle);
 
             // Change form title to include working file name
-            if (string.IsNullOrEmpty(m_configurationFileName))
-                Text = Tag.ToString();
-            else
-                Text = Tag + " - " + FilePath.GetFileName(m_configurationFileName);
+            Text = string.IsNullOrEmpty(m_configurationFileName) ? 
+                Tag.ToString() : $"{Tag} - {FilePath.GetFileName(m_configurationFileName)}";
         }
 
         #endregion

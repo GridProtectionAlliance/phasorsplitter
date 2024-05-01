@@ -51,8 +51,8 @@ namespace StreamSplitter
         #region [ Members ]
 
         // Constants
-        private double DefaultDataMonitorInterval = 10000.0D;
-        private double DefaultSocketErrorReportingInterval = 10.0D;
+        private const double DefaultDataMonitorInterval = 10000.0D;
+        private const double DefaultSocketErrorReportingInterval = 10.0D;
 
         // Events
 
@@ -322,7 +322,7 @@ namespace StreamSplitter
         {
             get
             {
-                StringBuilder status = new StringBuilder();
+                StringBuilder status = new();
 
                 status.AppendFormat("        Stream Splitter ID: {0}", ID);
                 status.AppendLine();
@@ -361,22 +361,19 @@ namespace StreamSplitter
 
                     TcpServer tcpPublishChannel = m_publishChannel as TcpServer;
 
-                    if (tcpPublishChannel is not null)
+                    Guid[] clientIDs = tcpPublishChannel?.ClientIDs;
+
+                    if (clientIDs != null && clientIDs.Length > 0)
                     {
-                        Guid[] clientIDs = tcpPublishChannel.ClientIDs;
+                        status.AppendLine();
+                        status.AppendFormat("TCP publish channel has {0} connected clients:\r\n\r\n", clientIDs.Length);
 
-                        if (clientIDs is not null && clientIDs.Length > 0)
+                        for (int i = 0; i < clientIDs.Length; i++)
                         {
-                            status.AppendLine();
-                            status.AppendFormat("TCP publish channel has {0} connected clients:\r\n\r\n", clientIDs.Length);
-
-                            for (int i = 0; i < clientIDs.Length; i++)
-                            {
-                                status.AppendFormat("    {0}) {1}\r\n", i + 1, GetConnectionID(tcpPublishChannel, clientIDs[i]));
-                            }
-
-                            status.AppendLine();
+                            status.AppendFormat("    {0}) {1}\r\n", i + 1, GetConnectionID(tcpPublishChannel, clientIDs[i]));
                         }
+
+                        status.AppendLine();
                     }
                 }
 
@@ -694,15 +691,12 @@ namespace StreamSplitter
                 try
                 {
                     // Start publication server
-                    if (m_publishChannel is not null)
-                        m_publishChannel.Start();
+                    m_publishChannel?.Start();
 
-                    if (m_clientBasedPublishChannel is not null)
-                        m_clientBasedPublishChannel.ConnectAsync();
+                    m_clientBasedPublishChannel?.ConnectAsync();
 
                     // Start multi-protocol frame parser
-                    if (m_frameParser is not null)
-                        m_frameParser.Start();
+                    m_frameParser?.Start();
 
                     if (!m_enabled)
                     {
@@ -742,15 +736,12 @@ namespace StreamSplitter
                     }
 
                     // Stop multi-protocol frame parser
-                    if (m_frameParser is not null)
-                        m_frameParser.Stop();
+                    m_frameParser?.Stop();
 
                     // Stop publication server
-                    if (m_publishChannel is not null)
-                        m_publishChannel.Stop();
+                    m_publishChannel?.Stop();
 
-                    if (m_clientBasedPublishChannel is not null)
-                        m_clientBasedPublishChannel.Disconnect();
+                    m_clientBasedPublishChannel?.Disconnect();
 
                     m_bytesReceived = 0;
                     m_receivedConfigurationFrames = 0;
@@ -879,47 +870,44 @@ namespace StreamSplitter
             if ((server is null || clientID.Equals(Guid.Empty)) && m_clientBasedPublishChannel is not null)
                 return m_clientBasedPublishChannel.ServerUri;
 
-            if (!m_connectionIDCache.TryGetValue(clientID, out string connectionID))
+            if (m_connectionIDCache.TryGetValue(clientID, out string connectionID))
+                return connectionID;
+
+            // Attempt to lookup remote connection identification for logging purposes
+            try
             {
-                // Attempt to lookup remote connection identification for logging purposes
-                try
-                {
-                    IPEndPoint remoteEndPoint = null;
-                    TcpServer commandChannel = server as TcpServer;
+                IPEndPoint remoteEndPoint = null;
 
-                    if (commandChannel is not null)
-                    {
-                        if (commandChannel.TryGetClient(clientID, out TransportProvider<Socket> tcpClient))
-                            remoteEndPoint = tcpClient.Provider.RemoteEndPoint as IPEndPoint;
-                    }
+                if (server is TcpServer commandChannel)
+                {
+                    if (commandChannel.TryGetClient(clientID, out TransportProvider<Socket> tcpClient))
+                        remoteEndPoint = tcpClient.Provider?.RemoteEndPoint as IPEndPoint;
+                }
+                else
+                {
+                    if (server is UdpServer dataChannel && dataChannel.TryGetClient(clientID, out TransportProvider<EndPoint> udpClient))
+                        remoteEndPoint = udpClient.Provider as IPEndPoint;
+                }
+
+                if (remoteEndPoint is not null)
+                {
+                    if (remoteEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
+                        connectionID = "[" + remoteEndPoint.Address + "]:" + remoteEndPoint.Port;
                     else
-                    {
-                        UdpServer dataChannel = server as UdpServer;
+                        connectionID = remoteEndPoint.Address + ":" + remoteEndPoint.Port;
 
-                        if (dataChannel is not null && dataChannel.TryGetClient(clientID, out TransportProvider<EndPoint> udpClient))
-                            remoteEndPoint = udpClient.Provider as IPEndPoint;
-                    }
-
-                    if (remoteEndPoint is not null)
-                    {
-                        if (remoteEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
-                            connectionID = "[" + remoteEndPoint.Address + "]:" + remoteEndPoint.Port;
-                        else
-                            connectionID = remoteEndPoint.Address + ":" + remoteEndPoint.Port;
-
-                        // Cache value for future lookup
-                        m_connectionIDCache.TryAdd(clientID, connectionID);
-                        ThreadPool.QueueUserWorkItem(LookupHostName, new Tuple<Guid, string, IPEndPoint>(clientID, connectionID, remoteEndPoint));
-                    }
+                    // Cache value for future lookup
+                    m_connectionIDCache.TryAdd(clientID, connectionID);
+                    ThreadPool.QueueUserWorkItem(LookupHostName, new Tuple<Guid, string, IPEndPoint>(clientID, connectionID, remoteEndPoint));
                 }
-                catch (Exception ex)
-                {
-                    OnProcessException(new InvalidOperationException("Failed to lookup remote end-point connection information for client data transmission due to exception: " + ex.Message, ex));
-                }
-
-                if (string.IsNullOrEmpty(connectionID))
-                    connectionID = "unavailable";
             }
+            catch (Exception ex)
+            {
+                OnProcessException(new InvalidOperationException("Failed to lookup remote end-point connection information for client data transmission due to exception: " + ex.Message, ex));
+            }
+
+            if (string.IsNullOrEmpty(connectionID))
+                connectionID = "unavailable";
 
             return connectionID;
         }
@@ -971,8 +959,10 @@ namespace StreamSplitter
                         {
                             if (m_publishChannel is not null)
                                 m_publishChannel.SendToAsync(clientID, m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
-                            else if (m_clientBasedPublishChannel is not null)
-                                m_clientBasedPublishChannel.SendAsync(m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
+                            else
+                            {
+                                m_clientBasedPublishChannel?.SendAsync(m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
+                            }
 
                             OnStatusMessage("Received request for \"{0}\" from \"{1}\" - frame was returned.", commandFrame.Command, connectionID);
                         }
@@ -987,8 +977,10 @@ namespace StreamSplitter
                             {
                                 if (m_publishChannel is not null)
                                     m_publishChannel.SendToAsync(clientID, frameImage, 0, frameImage.Length);
-                                else if (m_clientBasedPublishChannel is not null)
-                                    m_clientBasedPublishChannel.SendAsync(frameImage, 0, frameImage.Length);
+                                else
+                                {
+                                    m_clientBasedPublishChannel?.SendAsync(frameImage, 0, frameImage.Length);
+                                }
                             }
                             
                             foreach (byte[] frame in m_configurationFrame3.BinaryImageFrames)
@@ -1016,9 +1008,7 @@ namespace StreamSplitter
         // Thread procedure used to proxy data to the user implemented device command handler
         private void DeviceCommandHandlerProc(object state)
         {
-            EventArgs<Guid, byte[], int> e = state as EventArgs<Guid, byte[], int>;
-
-            if (e is not null)
+            if (state is EventArgs<Guid, byte[], int> e)
                 DeviceCommandHandler(e.Argument1, GetConnectionID(m_publishChannel, e.Argument1), e.Argument2, e.Argument3);
         }
 
@@ -1037,9 +1027,7 @@ namespace StreamSplitter
 
         private bool HandleException(Exception ex)
         {
-            SocketException socketEx = ex as SocketException;
-
-            if (socketEx is not null)
+            if (ex is SocketException socketEx)
             {
                 if (m_lastSocketErrorNumber == socketEx.ErrorCode)
                 {

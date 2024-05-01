@@ -71,14 +71,11 @@ namespace StreamSplitter
         [Description("Defines font to use with this tool tip.")]
         public Font Font
         {
-            get
-            {
-                return m_font;
-            }
+            get => m_font;
             set
             {
                 m_font = value;
-                OwnerDraw = ((object)m_font != null);
+                OwnerDraw = m_font is not null;
             }
         }
 
@@ -128,7 +125,7 @@ namespace StreamSplitter
         {
             if (OwnerDraw)
             {
-                DrawToolTipEventArgs newArgs = new DrawToolTipEventArgs(e.Graphics,
+                DrawToolTipEventArgs newArgs = new(e.Graphics,
                     e.AssociatedWindow, e.AssociatedControl, e.Bounds, e.ToolTipText,
                     BackColor, ForeColor, m_font);
 

@@ -36,11 +36,11 @@ namespace StreamSplitter
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && (components is not null))
             {
                 components.Dispose();
 
-                if ((object)m_frameParser != null)
+                if (m_frameParser is not null)
                 {
                     m_frameParser.Dispose();
                     m_frameParser = null;
@@ -77,9 +77,9 @@ namespace StreamSplitter
             this.tabControlSourceConnectionType = new System.Windows.Forms.TabControl();
             this.tabPageTcp = new System.Windows.Forms.TabPage();
             this.textBoxTcpListeningPort = new System.Windows.Forms.TextBox();
-            this.checkBoxTcpSourceIsListener = new System.Windows.Forms.CheckBox();
             this.labelTcpSourceFormat = new System.Windows.Forms.Label();
             this.labelTcpSourceSettings = new System.Windows.Forms.Label();
+            this.checkBoxTcpSourceIsListener = new System.Windows.Forms.CheckBox();
             this.tabPageUdp = new System.Windows.Forms.TabPage();
             this.labelUdpListeningPort = new System.Windows.Forms.Label();
             this.groupBoxProxyDestinations = new System.Windows.Forms.GroupBox();
@@ -89,25 +89,24 @@ namespace StreamSplitter
             this.pictureBoxYellow = new System.Windows.Forms.PictureBox();
             this.pictureBoxGray = new System.Windows.Forms.PictureBox();
             this.checkBoxEnabled = new System.Windows.Forms.CheckBox();
-            this.textBoxConnectionStatus = new System.Windows.Forms.TextBox();
             this.tabControlProxyDestinationType = new System.Windows.Forms.TabControl();
             this.tabTcpProxyPoint = new System.Windows.Forms.TabPage();
-            this.checkBoxTcpProxyIsListener = new System.Windows.Forms.CheckBox();
             this.labelTcpProxyFormat = new System.Windows.Forms.Label();
             this.textBoxTcpClientPublisherConnection = new System.Windows.Forms.TextBox();
             this.labelTcpProxySettings = new System.Windows.Forms.Label();
+            this.checkBoxTcpProxyIsListener = new System.Windows.Forms.CheckBox();
             this.tabUdpRebroacasts = new System.Windows.Forms.TabPage();
             this.flowLayoutPanelUdpDestinations = new System.Windows.Forms.FlowLayoutPanel();
             this.labelUdpDestinationFormat = new System.Windows.Forms.Label();
             this.buttonAddUdpDestination = new System.Windows.Forms.Button();
             this.buttonRemoveUdpDestination = new System.Windows.Forms.Button();
+            this.textBoxConnectionStatus = new System.Windows.Forms.TextBox();
             this.comboBoxProtocol = new System.Windows.Forms.ComboBox();
             this.propertyGridProtocolParameters = new System.Windows.Forms.PropertyGrid();
             this.groupBoxProtocolParameters = new System.Windows.Forms.GroupBox();
             this.textBoxConnectionString = new System.Windows.Forms.TextBox();
             this.panelCenterGroups = new System.Windows.Forms.Panel();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.transparentPanel = new StreamSplitter.TransparentPanel();
             this.toolTipEx = new StreamSplitter.ToolTipEx(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.groupBoxName.SuspendLayout();
@@ -242,7 +241,7 @@ namespace StreamSplitter
             this.groupBoxSourceConnection.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.groupBoxSourceConnection.Name = "groupBoxSourceConnection";
             this.groupBoxSourceConnection.Padding = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.groupBoxSourceConnection.Size = new System.Drawing.Size(218, 259);
+            this.groupBoxSourceConnection.Size = new System.Drawing.Size(218, 508);
             this.groupBoxSourceConnection.TabIndex = 0;
             this.groupBoxSourceConnection.TabStop = false;
             this.groupBoxSourceConnection.Text = "Source Connection";
@@ -333,18 +332,6 @@ namespace StreamSplitter
             this.textBoxTcpListeningPort.TextChanged += new System.EventHandler(this.ControlValueChanged);
             this.textBoxTcpListeningPort.Validating += new System.ComponentModel.CancelEventHandler(this.HandleInt16Validation);
             // 
-            // checkBoxTcpSourceIsListener
-            // 
-            this.checkBoxTcpSourceIsListener.AutoSize = true;
-            this.checkBoxTcpSourceIsListener.Location = new System.Drawing.Point(112, 0);
-            this.checkBoxTcpSourceIsListener.Name = "checkBoxTcpSourceIsListener";
-            this.checkBoxTcpSourceIsListener.Size = new System.Drawing.Size(77, 17);
-            this.checkBoxTcpSourceIsListener.TabIndex = 4;
-            this.checkBoxTcpSourceIsListener.Text = "Is Listener";
-            this.checkBoxTcpSourceIsListener.TextAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.checkBoxTcpSourceIsListener.UseVisualStyleBackColor = true;
-            this.checkBoxTcpSourceIsListener.CheckedChanged += new System.EventHandler(this.checkBoxTcpSourceIsListener_CheckedChanged);
-            // 
             // labelTcpSourceFormat
             // 
             this.labelTcpSourceFormat.AutoSize = true;
@@ -364,6 +351,18 @@ namespace StreamSplitter
             this.labelTcpSourceSettings.Size = new System.Drawing.Size(68, 13);
             this.labelTcpSourceSettings.TabIndex = 0;
             this.labelTcpSourceSettings.Text = "Connect To:";
+            // 
+            // checkBoxTcpSourceIsListener
+            // 
+            this.checkBoxTcpSourceIsListener.AutoSize = true;
+            this.checkBoxTcpSourceIsListener.Location = new System.Drawing.Point(112, 0);
+            this.checkBoxTcpSourceIsListener.Name = "checkBoxTcpSourceIsListener";
+            this.checkBoxTcpSourceIsListener.Size = new System.Drawing.Size(77, 17);
+            this.checkBoxTcpSourceIsListener.TabIndex = 4;
+            this.checkBoxTcpSourceIsListener.Text = "Is Listener";
+            this.checkBoxTcpSourceIsListener.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.checkBoxTcpSourceIsListener.UseVisualStyleBackColor = true;
+            this.checkBoxTcpSourceIsListener.CheckedChanged += new System.EventHandler(this.checkBoxTcpSourceIsListener_CheckedChanged);
             // 
             // tabPageUdp
             // 
@@ -396,14 +395,13 @@ namespace StreamSplitter
             this.groupBoxProxyDestinations.Controls.Add(this.pictureBoxYellow);
             this.groupBoxProxyDestinations.Controls.Add(this.pictureBoxGray);
             this.groupBoxProxyDestinations.Controls.Add(this.checkBoxEnabled);
-            this.groupBoxProxyDestinations.Controls.Add(this.textBoxConnectionStatus);
             this.groupBoxProxyDestinations.Controls.Add(this.tabControlProxyDestinationType);
             this.groupBoxProxyDestinations.Dock = System.Windows.Forms.DockStyle.Right;
             this.groupBoxProxyDestinations.Location = new System.Drawing.Point(427, 0);
             this.groupBoxProxyDestinations.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.groupBoxProxyDestinations.Name = "groupBoxProxyDestinations";
             this.groupBoxProxyDestinations.Padding = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.groupBoxProxyDestinations.Size = new System.Drawing.Size(218, 259);
+            this.groupBoxProxyDestinations.Size = new System.Drawing.Size(218, 508);
             this.groupBoxProxyDestinations.TabIndex = 2;
             this.groupBoxProxyDestinations.TabStop = false;
             this.groupBoxProxyDestinations.Text = "Proxy Destination(s)";
@@ -483,19 +481,6 @@ namespace StreamSplitter
             this.checkBoxEnabled.UseVisualStyleBackColor = true;
             this.checkBoxEnabled.CheckedChanged += new System.EventHandler(this.checkBoxEnabled_CheckedChanged);
             // 
-            // textBoxConnectionStatus
-            // 
-            this.textBoxConnectionStatus.CausesValidation = false;
-            this.textBoxConnectionStatus.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxConnectionStatus.Location = new System.Drawing.Point(6, 122);
-            this.textBoxConnectionStatus.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.textBoxConnectionStatus.Multiline = true;
-            this.textBoxConnectionStatus.Name = "textBoxConnectionStatus";
-            this.textBoxConnectionStatus.ReadOnly = true;
-            this.textBoxConnectionStatus.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxConnectionStatus.Size = new System.Drawing.Size(206, 53);
-            this.textBoxConnectionStatus.TabIndex = 1;
-            // 
             // tabControlProxyDestinationType
             // 
             this.tabControlProxyDestinationType.Appearance = System.Windows.Forms.TabAppearance.Buttons;
@@ -506,7 +491,7 @@ namespace StreamSplitter
             this.tabControlProxyDestinationType.Margin = new System.Windows.Forms.Padding(0);
             this.tabControlProxyDestinationType.Name = "tabControlProxyDestinationType";
             this.tabControlProxyDestinationType.SelectedIndex = 0;
-            this.tabControlProxyDestinationType.Size = new System.Drawing.Size(214, 103);
+            this.tabControlProxyDestinationType.Size = new System.Drawing.Size(214, 154);
             this.tabControlProxyDestinationType.TabIndex = 0;
             this.tabControlProxyDestinationType.SelectedIndexChanged += new System.EventHandler(this.ControlValueChanged);
             // 
@@ -521,24 +506,10 @@ namespace StreamSplitter
             this.tabTcpProxyPoint.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.tabTcpProxyPoint.Name = "tabTcpProxyPoint";
             this.tabTcpProxyPoint.Padding = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.tabTcpProxyPoint.Size = new System.Drawing.Size(206, 74);
+            this.tabTcpProxyPoint.Size = new System.Drawing.Size(206, 125);
             this.tabTcpProxyPoint.TabIndex = 0;
             this.tabTcpProxyPoint.Text = "TCP  Proxy Point";
             this.tabTcpProxyPoint.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxTcpProxyIsListener
-            // 
-            this.checkBoxTcpProxyIsListener.AutoSize = true;
-            this.checkBoxTcpProxyIsListener.Checked = true;
-            this.checkBoxTcpProxyIsListener.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxTcpProxyIsListener.Location = new System.Drawing.Point(116, 9);
-            this.checkBoxTcpProxyIsListener.Name = "checkBoxTcpProxyIsListener";
-            this.checkBoxTcpProxyIsListener.Size = new System.Drawing.Size(77, 17);
-            this.checkBoxTcpProxyIsListener.TabIndex = 4;
-            this.checkBoxTcpProxyIsListener.Text = "Is Listener";
-            this.checkBoxTcpProxyIsListener.TextAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.checkBoxTcpProxyIsListener.UseVisualStyleBackColor = true;
-            this.checkBoxTcpProxyIsListener.CheckedChanged += new System.EventHandler(this.checkBoxTcpProxyIsListener_CheckedChanged);
             // 
             // labelTcpProxyFormat
             // 
@@ -573,13 +544,27 @@ namespace StreamSplitter
             this.labelTcpProxySettings.TabIndex = 0;
             this.labelTcpProxySettings.Text = "Listening Port:";
             // 
+            // checkBoxTcpProxyIsListener
+            // 
+            this.checkBoxTcpProxyIsListener.AutoSize = true;
+            this.checkBoxTcpProxyIsListener.Checked = true;
+            this.checkBoxTcpProxyIsListener.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxTcpProxyIsListener.Location = new System.Drawing.Point(116, 9);
+            this.checkBoxTcpProxyIsListener.Name = "checkBoxTcpProxyIsListener";
+            this.checkBoxTcpProxyIsListener.Size = new System.Drawing.Size(77, 17);
+            this.checkBoxTcpProxyIsListener.TabIndex = 4;
+            this.checkBoxTcpProxyIsListener.Text = "Is Listener";
+            this.checkBoxTcpProxyIsListener.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.checkBoxTcpProxyIsListener.UseVisualStyleBackColor = true;
+            this.checkBoxTcpProxyIsListener.CheckedChanged += new System.EventHandler(this.checkBoxTcpProxyIsListener_CheckedChanged);
+            // 
             // tabUdpRebroacasts
             // 
             this.tabUdpRebroacasts.Controls.Add(this.flowLayoutPanelUdpDestinations);
             this.tabUdpRebroacasts.Location = new System.Drawing.Point(4, 25);
             this.tabUdpRebroacasts.Margin = new System.Windows.Forms.Padding(0);
             this.tabUdpRebroacasts.Name = "tabUdpRebroacasts";
-            this.tabUdpRebroacasts.Size = new System.Drawing.Size(206, 74);
+            this.tabUdpRebroacasts.Size = new System.Drawing.Size(206, 125);
             this.tabUdpRebroacasts.TabIndex = 1;
             this.tabUdpRebroacasts.Text = "UDP Rebroadcasts";
             this.tabUdpRebroacasts.UseVisualStyleBackColor = true;
@@ -596,7 +581,7 @@ namespace StreamSplitter
             this.flowLayoutPanelUdpDestinations.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanelUdpDestinations.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanelUdpDestinations.Name = "flowLayoutPanelUdpDestinations";
-            this.flowLayoutPanelUdpDestinations.Size = new System.Drawing.Size(206, 74);
+            this.flowLayoutPanelUdpDestinations.Size = new System.Drawing.Size(206, 125);
             this.flowLayoutPanelUdpDestinations.TabIndex = 0;
             // 
             // labelUdpDestinationFormat
@@ -635,6 +620,22 @@ namespace StreamSplitter
             this.buttonRemoveUdpDestination.UseVisualStyleBackColor = true;
             this.buttonRemoveUdpDestination.Click += new System.EventHandler(this.buttonRemoveUdpDestination_Click);
             // 
+            // textBoxConnectionStatus
+            // 
+            this.textBoxConnectionStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxConnectionStatus.CausesValidation = false;
+            this.textBoxConnectionStatus.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxConnectionStatus.Location = new System.Drawing.Point(0, 331);
+            this.textBoxConnectionStatus.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            this.textBoxConnectionStatus.Multiline = true;
+            this.textBoxConnectionStatus.Name = "textBoxConnectionStatus";
+            this.textBoxConnectionStatus.ReadOnly = true;
+            this.textBoxConnectionStatus.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBoxConnectionStatus.Size = new System.Drawing.Size(645, 224);
+            this.textBoxConnectionStatus.TabIndex = 1;
+            // 
             // comboBoxProtocol
             // 
             this.comboBoxProtocol.FormattingEnabled = true;
@@ -670,13 +671,14 @@ namespace StreamSplitter
             // 
             // textBoxConnectionString
             // 
-            this.textBoxConnectionString.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.textBoxConnectionString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxConnectionString.Location = new System.Drawing.Point(0, 260);
             this.textBoxConnectionString.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.textBoxConnectionString.Multiline = true;
             this.textBoxConnectionString.Name = "textBoxConnectionString";
             this.textBoxConnectionString.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxConnectionString.Size = new System.Drawing.Size(645, 46);
+            this.textBoxConnectionString.Size = new System.Drawing.Size(645, 71);
             this.textBoxConnectionString.TabIndex = 2;
             this.textBoxConnectionString.TextChanged += new System.EventHandler(this.textBoxConnectionString_TextChanged);
             // 
@@ -688,7 +690,7 @@ namespace StreamSplitter
             this.panelCenterGroups.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelCenterGroups.Location = new System.Drawing.Point(0, 47);
             this.panelCenterGroups.Name = "panelCenterGroups";
-            this.panelCenterGroups.Size = new System.Drawing.Size(645, 259);
+            this.panelCenterGroups.Size = new System.Drawing.Size(645, 508);
             this.panelCenterGroups.TabIndex = 1;
             // 
             // toolTip
@@ -698,13 +700,6 @@ namespace StreamSplitter
             this.toolTip.InitialDelay = 50;
             this.toolTip.ReshowDelay = 10;
             this.toolTip.ShowAlways = true;
-            // 
-            // transparentPanel
-            // 
-            this.transparentPanel.Location = new System.Drawing.Point(0, 0);
-            this.transparentPanel.Name = "transparentPanel";
-            this.transparentPanel.Size = new System.Drawing.Size(100, 50);
-            this.transparentPanel.TabIndex = 3;
             // 
             // toolTipEx
             // 
@@ -722,15 +717,15 @@ namespace StreamSplitter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.transparentPanel);
             this.Controls.Add(this.textBoxConnectionString);
+            this.Controls.Add(this.textBoxConnectionStatus);
             this.Controls.Add(this.panelCenterGroups);
             this.Controls.Add(this.groupBoxName);
             this.DoubleBuffered = true;
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.Name = "ProxyConnectionEditor";
-            this.Size = new System.Drawing.Size(645, 306);
+            this.Size = new System.Drawing.Size(645, 555);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
             this.groupBoxName.ResumeLayout(false);
             this.groupBoxName.PerformLayout();
@@ -788,7 +783,6 @@ namespace StreamSplitter
         private System.Windows.Forms.TextBox textBoxUdpRebroadcast0;
         private System.Windows.Forms.Label labelUdpListeningPort;
         private System.Windows.Forms.TextBox textBoxUdpListeningPort;
-        private System.Windows.Forms.CheckBox checkBoxEnabled;
         private System.Windows.Forms.ComboBox comboBoxProtocol;
         private System.Windows.Forms.GroupBox groupBoxProtocolParameters;
         private System.Windows.Forms.Label labelIDCode;
@@ -802,7 +796,6 @@ namespace StreamSplitter
         private System.Windows.Forms.TextBox textBoxConnectionString;
         private System.Windows.Forms.Panel panelCenterGroups;
         private System.Windows.Forms.TextBox textBoxName;
-        private StreamSplitter.TransparentPanel transparentPanel;
         private System.Windows.Forms.ToolTip toolTip;
 
         /// <summary>
@@ -815,5 +808,6 @@ namespace StreamSplitter
         private System.Windows.Forms.Label labelTcpSourceSettings;
         private System.Windows.Forms.CheckBox checkBoxTcpProxyIsListener;
         private System.Windows.Forms.Label labelTcpProxyFormat;
+        internal System.Windows.Forms.CheckBox checkBoxEnabled;
     }
 }

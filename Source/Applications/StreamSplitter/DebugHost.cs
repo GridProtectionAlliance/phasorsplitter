@@ -81,11 +81,11 @@ namespace StreamSplitter
         protected virtual void DebugHostUnloading()
         {
             // Close remote console session
-            if (m_remoteConsole != null && !m_remoteConsole.HasExited)
+            if (m_remoteConsole is not null && !m_remoteConsole.HasExited)
                 m_remoteConsole.Kill();
 
             // Close remote manager session
-            if (m_remoteManager != null && !m_remoteManager.HasExited)
+            if (m_remoteManager is not null && !m_remoteManager.HasExited)
                 m_remoteManager.Kill();
         }
 
@@ -115,7 +115,7 @@ namespace StreamSplitter
         {
             if (!DesignMode)
             {
-                if (MessageBox.Show(string.Format("Are you sure you want to stop {0} service? ", m_productName),
+                if (MessageBox.Show($"Are you sure you want to stop {m_productName} service? ",
                     "Stop Service", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     // Stop the windows service.

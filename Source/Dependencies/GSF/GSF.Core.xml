@@ -34502,7 +34502,7 @@
             </summary>
             <example><code>
             public void Foo(string param) {
-              if (param == null)
+              if (param is null)
                 throw new ArgumentNullException("par"); // Warning: Cannot resolve symbol
             }
             </code></example>
@@ -34614,7 +34614,7 @@
               public void Test() {
                 var ca1 = new NoEquality();
                 var ca2 = new NoEquality();
-                if (ca1 != null) { // OK
+                if (ca1 is not null) { // OK
                   bool condition = ca1 == ca2; // Warning
                 }
               }
@@ -40654,7 +40654,7 @@
                      {
                          m_enabled = value;
              
-                         if (m_timer != null)
+                         if (m_timer is not null)
                              m_timer.Enabled = m_enabled;
                      }
                  }
@@ -40678,7 +40678,7 @@
                      m_enabled = true;
              
                      // Initialize member variables
-                     if (m_timer == null)
+                     if (m_timer is null)
                      {
                          m_timer = new System.Timers.Timer(2000.0D);
                          m_timer.Elapsed += m_timer_Elapsed;
@@ -40708,7 +40708,7 @@
                              if (disposing)
                              {
                                  // Dispose member variables
-                                 if (m_timer != null)
+                                 if (m_timer is not null)
                                  {
                                      m_timer.Elapsed -= m_timer_Elapsed;
                                      m_timer.Dispose();
@@ -40722,7 +40722,7 @@
                          {
                              m_disposed = true;
              
-                             if (Disposed != null)
+                             if (Disposed is not null)
                                  Disposed(this, EventArgs.Empty);
                          }
                      }
@@ -59540,7 +59540,7 @@
                  {
                      using (var outStream = System.IO.File.Create(outputFile))
                      {
-                         if (deflater == null)
+                         if (deflater is null)
                              deflater = new ParallelDeflateOutputStream(outStream,
                                                                         CompressionLevel.Best,
                                                                         CompressionStrategy.Default,

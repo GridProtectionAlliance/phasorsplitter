@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using GSF;
@@ -68,7 +67,7 @@ namespace StreamSplitter
         private readonly List<TextBox> m_udpDestinations;
         private ProxyConnection m_proxyConnection;
         private volatile bool m_updatingConnectionString;
-        private bool m_transparentPanelEnabled;
+        private bool m_updatingProxyConnection;
 
         #endregion
 
@@ -89,36 +88,11 @@ namespace StreamSplitter
                 comboBoxProtocol.Items.Add(((PhasorProtocol)protocol).GetFormattedProtocolName());
 
             comboBoxProtocol.SelectedIndex = DefaultPhasorProtocol;
-
-            transparentPanel.Top = 0;
-            transparentPanel.Left = 0;
-            transparentPanel.Width = Width;
-            transparentPanel.Height = Height;
-            transparentPanel.Visible = false;
-
-            RegisterControls();
         }
 
         #endregion
 
         #region [ Properties ]
-
-        /// <summary>
-        /// Sets a flag that determines if transparent panel should be enabled for use.
-        /// </summary>
-        public bool TransparentPanelEnabled
-        {
-            set
-            {
-                m_transparentPanelEnabled = value;
-                transparentPanel.Visible = (value && !Selected);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets flag that determines if a state change is actively in progress.
-        /// </summary>
-        public bool StateChangeInProgress { get; set; }
 
         /// <summary>
         /// Gets or sets property that determines if focus should be applied upon selection.
@@ -130,36 +104,10 @@ namespace StreamSplitter
         /// </summary>
         public bool Selected
         {
-            get => BorderStyle == BorderStyle.FixedSingle;
             set
             {
-                if (value)
-                {
-                    if (BorderStyle == BorderStyle.FixedSingle)
-                        return;
-
-                    Font bold = new(Font.Name, Font.Size, FontStyle.Bold, GraphicsUnit.Point, (byte)0);
-
-                    BorderStyle = BorderStyle.FixedSingle;
-                    groupBoxName.Font = bold;
-
-                    transparentPanel.Visible = false;
-
-                    if (SelectionFocus)
-                        textBoxName.Focus();
-                }
-                else
-                {
-                    if (BorderStyle == BorderStyle.None)
-                        return;
-
-                    Font normal = new(Font.Name, Font.Size, Font.Style, GraphicsUnit.Point, (byte)0);
-
-                    BorderStyle = BorderStyle.None;
-                    groupBoxName.Font = normal;
-
-                    transparentPanel.Visible = m_transparentPanelEnabled;
-                }
+                if (value && SelectionFocus)
+                    textBoxName.Focus();
             }
         }
 
@@ -171,17 +119,25 @@ namespace StreamSplitter
             get => m_proxyConnection;
             set
             {
-                m_proxyConnection = value;
+                try
+                {
+                    m_updatingProxyConnection = true;
 
-                if (m_proxyConnection is null)
-                    return;
+                    m_proxyConnection = value;
 
-                ConnectionString = m_proxyConnection.ConnectionString;
-                m_frameParser.ConnectionParameters = m_proxyConnection.ConnectionParameters;
-                ID = m_proxyConnection.ID;
+                    if (m_proxyConnection is null)
+                        return;
 
-                // Establish linkage from proxy connection instance to its editor control
-                m_proxyConnection.ProxyConnectionEditor = this;
+                    ConnectionString = m_proxyConnection.ConnectionString;
+                    m_frameParser.ConnectionParameters = m_proxyConnection.ConnectionParameters;
+                    ID = m_proxyConnection.ID;
+                    ConnectionState = m_proxyConnection.ConnectionState;
+                    textBoxConnectionStatus.Text = "";
+                }
+                finally
+                {
+                    m_updatingProxyConnection = false;
+                }
             }
         }
 
@@ -292,28 +248,6 @@ namespace StreamSplitter
         #endregion
 
         #region [ Methods ]
-
-        // Handle event propagation from sub-controls
-
-        private void RegisterControls(ControlCollection controlCollection = null)
-        {
-            controlCollection ??= Controls;
-
-            foreach (Control control in controlCollection)
-            {
-                control.GotFocus += control_GotFocus;
-                control.Click += control_GotFocus;
-
-                if (control.HasChildren)
-                    RegisterControls(control.Controls);
-            }
-        }
-
-        private void control_GotFocus(object sender, EventArgs e)
-        {
-            if (!StateChangeInProgress)
-                OnGotFocus(e);
-        }
 
         // Handle connection string manipulations
 
@@ -434,10 +368,10 @@ namespace StreamSplitter
             }
             else
             {
-                if (!sourceSettings.ContainsKey("commandChannel"))
+                if (!sourceSettings.TryGetValue("commandChannel", out string setting))
                     return;
 
-                checkBoxUseAlternateTcpConnection.Tag = sourceSettings["commandChannel"];
+                checkBoxUseAlternateTcpConnection.Tag = setting;
                 sourceSettings.Remove("commandChannel");
             }
         }
@@ -580,7 +514,7 @@ namespace StreamSplitter
             textBoxName.Text = allSettings.TryGetValue("name", out setting) ? setting : "New Proxy Connection";
 
             if (updateConnectionString)
-                BeginInvoke((Action)(UpdateConnectionString));
+                BeginInvoke(UpdateConnectionString);
         }
 
         private void ControlValueChanged(object sender, EventArgs e)
@@ -598,6 +532,10 @@ namespace StreamSplitter
             try
             {
                 textBoxConnectionString.Text = GenerateConnectionString();
+                
+                if (m_proxyConnection is not null)
+                    m_proxyConnection.ConnectionString = textBoxConnectionString.Text;
+
                 OnConfigurationChanged();
             }
             finally
@@ -616,6 +554,13 @@ namespace StreamSplitter
             try
             {
                 ParseConnectionString();
+
+                if (m_updatingProxyConnection)
+                    return;
+
+                if (m_proxyConnection is not null)
+                    m_proxyConnection.ConnectionString = textBoxConnectionString.Text;
+
                 OnConfigurationChanged();
             }
             finally

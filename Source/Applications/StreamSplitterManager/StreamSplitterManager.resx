@@ -292,21 +292,21 @@
   <data name="toolStripButtonConnectTo.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         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
-        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
+        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
 </value>
   </data>
   <data name="toolStripButtonRestartService.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
@@ -383,7 +383,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACg
-        CgAAAk1TRnQBSQFMAgEBAgEAAbgBAQG4AQEBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
+        CgAAAk1TRnQBSQFMAgEBAgEAATgBAgE4AQIBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
         AwABQAMAARADAAEBAQABCAYAAQQYAAGAAgABgAMAAoABAAGAAwABgAEAAYABAAKAAgADwAEAAcAB3AHA
         AQAB8AHKAaYBAAEzBQABMwEAATMBAAEzAQACMwIAAxYBAAMcAQADIgEAAykBAANVAQADTQEAA0IBAAM5
         AQABgAF8Af8BAAJQAf8BAAGTAQAB1gEAAf8B7AHMAQABxgHWAe8BAAHWAucBAAGQAakBrQIAAf8BMwMA
@@ -437,6 +437,9 @@
   <metadata name="toolStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>416, 17</value>
   </metadata>
+  <data name="proxyConnectionEditor.ConnectionString" xml:space="preserve">
+    <value>sourceSettings={transportProtocol=Tcp; interface=0.0.0.0; server=localhost:4712; phasorProtocol=IEEEC37_118V1; accessID=1; maxSendQueueSize=10000}; proxySettings={protocol=Tcp; interface=0.0.0.0; port=4712; maxSendQueueSize=10000}; enabled=False; name=</value>
+  </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>161</value>
   </metadata>

@@ -36,12 +36,12 @@ namespace StreamSplitter
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && (components is not null))
             {
                 components.Dispose();
             }
 
-            if ((object)m_serviceConnection != null)
+            if (m_serviceConnection is not null)
             {
                 m_serviceConnection.StatusMessage -= m_serviceConnection_StatusMessage;
                 m_serviceConnection.ServiceResponse -= m_serviceConnection_ServiceResponse;
@@ -50,7 +50,7 @@ namespace StreamSplitter
                 m_serviceConnection = null;
             }
 
-            if ((object)m_refreshProxyStatusTimer != null)
+            if (m_refreshProxyStatusTimer is not null)
             {
                 m_refreshProxyStatusTimer.Elapsed -= m_refreshProxyStatusTimer_Elapsed;
                 m_refreshProxyStatusTimer.Dispose();
@@ -100,7 +100,6 @@ namespace StreamSplitter
             this.toolStripStatusLabelStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelState = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelVersion = new System.Windows.Forms.ToolStripStatusLabel();
-            this.flowLayoutPanelProxyConnections = new System.Windows.Forms.FlowLayoutPanel();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
@@ -111,6 +110,8 @@ namespace StreamSplitter
             this.toolStripTextBoxSearch = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButtonSearch = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonClearSearch = new System.Windows.Forms.ToolStripButton();
+            this.dataGridView = new System.Windows.Forms.DataGridView();
+            this.proxyConnectionEditor = new StreamSplitter.ProxyConnectionEditor();
             this.toolTipEx = new StreamSplitter.ToolTipEx(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator)).BeginInit();
             this.bindingNavigator.SuspendLayout();
@@ -118,6 +119,7 @@ namespace StreamSplitter
             this.statusStrip.SuspendLayout();
             this.panel.SuspendLayout();
             this.toolStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // bindingNavigator
@@ -159,7 +161,7 @@ namespace StreamSplitter
             this.bindingNavigator.MovePreviousItem = this.bindingNavigatorMovePreviousItem;
             this.bindingNavigator.Name = "bindingNavigator";
             this.bindingNavigator.PositionItem = this.bindingNavigatorPositionItem;
-            this.bindingNavigator.Size = new System.Drawing.Size(761, 25);
+            this.bindingNavigator.Size = new System.Drawing.Size(1159, 25);
             this.bindingNavigator.Stretch = true;
             this.bindingNavigator.TabIndex = 0;
             // 
@@ -198,8 +200,6 @@ namespace StreamSplitter
             this.bindingNavigatorDeleteItem.Text = "D&elete Selected Proxy Connection";
             this.bindingNavigatorDeleteItem.ToolTipText = "Delete Selected Proxy Connection";
             this.bindingNavigatorDeleteItem.MouseDown += new System.Windows.Forms.MouseEventHandler(this.bindingNavigatorDeleteItem_MouseDown);
-            this.bindingNavigatorDeleteItem.MouseEnter += new System.EventHandler(this.bindingNavigatorDeleteItem_MouseEnter);
-            this.bindingNavigatorDeleteItem.MouseLeave += new System.EventHandler(this.bindingNavigatorDeleteItem_MouseLeave);
             // 
             // toolStripButtonNewConfig
             // 
@@ -399,9 +399,9 @@ namespace StreamSplitter
             this.toolStripStatusLabelStatus,
             this.toolStripStatusLabelState,
             this.toolStripStatusLabelVersion});
-            this.statusStrip.Location = new System.Drawing.Point(0, 404);
+            this.statusStrip.Location = new System.Drawing.Point(0, 647);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(761, 24);
+            this.statusStrip.Size = new System.Drawing.Size(1159, 24);
             this.statusStrip.TabIndex = 2;
             this.toolTipEx.SetToolTip(this.statusStrip, "...");
             // 
@@ -413,7 +413,7 @@ namespace StreamSplitter
             this.toolStripStatusLabelStatus.Name = "toolStripStatusLabelStatus";
             this.toolStripStatusLabelStatus.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripStatusLabelStatus.Padding = new System.Windows.Forms.Padding(0, 0, 5, 0);
-            this.toolStripStatusLabelStatus.Size = new System.Drawing.Size(545, 19);
+            this.toolStripStatusLabelStatus.Size = new System.Drawing.Size(943, 19);
             this.toolStripStatusLabelStatus.Spring = true;
             this.toolStripStatusLabelStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -431,17 +431,6 @@ namespace StreamSplitter
             this.toolStripStatusLabelVersion.Name = "toolStripStatusLabelVersion";
             this.toolStripStatusLabelVersion.Size = new System.Drawing.Size(31, 19);
             this.toolStripStatusLabelVersion.Text = "0.0.0";
-            // 
-            // flowLayoutPanelProxyConnections
-            // 
-            this.flowLayoutPanelProxyConnections.AutoScroll = true;
-            this.flowLayoutPanelProxyConnections.AutoSize = true;
-            this.flowLayoutPanelProxyConnections.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flowLayoutPanelProxyConnections.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanelProxyConnections.Location = new System.Drawing.Point(0, 68);
-            this.flowLayoutPanelProxyConnections.Name = "flowLayoutPanelProxyConnections";
-            this.flowLayoutPanelProxyConnections.Size = new System.Drawing.Size(761, 336);
-            this.flowLayoutPanelProxyConnections.TabIndex = 3;
             // 
             // openFileDialog
             // 
@@ -475,7 +464,7 @@ namespace StreamSplitter
             this.panel.Location = new System.Drawing.Point(0, 25);
             this.panel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel.Name = "panel";
-            this.panel.Size = new System.Drawing.Size(761, 43);
+            this.panel.Size = new System.Drawing.Size(1159, 43);
             this.panel.TabIndex = 0;
             // 
             // toolStrip
@@ -491,7 +480,7 @@ namespace StreamSplitter
             this.toolStrip.Name = "toolStrip";
             this.toolStrip.Padding = new System.Windows.Forms.Padding(0, 9, 3, 0);
             this.toolStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip.Size = new System.Drawing.Size(761, 41);
+            this.toolStrip.Size = new System.Drawing.Size(1159, 41);
             this.toolStrip.TabIndex = 0;
             this.toolStrip.TabStop = true;
             // 
@@ -528,6 +517,43 @@ namespace StreamSplitter
             this.toolStripButtonClearSearch.Text = "Clear";
             this.toolStripButtonClearSearch.Click += new System.EventHandler(this.toolStripButtonClearSearch_Click);
             // 
+            // dataGridView
+            // 
+            this.dataGridView.AllowUserToAddRows = false;
+            this.dataGridView.AllowUserToResizeRows = false;
+            this.dataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridView.AutoGenerateColumns = false;
+            this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView.DataSource = this.bindingSource;
+            this.dataGridView.Location = new System.Drawing.Point(3, 68);
+            this.dataGridView.MultiSelect = false;
+            this.dataGridView.Name = "dataGridView";
+            this.dataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dataGridView.Size = new System.Drawing.Size(512, 578);
+            this.dataGridView.TabIndex = 7;
+            this.dataGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView_CellContentClick);
+            this.dataGridView.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView_CellFormatting);
+            this.dataGridView.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_ColumnHeaderMouseClick);
+            // 
+            // proxyConnectionEditor
+            // 
+            this.proxyConnectionEditor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.proxyConnectionEditor.ConnectionParameters = null;
+            this.proxyConnectionEditor.ConnectionState = StreamSplitter.ConnectionState.Disabled;
+            this.proxyConnectionEditor.ConnectionString = resources.GetString("proxyConnectionEditor.ConnectionString");
+            this.proxyConnectionEditor.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.proxyConnectionEditor.ID = new System.Guid("00000000-0000-0000-0000-000000000000");
+            this.proxyConnectionEditor.Location = new System.Drawing.Point(517, 68);
+            this.proxyConnectionEditor.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            this.proxyConnectionEditor.Name = "proxyConnectionEditor";
+            this.proxyConnectionEditor.ProxyConnection = null;
+            this.proxyConnectionEditor.SelectionFocus = true;
+            this.proxyConnectionEditor.Size = new System.Drawing.Size(643, 579);
+            this.proxyConnectionEditor.TabIndex = 8;
+            // 
             // toolTipEx
             // 
             this.toolTipEx.AutomaticDelay = 10;
@@ -544,13 +570,15 @@ namespace StreamSplitter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(761, 428);
-            this.Controls.Add(this.flowLayoutPanelProxyConnections);
+            this.ClientSize = new System.Drawing.Size(1159, 671);
+            this.Controls.Add(this.proxyConnectionEditor);
+            this.Controls.Add(this.dataGridView);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.panel);
             this.Controls.Add(this.bindingNavigator);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(995, 465);
             this.Name = "StreamSplitterManager";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Tag = "Synchrophasor Stream Splitter";
@@ -559,7 +587,7 @@ namespace StreamSplitter
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.StreamSplitterManager_FormClosing);
             this.Load += new System.EventHandler(this.StreamSplitterManager_Load);
             this.Move += new System.EventHandler(this.StreamSplitterManager_Activated);
-            this.Resize += new System.EventHandler(this.StreamSplitterManager_Activated);
+            this.Resize += new System.EventHandler(this.StreamSplitterManager_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.bindingNavigator)).EndInit();
             this.bindingNavigator.ResumeLayout(false);
             this.bindingNavigator.PerformLayout();
@@ -570,6 +598,7 @@ namespace StreamSplitter
             this.panel.PerformLayout();
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -591,7 +620,6 @@ namespace StreamSplitter
         private System.Windows.Forms.ToolStripSeparator bindingNavigatorSeparator2;
         private System.Windows.Forms.BindingSource bindingSource;
         private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelProxyConnections;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton toolStripButtonConnectTo;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelStatus;
@@ -619,6 +647,8 @@ namespace StreamSplitter
         private System.Windows.Forms.ToolStripTextBox toolStripTextBoxSearch;
         private System.Windows.Forms.ToolStripButton toolStripButtonClearSearch;
         private System.Windows.Forms.ToolStripButton toolStripButtonSearch;
+        private System.Windows.Forms.DataGridView dataGridView;
+        private ProxyConnectionEditor proxyConnectionEditor;
     }
 }
 

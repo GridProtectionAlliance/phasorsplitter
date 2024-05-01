@@ -79,10 +79,10 @@ namespace StreamSplitter
             m_serviceHelper.ServiceStarted += ServiceHelper_ServiceStarted;
             m_serviceHelper.ServiceStopping += ServiceHelper_ServiceStopping;
 
-            if ((object)m_serviceHelper.StatusLog != null)
+            if (m_serviceHelper.StatusLog is not null)
                 m_serviceHelper.StatusLog.LogException += LogExceptionHandler;
 
-            if ((object)m_serviceHelper.ErrorLogger != null && m_serviceHelper.ErrorLogger.ErrorLog != null)
+            if (m_serviceHelper.ErrorLogger is not null && m_serviceHelper.ErrorLogger.ErrorLog is not null)
                 m_serviceHelper.ErrorLogger.ErrorLog.LogException += LogExceptionHandler;
 
             // Create a cache for derived proxy connection names
@@ -92,8 +92,7 @@ namespace StreamSplitter
         public ServiceHost(IContainer container)
             : this()
         {
-            if ((object)container != null)
-                container.Add(this);
+            container?.Add(this);
         }
 
         #endregion
@@ -103,35 +102,17 @@ namespace StreamSplitter
         /// <summary>
         /// Gets the related remote console application name.
         /// </summary>
-        private string ConsoleApplicationName
-        {
-            get
-            {
-                return ServiceName + "Console.exe";
-            }
-        }
+        private string ConsoleApplicationName => ServiceName + "Console.exe";
 
         /// <summary>
         /// Gets access to the <see cref="GSF.ServiceProcess.ServiceHelper"/>.
         /// </summary>
-        private ServiceHelper ServiceHelper
-        {
-            get
-            {
-                return m_serviceHelper;
-            }
-        }
+        private ServiceHelper ServiceHelper => m_serviceHelper;
 
         /// <summary>
         /// Gets reference to the <see cref="TcpServer"/> based remoting server.
         /// </summary>
-        private TcpServer RemotingServer
-        {
-            get
-            {
-                return m_remotingServer;
-            }
-        }
+        private TcpServer RemotingServer => m_remotingServer;
 
         #endregion
 
@@ -164,7 +145,7 @@ namespace StreamSplitter
         private void ServiceHelper_ServiceStarted(object sender, EventArgs e)
         {
             // Define a line of asterisks for emphasis
-            string stars = new string('*', 79);
+            string stars = new('*', 79);
 
             // Log startup information
             m_serviceHelper.UpdateStatus(
@@ -229,19 +210,19 @@ namespace StreamSplitter
             m_serviceHelper.ServiceStarted -= ServiceHelper_ServiceStarted;
             m_serviceHelper.ServiceStopping -= ServiceHelper_ServiceStopping;
 
-            if ((object)m_serviceHelper.StatusLog != null)
+            if (m_serviceHelper.StatusLog is not null)
             {
                 m_serviceHelper.StatusLog.Flush();
                 m_serviceHelper.StatusLog.LogException -= LogExceptionHandler;
             }
 
-            if ((object)m_serviceHelper.ErrorLogger != null && (object)m_serviceHelper.ErrorLogger.ErrorLog != null)
+            if (m_serviceHelper.ErrorLogger is not null && m_serviceHelper.ErrorLogger.ErrorLog is not null)
             {
                 m_serviceHelper.ErrorLogger.ErrorLog.Flush();
                 m_serviceHelper.ErrorLogger.ErrorLog.LogException -= LogExceptionHandler;
             }
 
-            if ((object)m_configurationLoadComplete != null)
+            if (m_configurationLoadComplete is not null)
             {
                 // Release any waiting threads before disposing wait handle
                 m_configurationLoadComplete.Set();
@@ -278,8 +259,7 @@ namespace StreamSplitter
             ClientRequestHandler requestHandler = m_serviceHelper.FindClientRequestHandler(requestCommand);
 
             // Send a "Health" command to ourselves on heart-beat schedule...
-            if ((object)requestHandler != null)
-                requestHandler.HandlerMethod(ClientHelper.PretendRequest(requestCommand));
+            requestHandler?.HandlerMethod(ClientHelper.PretendRequest(requestCommand));
         }
 
         #endregion
@@ -301,7 +281,7 @@ namespace StreamSplitter
             }
             catch (Exception ex)
             {
-                string message = string.Format("Failed to queue configuration load due to exception: {0}", ex.Message);
+                string message = $"Failed to queue configuration load due to exception: {ex.Message}";
                 HandleException(new InvalidOperationException(message, ex));
             }
         }
@@ -320,12 +300,12 @@ namespace StreamSplitter
                 {
                     try
                     {
-                        // Queue up task to to execute load of the latest configuration
+                        // Queue up task to execute load of the latest configuration
                         ThreadPool.QueueUserWorkItem(ExecuteConfigurationLoad);
                     }
                     catch (Exception ex)
                     {
-                        string message = string.Format("Failed to queue configuration load process due to exception: {0}", ex.Message);
+                        string message = $"Failed to queue configuration load process due to exception: {ex.Message}";
                         HandleException(new InvalidOperationException(message, ex));
                     }
                 }
@@ -353,12 +333,12 @@ namespace StreamSplitter
                 ProxyConnection[] deletedConnections;
                 ProxyConnection[] updatedConnections;
 
-                if ((object)m_currentConfiguration == null)
+                if (m_currentConfiguration is null)
                 {
                     // If no existing configuration exists, everything is assumed to be new
                     newConnections = currentConfiguration.ToArray();
-                    deletedConnections = new ProxyConnection[0];
-                    updatedConnections = new ProxyConnection[0];
+                    deletedConnections = [];
+                    updatedConnections = [];
                 }
                 else
                 {
@@ -389,19 +369,20 @@ namespace StreamSplitter
                     // Handle connection removals
                     foreach (StreamProxy splitter in deletedConnections.Select(deletedConnection => m_streamSplitters.Find(s => s.ID == deletedConnection.ID)))
                     {
-                        if ((object)splitter != null)
-                        {
-                            splitter.Stop();
-                            splitter.Dispose();
-                            m_streamSplitters.Remove(splitter);
-                            m_serviceHelper.ServiceComponents.Remove(splitter);
-                        }
+                        if (splitter is null)
+                            continue;
+
+                        splitter.Stop();
+                        splitter.Dispose();
+                        
+                        m_streamSplitters.Remove(splitter);
+                        m_serviceHelper.ServiceComponents.Remove(splitter);
                     }
 
                     // Handle connection additions
                     foreach (ProxyConnection newConnection in newConnections)
                     {
-                        StreamProxy splitter = new StreamProxy(newConnection);
+                        StreamProxy splitter = new(newConnection);
 
                         splitter.StatusMessage += splitter_StatusMessage;
                         splitter.ProcessException += splitter_ProcessException;
@@ -415,7 +396,7 @@ namespace StreamSplitter
                     {
                         StreamProxy splitter = m_streamSplitters.Find(s => s.ID == updatedConnection.ID);
 
-                        if ((object)splitter != null)
+                        if (splitter is not null)
                             splitter.ProxyConnection = updatedConnection;
                     }
                 }
@@ -429,14 +410,13 @@ namespace StreamSplitter
             }
             catch (Exception ex)
             {
-                string message = string.Format("Failed to load configuration : {0}", ex.Message);
+                string message = $"Failed to load configuration : {ex.Message}";
                 HandleException(new InvalidOperationException(message, ex));
             }
             finally
             {
                 // Release any waiting threads
-                if ((object)m_configurationLoadComplete != null)
-                    m_configurationLoadComplete.Set();
+                m_configurationLoadComplete?.Set();
             }
         }
 
@@ -451,15 +431,15 @@ namespace StreamSplitter
                 {
                     string origConfigFile = configurationFile + ".backup" + (i == 1 ? "" : (i - 1).ToString());
 
-                    if (File.Exists(origConfigFile))
-                    {
-                        string nextConfigFile = configurationFile + ".backup" + i;
+                    if (!File.Exists(origConfigFile))
+                        continue;
 
-                        if (File.Exists(nextConfigFile))
-                            File.Delete(nextConfigFile);
+                    string nextConfigFile = configurationFile + ".backup" + i;
 
-                        File.Move(origConfigFile, nextConfigFile);
-                    }
+                    if (File.Exists(nextConfigFile))
+                        File.Delete(nextConfigFile);
+
+                    File.Move(origConfigFile, nextConfigFile);
                 }
             }
             catch (Exception ex)
@@ -497,7 +477,7 @@ namespace StreamSplitter
         {
             if (requestInfo.Request.Arguments.ContainsHelpRequest)
             {
-                StringBuilder helpMessage = new StringBuilder();
+                StringBuilder helpMessage = new();
 
                 helpMessage.Append("Attempts to restart the host service.");
                 helpMessage.AppendLine();
@@ -520,7 +500,7 @@ namespace StreamSplitter
 
                 try
                 {
-                    ProcessStartInfo psi = new ProcessStartInfo(ConsoleApplicationName)
+                    ProcessStartInfo psi = new(ConsoleApplicationName)
                     {
                         CreateNoWindow = true,
                         WindowStyle = ProcessWindowStyle.Hidden,
@@ -528,7 +508,7 @@ namespace StreamSplitter
                         Arguments = ServiceName + " -restart"
                     };
 
-                    using (Process shell = new Process())
+                    using (Process shell = new())
                     {
                         shell.StartInfo = psi;
                         shell.Start();
@@ -551,7 +531,7 @@ namespace StreamSplitter
         {
             if (requestInfo.Request.Arguments.ContainsHelpRequest)
             {
-                StringBuilder helpMessage = new StringBuilder();
+                StringBuilder helpMessage = new();
 
                 helpMessage.Append("Gets current status for all stream proxies.");
                 helpMessage.AppendLine();
@@ -586,7 +566,7 @@ namespace StreamSplitter
         {
             if (requestInfo.Request.Arguments.ContainsHelpRequest)
             {
-                StringBuilder helpMessage = new StringBuilder();
+                StringBuilder helpMessage = new();
 
                 helpMessage.Append("Enumerates all stream splitters.");
                 helpMessage.AppendLine();
@@ -608,14 +588,15 @@ namespace StreamSplitter
             else
             {
                 // Send current status all stream proxies                
-                StringBuilder splitterEnumeration = new StringBuilder();
+                StringBuilder splitterEnumeration = new();
                 StreamProxy splitter = null;
-                int index;
 
                 Arguments args = requestInfo.Request.Arguments;
 
                 if (args.Exists("OrderedArg1"))
                 {
+                    int index;
+
                     lock (m_streamSplitters)
                     {
                         if (int.TryParse(args["OrderedArg1"], out index) && index >= 0 && index < m_streamSplitters.Count)
@@ -630,7 +611,7 @@ namespace StreamSplitter
                         }
                     }
 
-                    if ((object)splitter != null)
+                    if (splitter is not null)
                     {
                         splitterEnumeration.AppendFormat("  {0} - {1}\r\n          {2}\r\n          {3}\r\n\r\n",
                                 index.ToString().PadLeft(3),
@@ -670,7 +651,7 @@ namespace StreamSplitter
         {
             if (requestInfo.Request.Arguments.ContainsHelpRequest)
             {
-                StringBuilder helpMessage = new StringBuilder();
+                StringBuilder helpMessage = new();
 
                 helpMessage.Append("Sends command to a specific stream splitter.");
                 helpMessage.AppendLine();
@@ -686,11 +667,10 @@ namespace StreamSplitter
                 helpMessage.AppendLine("One of the following:");
 
                 string[] commands = Enum.GetNames(typeof(DeviceCommand));
-                DeviceCommand command;
 
                 for (int i = 0; i < commands.Length; i++)
                 {
-                    command = (DeviceCommand)Enum.Parse(typeof(DeviceCommand), commands[i]);
+                    DeviceCommand command = (DeviceCommand)Enum.Parse(typeof(DeviceCommand), commands[i]);
                     helpMessage.Append(new string(' ', 25));
                     helpMessage.AppendFormat("{0} - {1}\r\n", (int)command, command);
                 }
@@ -708,13 +688,12 @@ namespace StreamSplitter
 
                 if (args.OrderedArgCount == 2)
                 {
-                    int index;
                     DeviceCommand command = DeviceCommand.ReservedBits;
                     StreamProxy splitter = null;
 
                     lock (m_streamSplitters)
                     {
-                        if (int.TryParse(args["OrderedArg1"], out index) && index >= 0 && index < m_streamSplitters.Count)
+                        if (int.TryParse(args["OrderedArg1"], out int index) && index >= 0 && index < m_streamSplitters.Count)
                         {
                             if (Enum.TryParse(args["OrderedArg2"], true, out command))
                             {
@@ -735,7 +714,7 @@ namespace StreamSplitter
                         }
                     }
 
-                    if ((object)splitter != null)
+                    if (splitter is not null)
                     {
                         splitter.SendCommand(command);
                         DisplayResponseMessage(requestInfo, "Sent device command \"{0}\" to \"{1}\"", command, splitter.Name);
@@ -755,7 +734,7 @@ namespace StreamSplitter
         {
             if (requestInfo.Request.Arguments.ContainsHelpRequest)
             {
-                StringBuilder helpMessage = new StringBuilder();
+                StringBuilder helpMessage = new();
 
                 helpMessage.Append("Reloads the current configuration.");
                 helpMessage.AppendLine();
@@ -784,7 +763,7 @@ namespace StreamSplitter
         {
             if (requestInfo.Request.Arguments.ContainsHelpRequest)
             {
-                StringBuilder helpMessage = new StringBuilder();
+                StringBuilder helpMessage = new();
 
                 helpMessage.Append("Provides the current configuration to requester.");
                 helpMessage.AppendLine();
@@ -814,7 +793,7 @@ namespace StreamSplitter
         {
             if (requestInfo.Request.Arguments.ContainsHelpRequest)
             {
-                StringBuilder helpMessage = new StringBuilder();
+                StringBuilder helpMessage = new();
 
                 helpMessage.Append("Deserializes and loads received configuration.");
                 helpMessage.AppendLine();
@@ -856,7 +835,7 @@ namespace StreamSplitter
                     }
                     catch (Exception ex)
                     {
-                        string message = string.Format("Failed to apply new configuration due to exception: {0}", ex.Message);
+                        string message = $"Failed to apply new configuration due to exception: {ex.Message}";
                         DisplayStatusMessage(message, UpdateType.Warning);
                         SendResponse(requestInfo, false, message);
                         m_serviceHelper.ErrorLogger.Log(ex);
@@ -876,7 +855,7 @@ namespace StreamSplitter
         {
             if (requestInfo.Request.Arguments.ContainsHelpRequest)
             {
-                StringBuilder helpMessage = new StringBuilder();
+                StringBuilder helpMessage = new();
 
                 helpMessage.Append("Applies received proxy connection to running configuration.");
                 helpMessage.AppendLine();
@@ -900,9 +879,8 @@ namespace StreamSplitter
                     try
                     {
                         // Attempt to deserialize received connection
-                        ProxyConnection receivedConfiguration = requestInfo.Request.Attachments[0] as ProxyConnection;
 
-                        if ((object)receivedConfiguration == null)
+                        if (requestInfo.Request.Attachments[0] is not ProxyConnection receivedConfiguration)
                         {
                             const string message = "Uploaded proxy connection was empty - could not apply new connection.";
                             DisplayStatusMessage(message, UpdateType.Warning);
@@ -916,7 +894,7 @@ namespace StreamSplitter
                             {
                                 StreamProxy splitter = m_streamSplitters.Find(s => s.ID == receivedConfiguration.ID);
 
-                                if ((object)splitter != null)
+                                if (splitter is not null)
                                 {
                                     // Update existing stream proxy
                                     splitter.ProxyConnection = receivedConfiguration;
@@ -950,7 +928,7 @@ namespace StreamSplitter
                     }
                     catch (Exception ex)
                     {
-                        string message = string.Format("Failed to apply new proxy connection due to exception: {0}", ex.Message);
+                        string message = $"Failed to apply new proxy connection due to exception: {ex.Message}";
                         DisplayStatusMessage(message, UpdateType.Warning);
                         SendResponse(requestInfo, false, message);
                         m_serviceHelper.ErrorLogger.Log(ex);
@@ -976,7 +954,8 @@ namespace StreamSplitter
 
         private void splitter_ProcessException(object sender, EventArgs<Exception> e)
         {
-            HandleException(new InvalidOperationException(string.Format("[{0}] Stream splitter exception: {1}", GetDerivedName(sender), e.Argument.Message), e.Argument));
+            HandleException(new InvalidOperationException(
+                $"[{GetDerivedName(sender)}] Stream splitter exception: {e.Argument.Message}", e.Argument));
         }
 
         #endregion
@@ -1026,7 +1005,7 @@ namespace StreamSplitter
                     string arguments = requestInfo.Request.Arguments.ToString();
                     string message = responseType + (string.IsNullOrWhiteSpace(arguments) ? "" : "(" + arguments + ")");
 
-                    if (status != null)
+                    if (status is not null)
                     {
                         if (args.Length == 0)
                             message += " - " + status;
@@ -1040,7 +1019,7 @@ namespace StreamSplitter
             }
             catch (Exception ex)
             {
-                string message = string.Format("Failed to send client response due to an exception: {0}", ex.Message);
+                string message = $"Failed to send client response due to an exception: {ex.Message}";
                 HandleException(new InvalidOperationException(message, ex));
             }
         }
@@ -1055,11 +1034,12 @@ namespace StreamSplitter
         {
             try
             {
-                m_serviceHelper.UpdateStatus(requestInfo.Sender.ClientID, UpdateType.Information, string.Format("{0}\r\n\r\n", status), args);
+                m_serviceHelper.UpdateStatus(requestInfo.Sender.ClientID, UpdateType.Information, $"{status}\r\n\r\n", args);
             }
             catch (Exception ex)
             {
-                string message = string.Format("Failed to update client status \"{0}\" due to an exception: {1}", status.ToNonNullString(), ex.Message);
+                string message =
+                    $"Failed to update client status \"{status.ToNonNullString()}\" due to an exception: {ex.Message}";
                 HandleException(new InvalidOperationException(message, ex));
             }
         }
@@ -1074,11 +1054,11 @@ namespace StreamSplitter
             try
             {
                 status = status.Replace("{", "{{").Replace("}", "}}");
-                m_serviceHelper.UpdateStatus(type, string.Format("{0}\r\n\r\n", status));
+                m_serviceHelper.UpdateStatus(type, $"{status}\r\n\r\n");
             }
             catch (Exception ex)
             {
-                string message = string.Format("Failed to update client status \"{0}\" due to an exception: {1}", status.ToNonNullString(), ex.Message);
+                string message = $"Failed to update client status \"{status.ToNonNullString()}\" due to an exception: {ex.Message}";
                 HandleException(new InvalidOperationException(message, ex));
             }
         }
@@ -1097,7 +1077,7 @@ namespace StreamSplitter
             }
             catch (Exception ex)
             {
-                string message = string.Format("Failed to update client status \"{0}\" due to an exception: {1}", status.ToNonNullString(), ex.Message);
+                string message = $"Failed to update client status \"{status.ToNonNullString()}\" due to an exception: {ex.Message}";
                 HandleException(new InvalidOperationException(message, ex));
             }
         }
@@ -1112,9 +1092,8 @@ namespace StreamSplitter
             return m_derivedNameCache.GetOrAdd(sender, key =>
             {
                 string name;
-                IProvideStatus statusProvider = key as IProvideStatus;
 
-                if ((object)statusProvider != null)
+                if (key is IProvideStatus statusProvider)
                     name = statusProvider.Name;
                 else
                     name = key as string;

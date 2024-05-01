@@ -260,7 +260,7 @@
                  {
                      using (var outStream = System.IO.File.Create(outputFile))
                      {
-                         if (deflater == null)
+                         if (deflater is null)
                              deflater = new ParallelDeflateOutputStream(outStream,
                                                                         CompressionLevel.Best,
                                                                         CompressionStrategy.Default,

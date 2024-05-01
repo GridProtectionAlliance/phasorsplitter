@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.ComponentModel;
 
 namespace StreamSplitter
 {
@@ -36,18 +37,22 @@ namespace StreamSplitter
         /// <summary>
         /// Disabled state - gray.
         /// </summary>
+        [Description("Disabled")]
         Disabled,
         /// <summary>
         /// Disconnected state - red.
         /// </summary>
+        [Description("Disconnected")]
         Disconnected,
         /// <summary>
         /// Connected with no data state - yellow.
         /// </summary>
+        [Description("Connected (No Data)")]
         ConnectedNoData,
         /// <summary>
         /// Connected normally state - green.
         /// </summary>
+        [Description("Connected")]
         Connected
     }
 
@@ -69,7 +74,7 @@ namespace StreamSplitter
         /// <remarks>
         /// Value should not exceed TextBox.MaxLength (i.e., 32767).
         /// </remarks>
-        public const int MaximumStatusSize = 1024;
+        public const int MaximumStatusSize = 2048;
 
         // Fields
         private ConnectionState m_connectionState;
@@ -100,27 +105,15 @@ namespace StreamSplitter
         /// <summary>
         /// Gets the ID of the associated stream proxy.
         /// </summary>
-        public Guid ID
-        {
-            get
-            {
-                return m_id;
-            }
-        }
+        public Guid ID => m_id;
 
         /// <summary>
         /// Gets or sets current connection state for a stream proxy.
         /// </summary>
         public ConnectionState ConnectionState
         {
-            get
-            {
-                return m_connectionState;
-            }
-            set
-            {
-                m_connectionState = value;
-            }
+            get => m_connectionState;
+            set => m_connectionState = value;
         }
 
         /// <summary>
@@ -129,13 +122,7 @@ namespace StreamSplitter
         /// <remarks>
         /// This property is usually accessed post-deserialization in the stream splitter manager.
         /// </remarks>
-        public string RecentStatusMessages
-        {
-            get
-            {
-                return m_recentStatusMessages;
-            }
-        }
+        public string RecentStatusMessages => m_recentStatusMessages;
 
         #endregion
 
@@ -161,11 +148,14 @@ namespace StreamSplitter
                     return;
                 }
 
-                string updatedStatusMessages = m_recentStatusMessages + Environment.NewLine + ToolTipEx.WordWrapStatus(statusMessage);
+                string updatedStatusMessages = $"{m_recentStatusMessages}{Environment.NewLine}{ToolTipEx.WordWrapStatus(statusMessage)}";
 
                 // Truncate from the left to maintain maximum status size
                 if (updatedStatusMessages.Length > MaximumStatusSize)
+                {
                     updatedStatusMessages = updatedStatusMessages.Substring(updatedStatusMessages.Length - MaximumStatusSize);
+                    updatedStatusMessages = updatedStatusMessages.Substring(updatedStatusMessages.IndexOf(Environment.NewLine, StringComparison.Ordinal) + Environment.NewLine.Length);
+                }
 
                 m_recentStatusMessages = updatedStatusMessages;
             }

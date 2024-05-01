@@ -24,7 +24,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GSF;
+using GSF.Collections;
 using GSF.IO;
 using StreamSplitter;
 
@@ -53,39 +55,104 @@ namespace UpdateConfig
 
             Console.WriteLine($"Loaded {configuration.Count:N0} connections from \"{configurationFile}\".");
 
-            const string ProxySettings = "protocol=Udp; interface=0.0.0.0; port=-1; clients=192.168.1.100:{0}, 192.168.1.101:{0}, 192.168.1.102:{0}, 127.0.0.1:{0}";
-
-            foreach (ProxyConnection proxy in configuration)
+            foreach (ProxyConnection proxy in configuration.ToArray())
             {
                 Dictionary<string, string> settings = proxy.ConnectionString.ParseKeyValuePairs();
 
                 Console.WriteLine($"   >> Updating \"{proxy.Name}\"...");
 
+                ushort port = 0;
+
+                // Get target port from first client in UDP proxy settings
                 if (settings.TryGetValue("proxySettings", out string proxySettingsConnectionString))
                 {
                     Dictionary<string, string> proxySettings = proxySettingsConnectionString.ParseKeyValuePairs();
 
-                    if (proxySettings.TryGetValue("clients", out string clientValues))
+                    if ((proxySettings.TryGetValue("protocol", out string protocol) || proxySettings.TryGetValue("transportProtocol", out protocol)) && protocol.Equals("Udp", StringComparison.OrdinalIgnoreCase))
                     {
-                        string[] clients = clientValues.Split(',');
-
-                        if (clients.Length > 0)
+                        if (proxySettings.TryGetValue("clients", out string clientValues))
                         {
-                            string[] parts = clients[0].Split(':');
+                            string[] clients = clientValues.Split(',');
 
-                            if (parts.Length == 2 && ushort.TryParse(parts[1], out ushort port))
+                            if (clients.Length > 0)
                             {
-                                settings["proxySettings"] = string.Format(ProxySettings, port);
-                                proxy.ConnectionString = settings.JoinKeyValuePairs();
+                                string[] parts = clients[0].Split(':');
+
+                                if (parts.Length == 2)
+                                {
+                                    ushort.TryParse(parts[1], out port);
+
+                                    // Update existing proxy UDP connections publish to two destinations, primary and backup
+                                    proxySettings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                                    {
+                                        ["protocol"] = "Udp",
+                                        ["interface"] = "0.0.0.0",
+                                        ["port"] = "-1",
+                                        ["clients"] = $"192.168.1.142:{port}, 192.168.1.143:{port}"
+                                    };
+
+                                    settings["proxySettings"] = proxySettings.JoinKeyValuePairs();
+                                    proxy.ConnectionString = settings.JoinKeyValuePairs();
+                                }
                             }
                         }
                     }
                 }
+
+                if (port == 0)
+                {
+                    Console.WriteLine($"      >> Unable to determine target port for \"{proxy.Name}\".");
+                    continue;
+                }
+
+                if (settings.TryGetValue("sourceSettings", out string sourceSettingsConnectionString))
+                {
+                    Dictionary<string, string> sourceSettings = sourceSettingsConnectionString.ParseKeyValuePairs();
+
+                    // Add a new TCP proxy record for field device connection
+                    if ((sourceSettings.TryGetValue("transportProtocol", out string protocol) || sourceSettings.TryGetValue("protocol", out protocol)) && protocol.Equals("Tcp", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Add new TCP proxy record for field device connection
+                        ProxyConnection newProxy = new()
+                        {
+                            ConnectionString = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                            {
+                                ["sourceSettings"] = sourceSettingsConnectionString,
+                                ["proxySettings"] = $"protocol=Tcp; interface=0.0.0.0; port={port}",
+                                ["enabled"] = "True",
+                                ["name"] = $"{proxy.Name} TCP Proxy"
+                            }
+                            .JoinKeyValuePairs()
+                        };
+
+                        configuration.Add(newProxy);
+                        Console.WriteLine($"      >> Added new local TCP proxy \"{newProxy.Name}\"...");
+
+                        // Update existing connection to connect to local TCP proxy
+                        sourceSettings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            ["transportProtocol"] = "Tcp",
+                            ["interface"] = "0.0.0.0",
+                            ["server"] = $"127.0.0.1:{port}",
+                            ["phasorProtocol"] = "IEEEC37_118V1",
+                            ["accessID"] = "1"
+                        };
+
+                        settings["sourceSettings"] = sourceSettings.JoinKeyValuePairs();
+                        proxy.ConnectionString = settings.JoinKeyValuePairs();
+
+                        Console.WriteLine($"      >> Updated \"{proxy.Name}\" to connect to local TCP proxy.");
+                    }
+                }
             }
 
-            Console.WriteLine("Saving updated config file...");
-            ProxyConnectionCollection.SaveConfiguration(configuration, FilePath.GetAbsolutePath("UpdatedConfig.s3config"));
+            ProxyConnectionCollection sortedConfig = new();
+            sortedConfig.AddRange(configuration.OrderBy(connection => connection.Name));
 
+            Console.WriteLine("Saving updated config file...");
+            ProxyConnectionCollection.SaveConfiguration(sortedConfig, FilePath.GetAbsolutePath("UpdatedConfig.s3config"));
+
+            Console.ReadKey();
             return 0;
         }
     }

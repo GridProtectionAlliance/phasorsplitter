@@ -26,6 +26,7 @@ using GSF.PhasorProtocols;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace StreamSplitter
@@ -47,10 +48,10 @@ namespace StreamSplitter
 
         // Fields
         private Guid m_id;
-        private ProxyConnectionEditor m_proxyConnectionEditor;
-        private IConnectionParameters m_temporaryConnectionParameters;
-        private string m_temporaryConnectionString;
+        private IConnectionParameters m_connectionParameters;
+        private string m_connectionString;
         private string m_name;
+        private readonly Dictionary<ConnectionState, string> m_connectionStateDescriptions;
 
         #endregion
 
@@ -62,6 +63,7 @@ namespace StreamSplitter
         public ProxyConnection()
         {
             m_id = Guid.NewGuid();
+            m_connectionStateDescriptions = InitializeConnectionStateDescriptions();
         }
 
         /// <summary>
@@ -82,9 +84,16 @@ namespace StreamSplitter
             {
                 m_id = Guid.NewGuid();
                 ConnectionParameters = null;
-                m_temporaryConnectionString = "";
+                ConnectionString = "";
             }
+
+            m_connectionStateDescriptions = InitializeConnectionStateDescriptions();
         }
+
+        private Dictionary<ConnectionState, string> InitializeConnectionStateDescriptions() => 
+            Enum.GetValues(typeof(ConnectionState))
+                .Cast<ConnectionState>()
+                .ToDictionary(state => state, state => state.GetDescription());
 
         #endregion
 
@@ -99,7 +108,7 @@ namespace StreamSplitter
             set
             {
                 m_id = value;
-                OnProperyChanged("ID");
+                OnPropertyChanged("ID");
             }
         }
 
@@ -108,17 +117,11 @@ namespace StreamSplitter
         /// </summary>
         public string ConnectionString
         {
-            get => m_proxyConnectionEditor is null ? m_temporaryConnectionString : m_proxyConnectionEditor.ConnectionString;
+            get => m_connectionString;
             set
             {
-                // If no associated proxy connection editor control is available yet, we temporarily
-                // cache any connection string until a control is referenced
-                if (m_proxyConnectionEditor is not null)
-                    m_proxyConnectionEditor.ConnectionString = ParseConnectionString(value);
-                else
-                    m_temporaryConnectionString = ParseConnectionString(value);
-
-                OnProperyChanged("ConnectionString");
+                m_connectionString = ParseConnectionString(value);
+                OnPropertyChanged("ConnectionString");
             }
         }
 
@@ -127,49 +130,11 @@ namespace StreamSplitter
         /// </summary>
         public IConnectionParameters ConnectionParameters
         {
-            get
-            {
-                if (m_proxyConnectionEditor is null)
-                    return m_temporaryConnectionParameters;
-
-                return m_proxyConnectionEditor.ConnectionParameters;
-            }
+            get => m_connectionParameters;
             set
             {
-                // If no associated proxy connection editor control is available yet, we temporarily
-                // cache any connection parameters until a control is referenced
-                if (m_proxyConnectionEditor is not null)
-                    m_proxyConnectionEditor.ConnectionParameters = value;
-                else
-                    m_temporaryConnectionParameters = value;
-
-                OnProperyChanged("ConnectionParameters");
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets reference to associated <see cref="ProxyConnectionEditor"/>.
-        /// </summary>
-        public ProxyConnectionEditor ProxyConnectionEditor
-        {
-            get => m_proxyConnectionEditor;
-            set
-            {
-                if (value is not null && m_proxyConnectionEditor is not null)
-                    throw new InvalidOperationException("Proxy connection is already associated with an existing editing control, only one association is expected per instance.");
-
-                m_proxyConnectionEditor = value;
-
-                if (m_proxyConnectionEditor is not null)
-                {
-                    if (!string.IsNullOrWhiteSpace(m_temporaryConnectionString))
-                        m_proxyConnectionEditor.ConnectionString = m_temporaryConnectionString;
-
-                    if (m_temporaryConnectionParameters is not null)
-                        m_proxyConnectionEditor.ConnectionParameters = m_temporaryConnectionParameters;
-                }
-
-                OnProperyChanged("ProxyConnectionEditor");
+                m_connectionParameters = value;
+                OnPropertyChanged("ConnectionParameters");
             }
         }
 
@@ -186,8 +151,7 @@ namespace StreamSplitter
         /// Gets enabled state for the proxy connection.
         /// </summary>
         /// <remarks>
-        /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>,
-        /// if there is an associated editor control it may have more recent edited values.
+        /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>.
         /// </remarks>
         public bool Enabled { get; private set; }
 
@@ -195,8 +159,7 @@ namespace StreamSplitter
         /// Gets source settings (or null if there are none) for the proxy connection.
         /// </summary>
         /// <remarks>
-        /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>,
-        /// if there is an associated editor control it may have more recent edited values.
+        /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>.
         /// </remarks>
         public string SourceSettings { get; private set; }
 
@@ -204,23 +167,24 @@ namespace StreamSplitter
         /// Gets proxy settings (or null if there are none) for the proxy connection.
         /// </summary>
         /// <remarks>
-        /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>,
-        /// if there is an associated editor control it may have more recent edited values.
+        /// This value will only be as recent as the last update to the <see cref="ConnectionString"/>.
         /// </remarks>
         public string ProxySettings { get; private set; }
 
         /// <summary>
+        /// Gets or sets <see cref="ConnectionState"/> for the <see cref="ProxyConnection"/> controlling the connection state.
+        /// </summary>
+        public ConnectionState ConnectionState { get; set; }
+
+        /// <summary>
+        /// Gets the description of the <see cref="ConnectionState"/> for the <see cref="ProxyConnection"/>.
+        /// </summary>
+        public string ConnectionStateDescription => m_connectionStateDescriptions[ConnectionState];
+
+        /// <summary>
         /// Gets or sets the <see cref="ProxyConnection"/> visibility flag.
         /// </summary>
-        public bool Visible
-        {
-            get => m_proxyConnectionEditor?.Visible ?? false;
-            set
-            {
-                if (m_proxyConnectionEditor is not null)
-                    m_proxyConnectionEditor.Visible = value;
-            }
-        }
+        public bool Visible { get; set; }
 
         #endregion
 
@@ -272,7 +236,7 @@ namespace StreamSplitter
         /// Raises the <see cref="PropertyChanged"/> event.
         /// </summary>
         /// <param name="propertyName">Name of property that changed.</param>
-        protected virtual void OnProperyChanged(string propertyName) => 
+        protected virtual void OnPropertyChanged(string propertyName) => 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         /// <summary>

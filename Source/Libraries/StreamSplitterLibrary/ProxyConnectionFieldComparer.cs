@@ -85,7 +85,7 @@ namespace StreamSplitter
         {
             get
             {
-                if ((object)s_defaultComparer == null)
+                if (s_defaultComparer is null)
                     s_defaultComparer = new ProxyConnectionFieldComparer();
 
                 return s_defaultComparer;

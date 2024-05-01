@@ -90,27 +90,27 @@ namespace StreamSplitterConsole
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!m_disposed)
-            {
-                try
-                {
-                    // This will be done regardless of whether the object is finalized or disposed.
+            if (m_disposed)
+                return;
 
-                    if (disposing)
-                    {
-                        if ((object)m_serviceConnection != null)
-                        {
-                            m_serviceConnection.StatusMessage -= m_serviceConnection_StatusMessage;
-                            m_serviceConnection.ServiceResponse -= m_serviceConnection_ServiceResponse;
-                            m_serviceConnection.Dispose();
-                            m_serviceConnection = null;
-                        }
-                    }
-                }
-                finally
+            try
+            {
+                // This will be done regardless of whether the object is finalized or disposed.
+
+                if (!disposing)
+                    return;
+
+                if (m_serviceConnection is not null)
                 {
-                    m_disposed = true;  // Prevent duplicate dispose.
+                    m_serviceConnection.StatusMessage -= m_serviceConnection_StatusMessage;
+                    m_serviceConnection.ServiceResponse -= m_serviceConnection_ServiceResponse;
+                    m_serviceConnection.Dispose();
+                    m_serviceConnection = null;
                 }
+            }
+            finally
+            {
+                m_disposed = true;  // Prevent duplicate dispose.
             }
         }
 
@@ -121,16 +121,16 @@ namespace StreamSplitterConsole
         public void Start(string[] args)
         {
             string userInput = null;
-            Arguments arguments = new Arguments(string.Join(" ", args));
+            Arguments arguments = new(string.Join(" ", args));
 
             if (arguments.Exists("OrderedArg1") && arguments.Exists("restart"))
             {
                 string serviceName = arguments["OrderedArg1"];
 
                 // Attempt to access service controller for the specified Windows service
-                ServiceController serviceController = ServiceController.GetServices().SingleOrDefault(svc => string.Compare(svc.ServiceName, serviceName, true) == 0);
+                ServiceController serviceController = ServiceController.GetServices().SingleOrDefault(svc => string.Compare(svc.ServiceName, serviceName, StringComparison.OrdinalIgnoreCase) == 0);
 
-                if (serviceController != null)
+                if (serviceController is not null)
                 {
                     try
                     {
@@ -188,7 +188,7 @@ namespace StreamSplitterConsole
                 }
 
                 // Attempt to restart Windows service...
-                if (serviceController != null)
+                if (serviceController is not null)
                 {
                     try
                     {
@@ -211,7 +211,7 @@ namespace StreamSplitterConsole
                 {
                     m_serviceConnection.Connect();
 
-                    while (m_serviceConnection.Enabled && string.Compare(userInput, "Exit", true) != 0)
+                    while (m_serviceConnection.Enabled && string.Compare(userInput, "Exit", StringComparison.OrdinalIgnoreCase) != 0)
                     {
                         // Wait for a command from the user. 
                         userInput = Console.ReadLine();
@@ -234,7 +234,7 @@ namespace StreamSplitterConsole
                                     // User wants to send a request to the service. 
                                     m_serviceConnection.SendCommand(userInput);
 
-                                    if (string.Compare(userInput, "Help", true) == 0)
+                                    if (string.Compare(userInput, "Help", StringComparison.OrdinalIgnoreCase) == 0)
                                         DisplayHelp();
 
                                     break;
@@ -247,7 +247,7 @@ namespace StreamSplitterConsole
 
         private void DisplayHelp()
         {
-            StringBuilder help = new StringBuilder();
+            StringBuilder help = new();
 
             help.AppendFormat("Commands supported by {0}:", AssemblyInfo.EntryAssembly.Name);
             help.AppendLine();
