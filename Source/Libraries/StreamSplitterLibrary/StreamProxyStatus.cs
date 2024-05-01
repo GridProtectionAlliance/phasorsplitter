@@ -144,11 +144,11 @@ namespace StreamSplitter
             {
                 if (string.IsNullOrEmpty(m_recentStatusMessages))
                 {
-                    m_recentStatusMessages = ToolTipEx.WordWrapStatus(statusMessage);
+                    m_recentStatusMessages = statusMessage;
                     return;
                 }
 
-                string updatedStatusMessages = $"{m_recentStatusMessages}{Environment.NewLine}{ToolTipEx.WordWrapStatus(statusMessage)}";
+                string updatedStatusMessages = $"{m_recentStatusMessages}{Environment.NewLine}{statusMessage}";
 
                 // Truncate from the left to maintain maximum status size
                 if (updatedStatusMessages.Length > MaximumStatusSize)

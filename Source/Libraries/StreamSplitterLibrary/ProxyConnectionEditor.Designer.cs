@@ -625,8 +625,10 @@ namespace StreamSplitter
             this.textBoxConnectionStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxConnectionStatus.BackColor = System.Drawing.Color.Black;
             this.textBoxConnectionStatus.CausesValidation = false;
-            this.textBoxConnectionStatus.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxConnectionStatus.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxConnectionStatus.ForeColor = System.Drawing.Color.White;
             this.textBoxConnectionStatus.Location = new System.Drawing.Point(0, 331);
             this.textBoxConnectionStatus.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.textBoxConnectionStatus.Multiline = true;
@@ -635,6 +637,7 @@ namespace StreamSplitter
             this.textBoxConnectionStatus.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBoxConnectionStatus.Size = new System.Drawing.Size(645, 224);
             this.textBoxConnectionStatus.TabIndex = 1;
+            this.textBoxConnectionStatus.Text = "Status Text";
             // 
             // comboBoxProtocol
             // 
