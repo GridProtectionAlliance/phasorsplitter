@@ -523,6 +523,7 @@ namespace StreamSplitter
             sortColumn.HeaderCell.SortGlyphDirection = sortOrder;
 
             dataGridView.Refresh();
+            bindingSource.MoveFirst();
         }
 
         private void m_proxyConnections_ConfigurationChanged(object sender, EventArgs<ProxyConnection> e)
@@ -545,8 +546,14 @@ namespace StreamSplitter
 
         private void m_proxyConnections_RemovingItem(object sender, EventArgs<ProxyConnection, bool> e)
         {
-            if (e is null || !e.Argument2)
+            if (e is null)
                 return;
+
+            if (!e.Argument2)
+            {
+                e.Argument2 = m_proxyConnections.SearchList is not null;
+                return;
+            }
 
             ProxyConnection connection = e.Argument1;
 
@@ -680,7 +687,7 @@ namespace StreamSplitter
                 return;
 
             toolStripButtonClearSearch_Click(this, EventArgs.Empty);
-            MessageBox.Show("Clearing search...", Tag.ToNonNullString(Text), MessageBoxButtons.OK);
+            MessageBox.Show("Cleared search to add new proxy connection...", Tag.ToNonNullString(Text), MessageBoxButtons.OK);
             bindingSource.AddNew();
         }
 
