@@ -24,6 +24,8 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
+using Gemstone.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace StreamSplitter
 {
@@ -35,6 +37,15 @@ namespace StreamSplitter
         [STAThread]
         static void Main()
         {
+            Settings settings = new()
+            {
+                INIFile = ConfigurationOperation.ReadOnly, // Establishes machine-level defaults
+                SQLite = ConfigurationOperation.ReadWrite  // Controls actual values for user
+            };
+
+            // Bind service settings to configuration sources
+            settings.Bind(new ConfigurationBuilder().ConfigureGemstoneDefaults(settings));
+
             SplashScreen.ShowSplashScreen();
             Application.DoEvents();
 

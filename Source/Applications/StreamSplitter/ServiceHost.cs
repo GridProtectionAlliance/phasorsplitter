@@ -33,14 +33,13 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using GSF;
-using GSF.Communication;
-using GSF.Configuration;
-using GSF.Console;
-using GSF.IO;
-using GSF.PhasorProtocols;
-using GSF.ServiceProcess;
-using GSF.Units;
+using Gemstone;
+using Gemstone.Communication;
+using Gemstone.Console;
+using Gemstone.IO;
+using Gemstone.PhasorProtocols;
+using Gemstone.StringExtensions;
+using Gemstone.Units;
 using Microsoft.Win32;
 
 namespace StreamSplitter

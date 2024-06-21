@@ -21,16 +21,17 @@
 //
 //******************************************************************************************************
 
+using Gemstone;
+using Gemstone.Communication;
+using Gemstone.Diagnostics;
+using Gemstone.PhasorProtocols;
+using Gemstone.StringExtensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
-using GSF;
-using GSF.Communication;
-using GSF.Configuration;
-using GSF.Diagnostics;
-using GSF.PhasorProtocols;
+using Gemstone.Configuration;
 
 namespace StreamSplitter
 {
@@ -260,8 +261,7 @@ namespace StreamSplitter
             TransportProtocol sourceTransportProtocol = (TransportProtocol)tabControlSourceConnectionType.SelectedIndex;
             sourceSettings["transportProtocol"] = sourceTransportProtocol.ToString();
 
-            if (!sourceSettings.ContainsKey("interface"))
-                sourceSettings["interface"] = "0.0.0.0";
+            sourceSettings.TryAdd("interface", "0.0.0.0");
 
             sourceSettings.Remove("server");
             sourceSettings.Remove("localport");
@@ -299,8 +299,7 @@ namespace StreamSplitter
             proxySettings["protocol"] = proxyTransportProtocol.ToString();
             proxySettings.Remove("transportProtocol");
 
-            if (!proxySettings.ContainsKey("interface"))
-                proxySettings["interface"] = "0.0.0.0";
+            proxySettings.TryAdd("interface", "0.0.0.0");
 
             proxySettings.Remove("clients");
 
@@ -796,11 +795,8 @@ namespace StreamSplitter
                 try
                 {
                     // Make sure setting exists within system settings section of config file
-                    ConfigurationFile configFile = ConfigurationFile.Current;
-                    CategorizedSettingsElementCollection systemSettings = configFile.Settings["systemSettings"];
-                    systemSettings.Add("MaxSendQueueSize", DefaultMaxSendQueueSize, "Defines the max send queue size for socket connections. Set to -1 for no limit.");
-
-                    s_maxSendQueueSize = systemSettings["MaxSendQueueSize"].ValueAs(DefaultMaxSendQueueSize);
+                    dynamic systemSettings = Settings.Default[Settings.SystemSettingsCategory];
+                    s_maxSendQueueSize = systemSettings["MaxSendQueueSize", DefaultMaxSendQueueSize, "Defines the max send queue size for socket connections. Set to -1 for no limit."];
                 }
                 catch (Exception ex)
                 {

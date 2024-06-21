@@ -69,16 +69,7 @@ namespace StreamSplitter
         /// <summary>
         /// Gets the default instance of the <see cref="ProxyConnectionIDComparer"/>.
         /// </summary>
-        public static ProxyConnectionIDComparer Default
-        {
-            get
-            {
-                if (s_defaultComparer is null)
-                    s_defaultComparer = new ProxyConnectionIDComparer();
-
-                return s_defaultComparer;
-            }
-        }
+        public static ProxyConnectionIDComparer Default => s_defaultComparer ??= new ProxyConnectionIDComparer();
 
         #endregion
     }

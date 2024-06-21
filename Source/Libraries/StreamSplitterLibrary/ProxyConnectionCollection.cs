@@ -21,6 +21,8 @@
 //
 //******************************************************************************************************
 
+using Gemstone;
+using Gemstone.Threading.SynchronizedOperations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,8 +32,6 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.Threading;
-using GSF;
-using GSF.Threading;
 
 namespace StreamSplitter
 {
@@ -189,7 +189,10 @@ namespace StreamSplitter
             }
         }
 
-        private void Search() => (m_searchOperation ??= new ShortSynchronizedOperation(SearchConnections)).RunOnceAsync();
+        private void Search()
+        {
+            (m_searchOperation ??= new ShortSynchronizedOperation(SearchConnections)).RunAsync();
+        }
 
         private void SearchConnections()
         {

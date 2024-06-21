@@ -23,9 +23,8 @@
 
 using System;
 using System.Threading;
-using GSF;
-using GSF.Communication;
-using GSF.ServiceProcess;
+using Gemstone;
+using Gemstone.Communication;
 
 namespace StreamSplitter
 {
@@ -46,7 +45,7 @@ namespace StreamSplitter
         /// <summary>
         /// Reports a new response from the service.
         /// </summary>
-        public event EventHandler<EventArgs<ServiceResponse, string, bool>> ServiceResponse;
+        public event EventHandler<EventArgs</*ServiceResponse*/ object, string, bool>> ServiceResponse;
 
         /// <summary>
         /// Reports a change connection state.
@@ -54,7 +53,7 @@ namespace StreamSplitter
         public event EventHandler<EventArgs<bool>> ConnectionState;
 
         // Fields
-        private ClientHelper m_clientHelper;
+        //private ClientHelper m_clientHelper;
         private TcpClient m_remotingClient;
         private bool m_disposed;
 
@@ -67,7 +66,7 @@ namespace StreamSplitter
         /// </summary>
         public ServiceConnection()
         {
-            m_clientHelper = new ClientHelper();
+            //m_clientHelper = new ClientHelper();
             m_remotingClient = new TcpClient();
 
             // Setup remoting client
@@ -75,16 +74,16 @@ namespace StreamSplitter
             m_remotingClient.ConnectionException += m_remotingClient_ConnectionException;
             m_remotingClient.ConnectionTerminated += m_remotingClient_ConnectionTerminated;
             m_remotingClient.ConnectionString = "server=localhost:8890";
-            m_remotingClient.SettingsCategory = "RemotingClient";
+            //m_remotingClient.SettingsCategory = "RemotingClient";
             m_remotingClient.AllowDualStackSocket = true;
             m_remotingClient.IntegratedSecurity = false;
             m_remotingClient.PayloadAware = true;
-            m_remotingClient.PersistSettings = true;
+            //m_remotingClient.PersistSettings = true;
 
             // Setup client helper
-            m_clientHelper.ReceivedServiceUpdate += m_clientHelper_ReceivedServiceUpdate;
-            m_clientHelper.ReceivedServiceResponse += m_clientHelper_ReceivedServiceResponse;
-            m_clientHelper.RemotingClient = m_remotingClient;
+            //m_clientHelper.ReceivedServiceUpdate += m_clientHelper_ReceivedServiceUpdate;
+            //m_clientHelper.ReceivedServiceResponse += m_clientHelper_ReceivedServiceResponse;
+            //m_clientHelper.RemotingClient = m_remotingClient;
         }
 
         /// <summary>
@@ -106,15 +105,15 @@ namespace StreamSplitter
         {
             get
             {
-                if (m_clientHelper is not null)
-                    return m_clientHelper.Enabled;
+                //if (m_clientHelper is not null)
+                //    return m_clientHelper.Enabled;
 
                 return false;
             }
             set
             {
-                if (m_clientHelper is not null)
-                    m_clientHelper.Enabled = value;
+                //if (m_clientHelper is not null)
+                //    m_clientHelper.Enabled = value;
             }
         }
 
@@ -145,10 +144,7 @@ namespace StreamSplitter
         /// </summary>
         public string ConnectionString
         {
-            get
-            {
-                return m_remotingClient?.ConnectionString;
-            }
+            get => m_remotingClient?.ConnectionString;
             set
             {
                 if (m_remotingClient is not null)
@@ -175,34 +171,34 @@ namespace StreamSplitter
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!m_disposed)
-            {
-                try
-                {
-                    if (disposing)
-                    {
-                        if (m_clientHelper is not null)
-                        {
-                            m_clientHelper.ReceivedServiceUpdate -= m_clientHelper_ReceivedServiceUpdate;
-                            m_clientHelper.ReceivedServiceResponse -= m_clientHelper_ReceivedServiceResponse;
-                            m_clientHelper.Dispose();
-                            m_clientHelper = null;
-                        }
+            if (m_disposed)
+                return;
 
-                        if (m_remotingClient is not null)
-                        {
-                            m_remotingClient.ConnectionEstablished -= m_remotingClient_ConnectionEstablished;
-                            m_remotingClient.ConnectionException -= m_remotingClient_ConnectionException;
-                            m_remotingClient.ConnectionTerminated -= m_remotingClient_ConnectionTerminated;
-                            m_remotingClient.Dispose();
-                            m_remotingClient = null;
-                        }
-                    }
-                }
-                finally
+            try
+            {
+                if (!disposing)
+                    return;
+
+                //if (m_clientHelper is not null)
+                //{
+                //    m_clientHelper.ReceivedServiceUpdate -= m_clientHelper_ReceivedServiceUpdate;
+                //    m_clientHelper.ReceivedServiceResponse -= m_clientHelper_ReceivedServiceResponse;
+                //    m_clientHelper.Dispose();
+                //    m_clientHelper = null;
+                //}
+
+                if (m_remotingClient is not null)
                 {
-                    m_disposed = true;  // Prevent duplicate dispose.
+                    m_remotingClient.ConnectionEstablished -= m_remotingClient_ConnectionEstablished;
+                    m_remotingClient.ConnectionException -= m_remotingClient_ConnectionException;
+                    m_remotingClient.ConnectionTerminated -= m_remotingClient_ConnectionTerminated;
+                    m_remotingClient.Dispose();
+                    m_remotingClient = null;
                 }
+            }
+            finally
+            {
+                m_disposed = true;  // Prevent duplicate dispose.
             }
         }
 
@@ -213,19 +209,19 @@ namespace StreamSplitter
         {
             try
             {
-                if (m_clientHelper is not null && m_remotingClient is not null)
-                {
-                    // Disconnect if currently connected to allow actual "reconnect"
-                    if (m_remotingClient.CurrentState == ClientState.Connected)
-                    {
-                        m_clientHelper.Disconnect();
-                        OnConnectionState(false);
-                        Thread.Sleep(1000);
-                    }
+                //if (m_clientHelper is not null && m_remotingClient is not null)
+                //{
+                //    // Disconnect if currently connected to allow actual "reconnect"
+                //    if (m_remotingClient.CurrentState == ClientState.Connected)
+                //    {
+                //        m_clientHelper.Disconnect();
+                //        OnConnectionState(false);
+                //        Thread.Sleep(1000);
+                //    }
 
-                    if (m_remotingClient.CurrentState == ClientState.Disconnected)
-                        m_clientHelper.Connect();
-                }
+                //    if (m_remotingClient.CurrentState == ClientState.Disconnected)
+                //        m_clientHelper.Connect();
+                //}
             }
             catch (Exception ex)
             {
@@ -248,19 +244,19 @@ namespace StreamSplitter
         /// <param name="attachments">Optional attachments to send with command.</param>
         public void SendCommand(string command, params object[] attachments)
         {
-            if (m_clientHelper is null || m_remotingClient is null)
-                throw new NullReferenceException("Client helper is not established - cannot send service command.");
+            //if (m_clientHelper is null || m_remotingClient is null)
+            //    throw new NullReferenceException("Client helper is not established - cannot send service command.");
 
-            if (m_remotingClient.CurrentState == ClientState.Connected)
-            {
-                ClientRequest request = ClientRequest.Parse(command);
+            //if (m_remotingClient.CurrentState == ClientState.Connected)
+            //{
+            //    ClientRequest request = ClientRequest.Parse(command);
 
-                // Add any attachments to the client request
-                if (attachments is not null && attachments.Length > 0)
-                    request.Attachments.AddRange(attachments);
+            //    // Add any attachments to the client request
+            //    if (attachments is not null && attachments.Length > 0)
+            //        request.Attachments.AddRange(attachments);
 
-                m_clientHelper.SendRequest(request);
-            }
+            //    m_clientHelper.SendRequest(request);
+            //}
         }
 
         /// <summary>
@@ -279,9 +275,9 @@ namespace StreamSplitter
         /// <param name="serviceResponse">Reported <see cref="GSF.ServiceProcess.ServiceResponse"/> object.</param>
         /// <param name="sourceCommand">Original command.</param>
         /// <param name="responseSuccess">Response success flag.</param>
-        protected virtual void OnServiceResponse(ServiceResponse serviceResponse, string sourceCommand, bool responseSuccess)
+        protected virtual void OnServiceResponse(/*ServiceResponse*/ object serviceResponse, string sourceCommand, bool responseSuccess)
         {
-            ServiceResponse?.Invoke(this, new EventArgs<ServiceResponse, string, bool>(serviceResponse, sourceCommand, responseSuccess));
+            ServiceResponse?.Invoke(this, new EventArgs<object, string, bool>(serviceResponse, sourceCommand, responseSuccess));
         }
 
         /// <summary>
@@ -300,10 +296,10 @@ namespace StreamSplitter
         }
 
         // Client helper service response reception handler
-        private void m_clientHelper_ReceivedServiceResponse(object sender, EventArgs<ServiceResponse> e)
+        private void m_clientHelper_ReceivedServiceResponse(object sender, EventArgs</*ServiceResponse*/ object> e)
         {
-            if (ClientHelper.TryParseActionableResponse(e.Argument, out string sourceCommand, out bool responseSuccess))
-                OnServiceResponse(e.Argument, sourceCommand, responseSuccess);
+            //if (ClientHelper.TryParseActionableResponse(e.Argument, out string sourceCommand, out bool responseSuccess))
+            //    OnServiceResponse(e.Argument, sourceCommand, responseSuccess);
         }
 
         // Remoting client connection established handler

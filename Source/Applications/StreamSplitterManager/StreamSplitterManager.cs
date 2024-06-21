@@ -30,12 +30,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
-using GSF;
-using GSF.Configuration;
-using GSF.IO;
-using GSF.Reflection;
-using GSF.ServiceProcess;
-using GSF.Windows.Forms;
+using Gemstone;
+using Gemstone.IO;
+using Gemstone.Reflection;
+using Gemstone.StringExtensions;
 using Timer = System.Timers.Timer;
 
 namespace StreamSplitter
@@ -143,7 +141,7 @@ namespace StreamSplitter
             if (!configLoaded)
             {
                 // Attempt to load last configuration
-                string lastConfigurationFileName = ConfigurationFile.Current.Settings.General["LastConfiguration", true].ValueAs("");
+                string lastConfigurationFileName = null; //ConfigurationFile.Current.Settings.General["LastConfiguration", true].ValueAs("");
 
                 if (!string.IsNullOrEmpty(lastConfigurationFileName) && File.Exists(lastConfigurationFileName))
                     LoadConfiguration(lastConfigurationFileName);
@@ -217,7 +215,7 @@ namespace StreamSplitter
 
         private void StreamSplitterManager_Load(object sender, EventArgs e)
         {
-            this.RestoreLayout();
+            //this.RestoreLayout();
 
             // Start connection cycle
             m_serviceConnection?.ConnectAsync();
@@ -232,11 +230,11 @@ namespace StreamSplitter
         {
             SaveConfiguration(true);
 
-            this.SaveLayout();
+            //this.SaveLayout();
 
             // Save last configuration file name
-            ConfigurationFile.Current.Settings.General["LastConfiguration", true].Value = m_configurationFileName.ToNonNullString();
-            ConfigurationFile.Current.Save();
+            //ConfigurationFile.Current.Settings.General["LastConfiguration", true].Value = m_configurationFileName.ToNonNullString();
+            //ConfigurationFile.Current.Save();
         }
 
         private void StreamSplitterManager_Activated(object sender, EventArgs e)
@@ -821,13 +819,13 @@ namespace StreamSplitter
                 m_serviceConnection.SendCommand("GetStreamProxyStatus");
         }
 
-        private void m_serviceConnection_ServiceResponse(object sender, EventArgs<ServiceResponse, string, bool> e)
+        private void m_serviceConnection_ServiceResponse(object sender, EventArgs</*ServiceResponse*/ object, string, bool> e)
         {
             if (e is null)
                 return;
 
             // Handle service responses
-            ServiceResponse response = e.Argument1;
+            object response = e.Argument1;
             string sourceCommand = e.Argument2.ToNonNullString().Trim();
             bool responseSuccess = e.Argument3;
 
@@ -835,20 +833,20 @@ namespace StreamSplitter
                 return;
 
             // If command has attachments, they will be first followed by an attachment with the original command arguments
-            List<object> attachments = response.Attachments;
-            bool attachmentsExist = attachments is not null && attachments.Count > 1;
+            //List<object> attachments = response.Attachments;
+            //bool attachmentsExist = attachments is not null && attachments.Count > 1;
 
-            // Handle command responses
-            if (string.Compare(sourceCommand, "GetStreamProxyStatus", StringComparison.OrdinalIgnoreCase) == 0)
-            {
-                if (responseSuccess && attachmentsExist)
-                    ThreadPool.QueueUserWorkItem(ApplyStreamProxyStatusUpdates, attachments[0] as StreamProxyStatus[]);
-            }
-            else if (string.Compare(sourceCommand, "DownloadConfig", StringComparison.OrdinalIgnoreCase) == 0)
-            {
-                if (responseSuccess && attachmentsExist)
-                    ThreadPool.QueueUserWorkItem(ApplyDownloadedProxyConnections, ProxyConnectionCollection.DeserializeConfiguration(attachments[0] as byte[]));
-            }
+            //// Handle command responses
+            //if (string.Compare(sourceCommand, "GetStreamProxyStatus", StringComparison.OrdinalIgnoreCase) == 0)
+            //{
+            //    if (responseSuccess && attachmentsExist)
+            //        ThreadPool.QueueUserWorkItem(ApplyStreamProxyStatusUpdates, attachments[0] as StreamProxyStatus[]);
+            //}
+            //else if (string.Compare(sourceCommand, "DownloadConfig", StringComparison.OrdinalIgnoreCase) == 0)
+            //{
+            //    if (responseSuccess && attachmentsExist)
+            //        ThreadPool.QueueUserWorkItem(ApplyDownloadedProxyConnections, ProxyConnectionCollection.DeserializeConfiguration(attachments[0] as byte[]));
+            //}
         }
 
         private void ApplyStreamProxyStatusUpdates(object state)

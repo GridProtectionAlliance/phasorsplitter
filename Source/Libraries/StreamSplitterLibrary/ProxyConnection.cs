@@ -21,8 +21,9 @@
 //
 //******************************************************************************************************
 
-using GSF;
-using GSF.PhasorProtocols;
+using Gemstone.EnumExtensions;
+using Gemstone.PhasorProtocols;
+using Gemstone.StringExtensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -76,7 +77,7 @@ namespace StreamSplitter
             // Deserialize proxy connection fields
             try
             {
-                m_id = (Guid)info.GetValue("ID", typeof(Guid));
+                m_id = (Guid)info.GetValue("ID", typeof(Guid))!;
                 ConnectionParameters = (IConnectionParameters)info.GetValue("connectionParameters", typeof(IConnectionParameters));
                 ConnectionString = info.GetString("connectionString");
             }

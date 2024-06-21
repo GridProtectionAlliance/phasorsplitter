@@ -21,13 +21,13 @@
 //
 //******************************************************************************************************
 
+using Gemstone.Collections.CollectionExtensions;
+using Gemstone.IO;
+using Gemstone.StringExtensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GSF;
-using GSF.Collections;
-using GSF.IO;
 using StreamSplitter;
 
 namespace UpdateConfig

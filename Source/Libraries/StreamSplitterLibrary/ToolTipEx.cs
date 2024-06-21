@@ -21,11 +21,11 @@
 //
 //******************************************************************************************************
 
-using GSF;
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using Gemstone.StringExtensions;
 
 namespace StreamSplitter
 {
@@ -94,45 +94,44 @@ namespace StreamSplitter
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
-            if (!m_disposed)
+            if (m_disposed)
+                return;
+            try
             {
-                try
-                {
-                    if (disposing)
-                    {
-                        m_font?.Dispose();
-                    }
-                }
-                finally
-                {
-                    m_disposed = true;          // Prevent duplicate dispose.
-                    base.Dispose(disposing);    // Call base class Dispose().
-                }
+                if (!disposing)
+                    return;
+
+                m_font?.Dispose();
+            }
+            finally
+            {
+                m_disposed = true;          // Prevent duplicate dispose.
+                base.Dispose(disposing);    // Call base class Dispose().
             }
         }
 
         // Handle custom drawing of tool-tip when a new font is provided
         private void OnPopup(object sender, PopupEventArgs e)
         {
-            if (OwnerDraw)
-            {
-                e.ToolTipSize = TextRenderer.MeasureText(GetToolTip(e.AssociatedControl), m_font);
-                e.ToolTipSize = new Size(e.ToolTipSize.Width + 10, e.ToolTipSize.Height + 5);
-            }
+            if (!OwnerDraw)
+                return;
+
+            e.ToolTipSize = TextRenderer.MeasureText(GetToolTip(e.AssociatedControl), m_font);
+            e.ToolTipSize = new Size(e.ToolTipSize.Width + 10, e.ToolTipSize.Height + 5);
         }
 
         private void OnDraw(object sender, DrawToolTipEventArgs e)
         {
-            if (OwnerDraw)
-            {
-                DrawToolTipEventArgs newArgs = new(e.Graphics,
-                    e.AssociatedWindow, e.AssociatedControl, e.Bounds, e.ToolTipText,
-                    BackColor, ForeColor, m_font);
+            if (!OwnerDraw)
+                return;
 
-                newArgs.DrawBackground();
-                newArgs.DrawBorder();
-                newArgs.DrawText(TextFormatFlags.TextBoxControl);
-            }
+            DrawToolTipEventArgs newArgs = new(e.Graphics,
+                e.AssociatedWindow, e.AssociatedControl, e.Bounds, e.ToolTipText,
+                BackColor, ForeColor, m_font);
+
+            newArgs.DrawBackground();
+            newArgs.DrawBorder();
+            newArgs.DrawText(TextFormatFlags.TextBoxControl);
         }
 
         #endregion

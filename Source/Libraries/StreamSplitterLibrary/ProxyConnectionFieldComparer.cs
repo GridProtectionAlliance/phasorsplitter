@@ -21,9 +21,9 @@
 //
 //******************************************************************************************************
 
-using GSF;
 using System;
 using System.Collections.Generic;
+using Gemstone.StringExtensions;
 
 namespace StreamSplitter
 {
@@ -81,16 +81,7 @@ namespace StreamSplitter
         /// <summary>
         /// Gets the default instance of the <see cref="ProxyConnectionFieldComparer"/>.
         /// </summary>
-        public static ProxyConnectionFieldComparer Default
-        {
-            get
-            {
-                if (s_defaultComparer is null)
-                    s_defaultComparer = new ProxyConnectionFieldComparer();
-
-                return s_defaultComparer;
-            }
-        }
+        public static ProxyConnectionFieldComparer Default => s_defaultComparer ??= new ProxyConnectionFieldComparer();
 
         #endregion
     }
