@@ -23,7 +23,6 @@
 
 using Gemstone;
 using Gemstone.Communication;
-using Gemstone.Diagnostics;
 using Gemstone.PhasorProtocols;
 using Gemstone.StringExtensions;
 using System;
@@ -32,6 +31,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using Gemstone.Configuration;
+using Gemstone.Diagnostics;
+using Microsoft.Extensions.Configuration;
 
 namespace StreamSplitter
 {
@@ -79,9 +80,12 @@ namespace StreamSplitter
         /// </summary>
         public ProxyConnectionEditor()
         {
+            Settings settings = new();
+            settings.Bind(new ConfigurationBuilder().ConfigureGemstoneDefaults(settings));
+
             InitializeComponent();
 
-            m_udpDestinations = new List<TextBox> { textBoxUdpRebroadcast0 };
+            m_udpDestinations = [ textBoxUdpRebroadcast0 ];
             m_frameParser = new MultiProtocolFrameParser();
 
             // Initialize phasor protocol selection list

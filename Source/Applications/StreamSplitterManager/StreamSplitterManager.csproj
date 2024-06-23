@@ -21,6 +21,13 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="SplashScreen.cs" />
+    <Compile Remove="SplashScreen.Designer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="SplashScreen.resx" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="app.manifest">
       <SubType>Designer</SubType>
     </None>

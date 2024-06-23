@@ -17,9 +17,6 @@
     <DocumentationFile>..\..\..\Build\Output\Release\Libraries\StreamSplitterLibrary.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Update="ToolTipEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Update="ProxyConnectionEditor.cs" />
   </ItemGroup>
   <ItemGroup>

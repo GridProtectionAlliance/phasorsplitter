@@ -58,15 +58,17 @@ namespace StreamSplitter
         #region Public Static Methods
         // A static method to create the thread and 
         // launch the SplashScreen.
-        static public void ShowSplashScreen()
+        public static void ShowSplashScreen()
         {
             // Make sure it's only launched once.
             if (ms_frmSplash is not null)
                 return;
-            ms_oThread = new Thread(new ThreadStart(SplashScreen.ShowForm));
+            
+            ms_oThread = new Thread(ShowForm);
             ms_oThread.IsBackground = true;
             ms_oThread.SetApartmentState(ApartmentState.STA);
             ms_oThread.Start();
+
             while (ms_frmSplash is null || ms_frmSplash.IsHandleCreated == false)
             {
                 System.Threading.Thread.Sleep(TIMER_INTERVAL);
@@ -74,7 +76,7 @@ namespace StreamSplitter
         }
 
         // Close the form without setting the parent.
-        static public void CloseForm()
+        public static void CloseForm()
         {
             if (ms_frmSplash is not null && ms_frmSplash.IsDisposed == false)
             {
@@ -86,7 +88,7 @@ namespace StreamSplitter
         }
 
         // A static method to set the status and update the reference.
-        static public void SetStatus(string newStatus)
+        public static void SetStatus(string newStatus)
         {
             SetStatus(newStatus, true);
         }
@@ -94,7 +96,7 @@ namespace StreamSplitter
         // A static method to set the status and optionally update the reference.
         // This is useful if you are in a section of code that has a variable
         // set of status string updates.  In that case, don't set the reference.
-        static public void SetStatus(string newStatus, bool setReference)
+        public static void SetStatus(string newStatus, bool setReference)
         {
             if (ms_frmSplash is null)
                 return;
@@ -108,7 +110,7 @@ namespace StreamSplitter
         // Static method called from the initializing application to 
         // give the splash screen reference points.  Not needed if
         // you are using a lot of status strings.
-        static public void SetReferencePoint()
+        public static void SetReferencePoint()
         {
             ms_frmSplash?.SetReferenceInternal();
 
@@ -118,7 +120,7 @@ namespace StreamSplitter
         #region Private Methods
 
         // A private entry point for the thread.
-        static private void ShowForm()
+        private static void ShowForm()
         {
             ms_frmSplash = new SplashScreen();
             Application.Run(ms_frmSplash);
@@ -277,23 +279,23 @@ namespace StreamSplitter
 
 
         // Get or set the string storing the percentage complete at each checkpoint.
-        static public string Percents
+        public static string Percents
         {
             get => GetValue("Percents", ms_DefaultPercents);
             set => SetValue("Percents", value);
         }
         // Get or set how much time passes between updates.
-        static public string Interval
+        public static string Interval
         {
             get => GetValue("Interval", ms_DefaultIncrement);
             set => SetValue("Interval", value);
         }
 
         // Store the file in a location where it can be written with only User rights. (Don't use install directory).
-        static private string StoragePath => Path.Combine(Application.UserAppDataPath, ms_StoredValues);
+        private static string StoragePath => Path.Combine(Application.UserAppDataPath, ms_StoredValues);
 
         // Helper method for getting inner text of named element.
-        static private string GetValue(string name, string defaultValue)
+        private static string GetValue(string name, string defaultValue)
         {
             if (!File.Exists(StoragePath))
                 return defaultValue;
@@ -311,7 +313,7 @@ namespace StreamSplitter
         }
 
         // Helper method for setting inner text of named element.  Creates document if it doesn't exist.
-        static public void SetValue(string name,
+        public static void SetValue(string name,
              string stringValue)
         {
             XmlDocument docXML = new();

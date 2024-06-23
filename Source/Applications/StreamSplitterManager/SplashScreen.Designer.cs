@@ -53,66 +53,64 @@ namespace StreamSplitter
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SplashScreen));
-            this.lblStatus = new System.Windows.Forms.Label();
-            this.pnlStatus = new System.Windows.Forms.Panel();
-            this.lblTimeRemaining = new System.Windows.Forms.Label();
-            this.UpdateTimer = new System.Windows.Forms.Timer(this.components);
-            this.SuspendLayout();
+            lblStatus = new Label();
+            pnlStatus = new Panel();
+            lblTimeRemaining = new Label();
+            UpdateTimer = new Timer(components);
+            SuspendLayout();
             // 
             // lblStatus
             // 
-            this.lblStatus.BackColor = System.Drawing.Color.Transparent;
-            this.lblStatus.Location = new System.Drawing.Point(116, 96);
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(245, 14);
-            this.lblStatus.TabIndex = 0;
-            this.lblStatus.DoubleClick += new System.EventHandler(this.SplashScreen_DoubleClick);
+            lblStatus.BackColor = System.Drawing.Color.Transparent;
+            lblStatus.Location = new System.Drawing.Point(139, 118);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new System.Drawing.Size(294, 17);
+            lblStatus.TabIndex = 0;
+            lblStatus.DoubleClick += SplashScreen_DoubleClick;
             // 
             // pnlStatus
             // 
-            this.pnlStatus.BackColor = System.Drawing.Color.Transparent;
-            this.pnlStatus.Location = new System.Drawing.Point(101, 211);
-            this.pnlStatus.Name = "pnlStatus";
-            this.pnlStatus.Size = new System.Drawing.Size(239, 24);
-            this.pnlStatus.TabIndex = 1;
-            this.pnlStatus.DoubleClick += new System.EventHandler(this.SplashScreen_DoubleClick);
+            pnlStatus.BackColor = System.Drawing.Color.Transparent;
+            pnlStatus.Location = new System.Drawing.Point(121, 260);
+            pnlStatus.Name = "pnlStatus";
+            pnlStatus.Size = new System.Drawing.Size(287, 29);
+            pnlStatus.TabIndex = 1;
+            pnlStatus.DoubleClick += SplashScreen_DoubleClick;
             // 
             // lblTimeRemaining
             // 
-            this.lblTimeRemaining.BackColor = System.Drawing.Color.Transparent;
-            this.lblTimeRemaining.Location = new System.Drawing.Point(127, 184);
-            this.lblTimeRemaining.Name = "lblTimeRemaining";
-            this.lblTimeRemaining.Size = new System.Drawing.Size(182, 24);
-            this.lblTimeRemaining.TabIndex = 2;
-            this.lblTimeRemaining.Text = "Time remaining";
-            this.lblTimeRemaining.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblTimeRemaining.DoubleClick += new System.EventHandler(this.SplashScreen_DoubleClick);
+            lblTimeRemaining.BackColor = System.Drawing.Color.Transparent;
+            lblTimeRemaining.Location = new System.Drawing.Point(152, 226);
+            lblTimeRemaining.Name = "lblTimeRemaining";
+            lblTimeRemaining.Size = new System.Drawing.Size(219, 30);
+            lblTimeRemaining.TabIndex = 2;
+            lblTimeRemaining.Text = "Time remaining";
+            lblTimeRemaining.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            lblTimeRemaining.DoubleClick += SplashScreen_DoubleClick;
             // 
             // UpdateTimer
             // 
-            this.UpdateTimer.Tick += new System.EventHandler(this.UpdateTimer_Tick);
+            UpdateTimer.Tick += UpdateTimer_Tick;
             // 
             // SplashScreen
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-            this.BackColor = System.Drawing.Color.Black;
-            this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.ClientSize = new System.Drawing.Size(600, 244);
-            this.Controls.Add(this.lblTimeRemaining);
-            this.Controls.Add(this.pnlStatus);
-            this.Controls.Add(this.lblStatus);
-            this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "SplashScreen";
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "SplashScreen";
-            this.DoubleClick += new System.EventHandler(this.SplashScreen_DoubleClick);
-            this.ResumeLayout(false);
-
+            AutoScaleBaseSize = new System.Drawing.Size(6, 16);
+            BackColor = System.Drawing.Color.Black;
+            BackgroundImage = (System.Drawing.Image)resources.GetObject("$this.BackgroundImage");
+            BackgroundImageLayout = ImageLayout.Zoom;
+            ClientSize = new System.Drawing.Size(722, 303);
+            Controls.Add(lblTimeRemaining);
+            Controls.Add(pnlStatus);
+            Controls.Add(lblStatus);
+            FormBorderStyle = FormBorderStyle.None;
+            Name = "SplashScreen";
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "SplashScreen";
+            DoubleClick += SplashScreen_DoubleClick;
+            ResumeLayout(false);
         }
         #endregion
 

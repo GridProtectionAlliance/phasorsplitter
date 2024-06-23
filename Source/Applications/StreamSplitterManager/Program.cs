@@ -46,16 +46,7 @@ namespace StreamSplitter
             // Bind service settings to configuration sources
             settings.Bind(new ConfigurationBuilder().ConfigureGemstoneDefaults(settings));
 
-            SplashScreen.ShowSplashScreen();
-            Application.DoEvents();
-
-            SplashScreen.SetStatus("Loading existing configuration...");
-            Thread.Sleep(1000);
-
             StreamSplitterManager manager = new();
-
-            SplashScreen.CloseForm();
-
             Application.Run(manager);
         }
     }

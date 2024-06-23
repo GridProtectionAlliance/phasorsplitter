@@ -300,11 +300,11 @@ namespace StreamSplitter
                 Cursor = Cursors.WaitCursor;
                 ProxyConnections = ProxyConnectionCollection.LoadConfiguration(m_configurationFileName);
 
-                foreach (ProxyConnection connection in m_proxyConnections)
-                {
-                    if (!m_loaded)
-                        SplashScreen.SetStatus("Loading " + connection.Name + "...", true);
-                }
+                //foreach (ProxyConnection connection in m_proxyConnections)
+                //{
+                //    if (!m_loaded)
+                //        SplashScreen.SetStatus("Loading " + connection.Name + "...", true);
+                //}
 
                 ConfigurationSaved = true;
 
