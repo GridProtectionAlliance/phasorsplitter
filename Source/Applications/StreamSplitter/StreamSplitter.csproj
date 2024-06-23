@@ -1,59 +1,76 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <ApplicationIcon>StreamSplitter.ico</ApplicationIcon>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Web</InstallFrom>
-    <UpdateEnabled>true</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>StreamSplitter</RootNamespace>
+    <Authors>Grid Protection Alliance</Authors>
+    <Company>Grid Protection Alliance</Company>
+    <Product>StreamSplitter</Product>
+    <PackageId>StreamSplitter2.0</PackageId>
+    <Description>Synchrophasor Stream Splitter</Description>
+    <Copyright>Copyright © 2024</Copyright>
+    <PackageProjectUrl>https://github.com/GridProtectionAlliance/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/GridProtectionAlliance/phasorsplitter</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <LangVersion>latest</LangVersion>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UseWindowsForms>true</UseWindowsForms>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Version>2.0.0</Version>
+    <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
+    <InformationalVersion Condition="'$(Configuration)'=='Release'">2.0.0 -- Release Build</InformationalVersion>
+    <InformationalVersion Condition="'$(Configuration)'!='Release'">2.0.0 -- Debug Build</InformationalVersion>
+    <Configurations>Debug;Release;Development</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\..\Build\Output\Debug\Applications\StreamSplitter\</OutputPath>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>..\..\..\Build\Output\Release\Applications\StreamSplitter\</OutputPath>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Update="ServiceHost.cs">
-      <SubType>Component</SubType>
-    </Compile>
-  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>..\..\..\Build\Output\Debug\Applications\StreamSplitter\</OutputPath>
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Development'">
+    <OutputPath>..\..\..\Build\Output\Debug\Applications\StreamSplitter\</OutputPath>
+    <DebugType>Full</DebugType>
+    <Optimize>False</Optimize>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="StreamSplitter.ico" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Gemstone.Common" Version="1.0.120" />
     <PackageReference Include="Gemstone.Communication" Version="1.0.120" />
+    <PackageReference Include="Gemstone.Configuration" Version="1.0.120" />
+    <PackageReference Include="Gemstone.Data" Version="1.0.120" />
     <PackageReference Include="Gemstone.Diagnostics" Version="1.0.120" />
     <PackageReference Include="Gemstone.PhasorProtocols" Version="1.0.120" />
     <PackageReference Include="Gemstone.Timeseries" Version="1.0.120" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\StreamSplitterLibrary\StreamSplitterLibrary.csproj" />
+    <ProjectReference Include="..\StreamSplitter.WebUI\StreamSplitter.WebUI.csproj" />
   </ItemGroup>
+
   <Target Name="AfterBuild">
     <CallTarget Targets="SignBuild" />
   </Target>
+
   <Target Name="SignBuild" Condition="'$(SIGNTOOL)' != ''">
     <Exec Command="$(SIGNTOOL) $(TargetPath)" />
   </Target>
+
   <PropertyGroup />
 </Project>

@@ -21,34 +21,98 @@
 //
 //******************************************************************************************************
 
-#if !DEBUG
-#define RunAsService
+#if RELEASE
+using Microsoft.Extensions.Logging.EventLog;
 #endif
 
-#if RunAsService
-using System.ServiceProcess;
-#else
-using System.Windows.Forms;
-#endif
+using Gemstone.Configuration;
+using Gemstone.Diagnostics;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Debug;
+using Microsoft.Extensions.Logging;
 
-namespace StreamSplitter
+namespace StreamSplitter;
+
+internal class Program
 {
-    static class Program
+    private static void Main(string[] args)
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        static void Main()
+        // Define settings for the service. Note that the Gemstone defaults
+        // for handling INI and SQLite configuration are defined in a hierarchy
+        // where the configuration settings are loaded are in the following
+        // priority order, from lowest to highest:
+        // - INI file (defaults.ini) - Machine Level, %programdata% folder
+        // - INI file (settings.ini) - Machine Level, %programdata% folder
+        // - SQLite database (settings.db) - User Level, %appdata% folder (not used by service)
+        // - Environment variables - Machine Level
+        // - Environment variables - User Level
+        // - Command line arguments
+        Settings settings = new()
         {
-#if RunAsService
-            // Run as Windows Service.
-            ServiceBase.Run(new ServiceBase[] { new ServiceHost() });
+            INIFile = ConfigurationOperation.ReadWrite,
+            SQLite = ConfigurationOperation.Disabled
+        };
+
+        // Define settings for service components
+        ServiceHost.DefineSettings(settings);
+
+        // Bind settings to configuration sources
+        settings.Bind(new ConfigurationBuilder()
+            .ConfigureGemstoneDefaults(settings)
+            .AddCommandLine(args, settings.SwitchMappings));
+
+        HostApplicationBuilderSettings appSettings = new()
+        {
+            Args = args,
+            ApplicationName = nameof(StreamSplitter),
+            DisableDefaults = true,
+        };
+
+        HostApplicationBuilder application = new(appSettings);
+
+        application.Services.AddWindowsService(options =>
+        {
+            options.ServiceName = appSettings.ApplicationName;
+        });
+
+        application.Services.AddHostedService<ServiceHost>();
+
+        ConfigureLogging(application.Logging);
+
+        IHost host = application.Build();
+        host.Run();
+
+#if DEBUG
+        Settings.Save(forceSave: true);
 #else
-            // Run as Windows Application.
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new DebugHost());
+        Settings.Save();
 #endif
+    }
+
+    internal static void ConfigureLogging(ILoggingBuilder builder)
+    {
+        builder.ClearProviders();
+        builder.SetMinimumLevel(LogLevel.Information);
+
+        builder.AddFilter("Microsoft", LogLevel.Warning);
+        builder.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Error);
+        builder.AddFilter<DebugLoggerProvider>("", LogLevel.Debug);
+        builder.AddFilter<DiagnosticsLoggerProvider>("", LogLevel.Trace);
+
+        builder.AddConsole(options => options.LogToStandardErrorThreshold = LogLevel.Error);
+        builder.AddDebug();
+
+        // Add Gemstone diagnostics logging
+        builder.AddGemstoneDiagnostics();
+
+#if RELEASE
+        if (OperatingSystem.IsWindows())
+        {
+            builder.AddFilter<EventLogLoggerProvider>("Application", LogLevel.Warning);
+            builder.AddEventLog();
         }
+#endif
     }
 }

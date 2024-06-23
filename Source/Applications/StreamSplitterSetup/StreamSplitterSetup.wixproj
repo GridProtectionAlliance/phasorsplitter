@@ -45,14 +45,6 @@
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
-    <ProjectReference Include="..\StreamSplitterConsole\StreamSplitterConsole.csproj">
-      <Name>StreamSplitterConsole</Name>
-      <Project>{514c1869-c4fe-4e5c-9578-02fe97b82ad1}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
     <ProjectReference Include="..\StreamSplitterManager\StreamSplitterManager.csproj">
       <Name>StreamSplitterManager</Name>
       <Project>{e4a3fc2e-4d4c-4a9b-a1d5-1b95bbc33e90}</Project>
