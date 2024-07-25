@@ -335,30 +335,18 @@ namespace StreamSplitter
             {
                 StringBuilder status = new();
 
-                status.AppendFormat("        Stream Splitter ID: {0}", ID);
-                status.AppendLine();
-                status.AppendFormat("    Total process run time: {0}", RunTime.ToString(2));
-                status.AppendLine();
-                status.AppendFormat("          Total bytes sent: {0:N0}", TotalBytesSent);
-                status.AppendLine();
+                status.AppendLine($"        Stream Splitter ID: {ID:N0}");
+                status.AppendLine($"    Total process run time: {RunTime.ToString(2)}");
+                status.AppendLine($"          Total bytes sent: {TotalBytesSent:N0}");
 
                 if (m_dataStreamMonitor is not null)
-                {
-                    status.AppendFormat("No data reconnect interval: {0:0.000} seconds", Ticks.FromMilliseconds(m_dataStreamMonitor.Interval).ToSeconds());
-                    status.AppendLine();
-                }
+                    status.AppendLine($"No data reconnect interval: {Ticks.FromMilliseconds(m_dataStreamMonitor.Interval).ToSeconds():N3} seconds");
 
                 if (m_configurationFrame is not null)
-                {
-                    status.AppendFormat("  Configuration frame size: {0:N0} bytes", m_configurationFrame.BinaryLength);
-                    status.AppendLine();
-                }
+                    status.AppendLine($"  Configuration frame size: {m_configurationFrame.BinaryLength:N0} bytes");
 
                 if (m_configurationFrame3 is not null)
-                {
-                    status.AppendFormat(" Configuration frame3 size: {0:N0} bytes", m_configurationFrame3.BinaryLength);
-                    status.AppendLine();
-                }
+                    status.AppendLine($" Configuration frame3 size: {m_configurationFrame3.BinaryLength:N0} bytes");
 
                 if (m_frameParser is not null)
                     status.Append(m_frameParser.Status);
@@ -377,12 +365,10 @@ namespace StreamSplitter
                     if (clientIDs is { Length: > 0 })
                     {
                         status.AppendLine();
-                        status.AppendFormat("TCP publish channel has {0:N0} connected clients:\r\n\r\n", clientIDs.Length);
+                        status.Append($"TCP publish channel has {clientIDs.Length:N0} connected clients:\r\n\r\n");
 
                         for (int i = 0; i < clientIDs.Length; i++)
-                        {
-                            status.AppendFormat("    {0}) {1}\r\n", i + 1, GetConnectionID(tcpPublishChannel, clientIDs[i]));
-                        }
+                            status.Append($"    {i + 1}) {GetConnectionID(tcpPublishChannel, clientIDs[i])}\r\n");
 
                         status.AppendLine();
                     }
@@ -396,8 +382,7 @@ namespace StreamSplitter
                     status.Append(m_clientBasedPublishChannel.Status);
                 }
 
-                return status.ToString();
-            }
+                return status.ToString();            }
         }
 
         /// <summary>
@@ -919,22 +904,12 @@ namespace StreamSplitter
             // Attempt to lookup remote connection identification for logging purposes
             try
             {
-                IPEndPoint remoteEndPoint = null;
-
-                switch (server)
+                IPEndPoint remoteEndPoint = server switch
                 {
-                    case TcpServer commandChannel:
-                    {
-                        if (commandChannel.TryGetClient(clientID, out TransportProvider<Socket> tcpClient))
-                            remoteEndPoint = tcpClient.Provider?.RemoteEndPoint as IPEndPoint;
-                        break;
-                    }
-                    case UdpServer dataChannel when dataChannel.TryGetClient(clientID, out TransportProvider<EndPoint> udpClient):
-                    {
-                        remoteEndPoint = udpClient.Provider as IPEndPoint;
-                        break;
-                    }
-                }
+                    TcpServer commandChannel when commandChannel.TryGetClient(clientID, out TransportProvider<Socket> tcpClient) && tcpClient is not null => tcpClient.Provider?.RemoteEndPoint as IPEndPoint,
+                    UdpServer dataChannel when dataChannel.TryGetClient(clientID, out TransportProvider<EndPoint> udpClient) && udpClient is not null => udpClient.Provider as IPEndPoint,
+                    _ => null
+                };
 
                 if (remoteEndPoint is not null)
                 {
