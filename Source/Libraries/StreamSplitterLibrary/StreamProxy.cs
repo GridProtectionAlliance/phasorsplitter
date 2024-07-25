@@ -249,6 +249,7 @@ namespace StreamSplitter
                 return m_accessIDList?.Length > 0 ? m_accessIDList[0] : (ushort)1;
             }
         }
+
         private int ServerIndex => m_frameParser?.ServerIndex ?? 0;
 
         /// <summary>
@@ -644,13 +645,18 @@ namespace StreamSplitter
                     string[] parts = server.Split(['/'], StringSplitOptions.RemoveEmptyEntries);
 
                     if (parts.Length == 0)
-                        continue;
+                    {
+                        serverList.Add(server);
+                        accessIDList.Add(defaultAccessID);
+                    }
+                    else
+                    {
+                        if (parts.Length < 2 || !ushort.TryParse(parts[1], out ushort accessID))
+                            accessID = defaultAccessID;
 
-                    if (parts.Length < 2 || !ushort.TryParse(parts[1], out ushort accessID))
-                        accessID = defaultAccessID;
-
-                    serverList.Add(parts[0].Trim());
-                    accessIDList.Add(accessID);
+                        serverList.Add(parts[0].Trim());
+                        accessIDList.Add(accessID);
+                    }
                 }
 
                 sourceSettings["server"] = string.Join(",", serverList);
