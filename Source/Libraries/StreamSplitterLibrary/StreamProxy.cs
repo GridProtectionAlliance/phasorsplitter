@@ -382,7 +382,8 @@ namespace StreamSplitter
                     status.Append(m_clientBasedPublishChannel.Status);
                 }
 
-                return status.ToString();            }
+                return status.ToString();
+            }
         }
 
         /// <summary>
@@ -629,19 +630,11 @@ namespace StreamSplitter
                 {
                     string[] parts = server.Split(['/'], StringSplitOptions.RemoveEmptyEntries);
 
-                    if (parts.Length == 0)
-                    {
-                        serverList.Add(server);
-                        accessIDList.Add(defaultAccessID);
-                    }
-                    else
-                    {
-                        if (parts.Length < 2 || !ushort.TryParse(parts[1], out ushort accessID))
-                            accessID = defaultAccessID;
+                    if (parts.Length < 2 || !ushort.TryParse(parts[1], out ushort accessID))
+                        accessID = defaultAccessID;
 
-                        serverList.Add(parts[0].Trim());
-                        accessIDList.Add(accessID);
-                    }
+                    serverList.Add(parts[0].Trim());
+                    accessIDList.Add(accessID);
                 }
 
                 sourceSettings["server"] = string.Join(",", serverList);
@@ -1000,7 +993,7 @@ namespace StreamSplitter
                                 else
                                     m_clientBasedPublishChannel?.SendAsync(frameImage, 0, frameImage.Length);
                             }
-                            
+
                             foreach (byte[] frame in m_configurationFrame3.BinaryImageFrames)
                                 publishFrame(frame);
 
@@ -1307,8 +1300,8 @@ namespace StreamSplitter
             if (!HandleException(ex))
                 return;
 
-            OnProcessException(ex is SocketException ? 
-                new InvalidOperationException($"Socket exception occurred on the UDP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex) : 
+            OnProcessException(ex is SocketException ?
+                new InvalidOperationException($"Socket exception occurred on the UDP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex) :
                 new InvalidOperationException($"UDP publication channel exception occurred while sending client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
         }
 
@@ -1359,8 +1352,8 @@ namespace StreamSplitter
             if (!HandleException(ex))
                 return;
 
-            OnProcessException(ex is SocketException ? 
-                new InvalidOperationException($"Socket exception occurred on the TCP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex) : 
+            OnProcessException(ex is SocketException ?
+                new InvalidOperationException($"Socket exception occurred on the TCP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex) :
                 new InvalidOperationException($"TCP publication channel exception occurred while sending client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
         }
 
@@ -1422,8 +1415,8 @@ namespace StreamSplitter
             if (!HandleException(ex))
                 return;
 
-            OnProcessException(ex is SocketException ? 
-                new InvalidOperationException($"Socket exception occurred on the TCP publication client channel while attempting to send client data to TCP listening server \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex) : 
+            OnProcessException(ex is SocketException ?
+                new InvalidOperationException($"Socket exception occurred on the TCP publication client channel while attempting to send client data to TCP listening server \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex) :
                 new InvalidOperationException($"TCP publication client channel exception occurred while sending client data to TCP listening server \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex));
         }
 
