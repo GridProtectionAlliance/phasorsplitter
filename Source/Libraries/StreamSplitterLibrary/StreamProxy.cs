@@ -85,9 +85,8 @@ namespace StreamSplitter
         // Fields
         private string m_name;
         private Guid m_id;
-        private string m_sourceSettings;
-        private string m_proxySettings;
         private MultiProtocolFrameParser m_frameParser;
+        private ushort[] m_accessIDList;
         private IServer m_publishChannel;
         private TcpClient m_clientBasedPublishChannel;
         private Timer m_dataStreamMonitor;
@@ -96,18 +95,15 @@ namespace StreamSplitter
         private int m_lastConfigurationPublishMinute;
         private bool m_configurationFramePublished;
         private long m_receivedConfigurationFrames;
-        private readonly StreamProxyStatus m_streamProxyStatus;
         private readonly ConcurrentDictionary<Guid, string> m_connectionIDCache;
         private readonly object m_startStopLock;
         private long m_startTime;
         private long m_stopTime;
         private long m_bytesReceived;
-        private long m_totalBytesSent;
         private readonly double m_socketErrorReportingInterval;
         private int m_lastSocketErrorNumber;
         private long m_lastSocketErrorTime;
         private volatile bool m_enabled;
-        private bool m_disposed;
 
         #endregion
 
@@ -137,6 +133,7 @@ namespace StreamSplitter
             m_frameParser.ReceivedFrameBufferImage += m_frameParser_ReceivedFrameBufferImage;
             m_frameParser.ServerStarted += m_frameParser_ServerStarted;
             m_frameParser.ServerStopped += m_frameParser_ServerStopped;
+            m_frameParser.ServerIndexUpdated += m_frameParser_ServerIndexUpdated;
 
             // Create data stream monitoring timer
             m_dataStreamMonitor = new Timer();
@@ -155,7 +152,7 @@ namespace StreamSplitter
             m_id = proxyConnection.ID;
 
             // Maintain a current status for the stream proxy
-            m_streamProxyStatus = new StreamProxyStatus(m_id);
+            StreamProxyStatus = new StreamProxyStatus(m_id);
 
             // Initialize stream splitter based on new proxy connection settings
             ProxyConnection = proxyConnection;
@@ -213,7 +210,7 @@ namespace StreamSplitter
         /// <summary>
         /// Gets the current proxy connection status.
         /// </summary>
-        public StreamProxyStatus StreamProxyStatus => m_streamProxyStatus;
+        public StreamProxyStatus StreamProxyStatus { get; }
 
         /// <summary>
         /// Gets or sets name associated with the <see cref="StreamProxy"/>.
@@ -234,22 +231,36 @@ namespace StreamSplitter
         }
 
         /// <summary>
+        /// Gets the access ID (a.k.a., ID code) for this device connection. Value is often necessary in order to make a connection to some phasor protocols.
+        /// </summary>
+        /// <remarks>
+        /// This value can mutate when configured with multiple values, i.e., where an alternate access ID code is specified for a target device connection, e.g.:
+        /// <c>accessID=95; server=192.168.1.10:4712,192.168.1.12:4712/96,192.168.2.10:4712,192.168.2.12:4712/96</c>
+        /// In this example both <c>192.168.1.10:4712</c> and <c>192.168.2.10:4712</c> use the configured access ID of 95, but
+        /// <c>192.168.1.12:4712/96</c> and <c>192.168.2.12:4712/96</c> specify an access ID of 96.
+        /// </remarks>
+        public ushort AccessID
+        {
+            get
+            {
+                if (ServerIndex >= 0 && ServerIndex < m_accessIDList?.Length)
+                    return m_accessIDList[ServerIndex];
+
+                return m_accessIDList?.Length > 0 ? m_accessIDList[0] : (ushort)1;
+            }
+        }
+
+        private int ServerIndex => m_frameParser?.ServerIndex ?? 0;
+
+        /// <summary>
         /// Gets or sets connection string used for <see cref="MultiProtocolFrameParser"/> data source.
         /// </summary>
-        public string SourceSettings
-        {
-            get => m_sourceSettings;
-            set => m_sourceSettings = value;
-        }
+        public string SourceSettings { get; set; }
 
         /// <summary>
         /// Gets or sets connection string for TCP or UCP socket instance used to proxy synchrophasor frames.
         /// </summary>
-        public string ProxySettings
-        {
-            get => m_proxySettings;
-            set => m_proxySettings = value;
-        }
+        public string ProxySettings { get; set; }
 
         /// <summary>
         /// Gets or sets the current enabled state of <see cref="StreamProxy"/>.
@@ -257,7 +268,7 @@ namespace StreamSplitter
         /// <returns>Current enabled state of <see cref="StreamProxy"/>.</returns>
         /// <remarks>
         /// Splitter must be started by calling <see cref="Start"/> method or setting
-        /// <c><see cref="Enabled"/> = true</c>) before data splitting will begin.
+        /// <c><see cref="Enabled"/> = true</c> before data splitting will begin.
         /// </remarks>
         public virtual bool Enabled
         {
@@ -274,12 +285,12 @@ namespace StreamSplitter
         /// <summary>
         /// Gets a flag that indicates whether the object has been disposed.
         /// </summary>
-        public bool IsDisposed => m_disposed;
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Gets the total number of bytes sent to clients of this <see cref="StreamProxy"/>.
         /// </summary>
-        public long TotalBytesSent => m_totalBytesSent;
+        public long TotalBytesSent { get; private set; }
 
         /// <summary>
         /// Gets the UTC time the <see cref="StreamProxy"/> was started.
@@ -324,30 +335,18 @@ namespace StreamSplitter
             {
                 StringBuilder status = new();
 
-                status.AppendFormat("        Stream Splitter ID: {0}", ID);
-                status.AppendLine();
-                status.AppendFormat("    Total process run time: {0}", RunTime);
-                status.AppendLine();
-                status.AppendFormat("          Total bytes sent: {0}", m_totalBytesSent);
-                status.AppendLine();
+                status.AppendLine($"        Stream Splitter ID: {ID:N0}");
+                status.AppendLine($"    Total process run time: {RunTime.ToString(2)}");
+                status.AppendLine($"          Total bytes sent: {TotalBytesSent:N0}");
 
                 if (m_dataStreamMonitor is not null)
-                {
-                    status.AppendFormat("No data reconnect interval: {0} seconds", Ticks.FromMilliseconds(m_dataStreamMonitor.Interval).ToSeconds().ToString("0.000"));
-                    status.AppendLine();
-                }
+                    status.AppendLine($"No data reconnect interval: {Ticks.FromMilliseconds(m_dataStreamMonitor.Interval).ToSeconds():N3} seconds");
 
                 if (m_configurationFrame is not null)
-                {
-                    status.AppendFormat("  Configuration frame size: {0} bytes", m_configurationFrame.BinaryLength);
-                    status.AppendLine();
-                }
+                    status.AppendLine($"  Configuration frame size: {m_configurationFrame.BinaryLength:N0} bytes");
 
                 if (m_configurationFrame3 is not null)
-                {
-                    status.AppendFormat(" Configuration frame3 size: {0} bytes", m_configurationFrame3.BinaryLength);
-                    status.AppendLine();
-                }
+                    status.AppendLine($" Configuration frame3 size: {m_configurationFrame3.BinaryLength:N0} bytes");
 
                 if (m_frameParser is not null)
                     status.Append(m_frameParser.Status);
@@ -363,15 +362,13 @@ namespace StreamSplitter
 
                     Guid[] clientIDs = tcpPublishChannel?.ClientIDs;
 
-                    if (clientIDs != null && clientIDs.Length > 0)
+                    if (clientIDs is { Length: > 0 })
                     {
                         status.AppendLine();
-                        status.AppendFormat("TCP publish channel has {0} connected clients:\r\n\r\n", clientIDs.Length);
+                        status.Append($"TCP publish channel has {clientIDs.Length:N0} connected clients:\r\n\r\n");
 
                         for (int i = 0; i < clientIDs.Length; i++)
-                        {
-                            status.AppendFormat("    {0}) {1}\r\n", i + 1, GetConnectionID(tcpPublishChannel, clientIDs[i]));
-                        }
+                            status.Append($"    {i + 1}) {GetConnectionID(tcpPublishChannel, clientIDs[i])}\r\n");
 
                         status.AppendLine();
                     }
@@ -558,44 +555,43 @@ namespace StreamSplitter
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (m_disposed)
+            if (IsDisposed)
                 return;
 
             try
             {
-                if (disposing)
+                if (!disposing)
+                    return;
+
+                TcpPublishChannel = null;
+                UdpPublishChannel = null;
+                TcpClientPublishChannel = null;
+
+                if (m_frameParser is not null)
                 {
-                    TcpPublishChannel = null;
-                    UdpPublishChannel = null;
-                    TcpClientPublishChannel = null;
+                    m_frameParser.ConnectionAttempt -= m_frameParser_ConnectionAttempt;
+                    m_frameParser.ConnectionEstablished -= m_frameParser_ConnectionEstablished;
+                    m_frameParser.ConnectionException -= m_frameParser_ConnectionException;
+                    m_frameParser.ConnectionTerminated -= m_frameParser_ConnectionTerminated;
+                    m_frameParser.ConfigurationChanged -= m_frameParser_ConfigurationChanged;
+                    m_frameParser.ParsingException -= m_frameParser_ParsingException;
+                    m_frameParser.ExceededParsingExceptionThreshold -= m_frameParser_ExceededParsingExceptionThreshold;
+                    m_frameParser.ReceivedConfigurationFrame -= m_frameParser_ReceivedConfigurationFrame;
+                    m_frameParser.ReceivedFrameBufferImage -= m_frameParser_ReceivedFrameBufferImage;
+                    m_frameParser.Dispose();
+                    m_frameParser = null;
+                }
 
-                    if (m_frameParser is not null)
-                    {
-                        m_frameParser.ConnectionAttempt -= m_frameParser_ConnectionAttempt;
-                        m_frameParser.ConnectionEstablished -= m_frameParser_ConnectionEstablished;
-                        m_frameParser.ConnectionException -= m_frameParser_ConnectionException;
-                        m_frameParser.ConnectionTerminated -= m_frameParser_ConnectionTerminated;
-                        m_frameParser.ConfigurationChanged -= m_frameParser_ConfigurationChanged;
-                        m_frameParser.ParsingException -= m_frameParser_ParsingException;
-                        m_frameParser.ExceededParsingExceptionThreshold -= m_frameParser_ExceededParsingExceptionThreshold;
-                        m_frameParser.ReceivedConfigurationFrame -= m_frameParser_ReceivedConfigurationFrame;
-                        m_frameParser.ReceivedFrameBufferImage -= m_frameParser_ReceivedFrameBufferImage;
-                        m_frameParser.Dispose();
-                        m_frameParser = null;
-                    }
-
-                    if (m_dataStreamMonitor is not null)
-                    {
-                        m_dataStreamMonitor.Elapsed -= m_dataStreamMonitor_Elapsed;
-                        m_dataStreamMonitor.Dispose();
-                        m_dataStreamMonitor = null;
-                    }
+                if (m_dataStreamMonitor is not null)
+                {
+                    m_dataStreamMonitor.Elapsed -= m_dataStreamMonitor_Elapsed;
+                    m_dataStreamMonitor.Dispose();
+                    m_dataStreamMonitor = null;
                 }
             }
             finally
             {
-                m_disposed = true;  // Prevent duplicate dispose.
-
+                IsDisposed = true;  // Prevent duplicate dispose.
                 Disposed?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -605,7 +601,7 @@ namespace StreamSplitter
         /// </summary>
         public void Initialize()
         {
-            // Update connection information for the multi-protocol frame parser
+            // Update connection information for the multiprotocol frame parser
             m_frameParser.ConnectionString = SourceSettings;
 
             Dictionary<string, string> sourceSettings = m_frameParser.ConnectionString.ParseKeyValuePairs();
@@ -615,11 +611,40 @@ namespace StreamSplitter
             if (sourceSettings.TryGetValue("dataMonitorInterval", out string setting) && double.TryParse(setting, out double value) && m_dataStreamMonitor is not null)
                 m_dataStreamMonitor.Interval = value;
 
-            // TODO: These should be optionally picked up from connection string inside of MPFP
+            // TODO: These should be optionally picked up from connection string inside MPFP
 
             // Apply other settings as needed
-            if (sourceSettings.TryGetValue("accessID", out setting))
-                m_frameParser.DeviceID = ushort.Parse(setting);
+            if (!sourceSettings.TryGetValue("accessID", out setting) || string.IsNullOrWhiteSpace(setting) || !ushort.TryParse(setting, out ushort defaultAccessID))
+                defaultAccessID = 1;
+
+            m_frameParser.DeviceID = defaultAccessID;
+
+            // Parse any defined access IDs from server list, this assumes TCP connection since this is currently the only connection type that supports multiple end points
+            if (sourceSettings.TryGetValue("server", out setting) && !string.IsNullOrWhiteSpace(setting))
+            {
+                List<string> serverList = [];
+                List<ushort> accessIDList = [];
+                string[] servers = setting.Split([','], StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string server in servers)
+                {
+                    string[] parts = server.Split(['/'], StringSplitOptions.RemoveEmptyEntries);
+
+                    if (parts.Length < 2 || !ushort.TryParse(parts[1], out ushort accessID))
+                        accessID = defaultAccessID;
+
+                    serverList.Add(parts[0].Trim());
+                    accessIDList.Add(accessID);
+                }
+
+                sourceSettings["server"] = string.Join(",", serverList);
+                m_frameParser.ConnectionString = sourceSettings.JoinKeyValuePairs();
+                m_accessIDList = accessIDList.Count == 0 ? [defaultAccessID] : accessIDList.ToArray();
+            }
+            else
+            {
+                m_accessIDList = [defaultAccessID];
+            }
 
             if (sourceSettings.TryGetValue("simulateTimestamp", out setting))
                 m_frameParser.InjectSimulatedTimestamp = setting.ParseBoolean();
@@ -698,14 +723,14 @@ namespace StreamSplitter
                     // Start multi-protocol frame parser
                     m_frameParser?.Start();
 
-                    if (!m_enabled)
-                    {
-                        m_stopTime = 0;
-                        m_startTime = DateTime.UtcNow.Ticks;
+                    if (m_enabled)
+                        return;
 
-                        // Start real-time frame publication
-                        m_enabled = true;
-                    }
+                    m_stopTime = 0;
+                    m_startTime = DateTime.UtcNow.Ticks;
+
+                    // Start real-time frame publication
+                    m_enabled = true;
                 }
                 catch (Exception ex)
                 {
@@ -723,7 +748,7 @@ namespace StreamSplitter
             {
                 try
                 {
-                    m_streamProxyStatus.ConnectionState = ConnectionState.Disabled;
+                    StreamProxyStatus.ConnectionState = ConnectionState.Disabled;
 
                     // Stop data stream monitor
                     if (m_dataStreamMonitor is not null)
@@ -808,8 +833,7 @@ namespace StreamSplitter
         {
             try
             {
-                m_streamProxyStatus.AppendStatusMessage(status);
-
+                StreamProxyStatus.AppendStatusMessage(status);
                 StatusMessage?.Invoke(this, new EventArgs<string>(status));
             }
             catch (Exception ex)
@@ -832,9 +856,7 @@ namespace StreamSplitter
             try
             {
                 string status = string.Format(formattedStatus, args);
-
-                m_streamProxyStatus.AppendStatusMessage(status);
-
+                StreamProxyStatus.AppendStatusMessage(status);
                 StatusMessage?.Invoke(this, new EventArgs<string>(status));
             }
             catch (Exception ex)
@@ -853,8 +875,7 @@ namespace StreamSplitter
         /// </remarks>
         protected virtual void OnProcessException(Exception processException)
         {
-            m_streamProxyStatus.AppendStatusMessage("ERROR: " + processException.Message);
-
+            StreamProxyStatus.AppendStatusMessage("ERROR: " + processException.Message);
             ProcessException?.Invoke(this, new EventArgs<Exception>(processException));
         }
 
@@ -876,18 +897,12 @@ namespace StreamSplitter
             // Attempt to lookup remote connection identification for logging purposes
             try
             {
-                IPEndPoint remoteEndPoint = null;
-
-                if (server is TcpServer commandChannel)
+                IPEndPoint remoteEndPoint = server switch
                 {
-                    if (commandChannel.TryGetClient(clientID, out TransportProvider<Socket> tcpClient))
-                        remoteEndPoint = tcpClient.Provider?.RemoteEndPoint as IPEndPoint;
-                }
-                else
-                {
-                    if (server is UdpServer dataChannel && dataChannel.TryGetClient(clientID, out TransportProvider<EndPoint> udpClient))
-                        remoteEndPoint = udpClient.Provider as IPEndPoint;
-                }
+                    TcpServer commandChannel when commandChannel.TryGetClient(clientID, out TransportProvider<Socket> tcpClient) && tcpClient is not null => tcpClient.Provider?.RemoteEndPoint as IPEndPoint,
+                    UdpServer dataChannel when dataChannel.TryGetClient(clientID, out TransportProvider<EndPoint> udpClient) && udpClient is not null => udpClient.Provider as IPEndPoint,
+                    _ => null
+                };
 
                 if (remoteEndPoint is not null)
                 {
@@ -941,7 +956,7 @@ namespace StreamSplitter
             {
                 ICommandFrame commandFrame = m_frameParser.PhasorProtocol switch
                 {
-                    PhasorProtocol.IEEEC37_118V2 or PhasorProtocol.IEEEC37_118V1 or PhasorProtocol.IEEEC37_118D6 => new GSF.PhasorProtocols.IEEEC37_118.CommandFrame(commandBuffer, 0, length),
+                    PhasorProtocol.IEEEC37_118V2 or PhasorProtocol.IEEEC37_118V1 or PhasorProtocol.IEEEC37_118D6 => new CommandFrame(commandBuffer, 0, length),
                     PhasorProtocol.IEEE1344 => new GSF.PhasorProtocols.IEEE1344.CommandFrame(commandBuffer, 0, length),
                     PhasorProtocol.SelFastMessage => new GSF.PhasorProtocols.SelFastMessage.CommandFrame(commandBuffer, 0, length),
                     PhasorProtocol.IEC61850_90_5 => new GSF.PhasorProtocols.IEC61850_90_5.CommandFrame(commandBuffer, 0, length),
@@ -960,9 +975,7 @@ namespace StreamSplitter
                             if (m_publishChannel is not null)
                                 m_publishChannel.SendToAsync(clientID, m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
                             else
-                            {
                                 m_clientBasedPublishChannel?.SendAsync(m_configurationFrame.BinaryImage(), 0, m_configurationFrame.BinaryLength);
-                            }
 
                             OnStatusMessage("Received request for \"{0}\" from \"{1}\" - frame was returned.", commandFrame.Command, connectionID);
                         }
@@ -978,11 +991,9 @@ namespace StreamSplitter
                                 if (m_publishChannel is not null)
                                     m_publishChannel.SendToAsync(clientID, frameImage, 0, frameImage.Length);
                                 else
-                                {
                                     m_clientBasedPublishChannel?.SendAsync(frameImage, 0, frameImage.Length);
-                                }
                             }
-                            
+
                             foreach (byte[] frame in m_configurationFrame3.BinaryImageFrames)
                                 publishFrame(frame);
 
@@ -991,7 +1002,7 @@ namespace StreamSplitter
                         break;
                     case DeviceCommand.EnableRealTimeData:
                     case DeviceCommand.DisableRealTimeData:
-                        // We ignore these commands without message, these commands are normally sent by synchrophasor devices
+                        // We ignore these commands without message, these commands are normally sent by synchrophasor devices,
                         // but we do not allow stream control in a proxy situation
                         break;
                     default:
@@ -1019,6 +1030,9 @@ namespace StreamSplitter
                 // If we've received no data in the last time-span, we restart connect cycle...
                 m_dataStreamMonitor.Enabled = false;
                 OnStatusMessage("\r\nNo data received in {0} seconds, restarting connect cycle...\r\n", (m_dataStreamMonitor.Interval / 1000.0D).ToString("0.0"));
+
+                // Ask to move to next server, if available
+                m_frameParser.RequestNextServerIndex();
                 Start();
             }
 
@@ -1027,24 +1041,28 @@ namespace StreamSplitter
 
         private bool HandleException(Exception ex)
         {
-            if (ex is SocketException socketEx)
+            while (true)
             {
-                if (m_lastSocketErrorNumber == socketEx.ErrorCode)
+                if (ex is SocketException socketEx)
                 {
-                    // Suppress exception if we are within reporting interval
-                    if (DateTime.UtcNow.Ticks - m_lastSocketErrorTime <= Ticks.FromSeconds(m_socketErrorReportingInterval))
-                        return false;
+                    if (m_lastSocketErrorNumber == socketEx.ErrorCode)
+                    {
+                        // Suppress exception if we are within reporting interval
+                        if (DateTime.UtcNow.Ticks - m_lastSocketErrorTime <= Ticks.FromSeconds(m_socketErrorReportingInterval))
+                            return false;
+                    }
+
+                    m_lastSocketErrorNumber = socketEx.ErrorCode;
+                    m_lastSocketErrorTime = DateTime.UtcNow.Ticks;
+                }
+                else if (ex.InnerException is not null)
+                {
+                    ex = ex.InnerException;
+                    continue;
                 }
 
-                m_lastSocketErrorNumber = socketEx.ErrorCode;
-                m_lastSocketErrorTime = DateTime.UtcNow.Ticks;
+                return true;
             }
-            else if (ex.InnerException is not null)
-            {
-                return HandleException(ex.InnerException);
-            }
-
-            return true;
         }
 
         #region [ Frame Parser Event Handlers ]
@@ -1062,16 +1080,16 @@ namespace StreamSplitter
                 m_receivedConfigurationFrames++;
 
             // As soon as we start receiving data frames and a config frame exists, we change proxy connection status to "Connected" instead of "ConnectedNoData"
-            if (m_streamProxyStatus.ConnectionState == ConnectionState.ConnectedNoData && e.Argument1 == FundamentalFrameType.DataFrame && m_configurationFrame is not null)
+            if (StreamProxyStatus.ConnectionState == ConnectionState.ConnectedNoData && e.Argument1 == FundamentalFrameType.DataFrame && m_configurationFrame is not null)
             {
                 if (m_clientBasedPublishChannel is not null)
                 {
                     if (m_clientBasedPublishChannel.CurrentState == ClientState.Connected)
-                        m_streamProxyStatus.ConnectionState = ConnectionState.Connected;
+                        StreamProxyStatus.ConnectionState = ConnectionState.Connected;
                 }
                 else
                 {
-                    m_streamProxyStatus.ConnectionState = ConnectionState.Connected;
+                    StreamProxyStatus.ConnectionState = ConnectionState.Connected;
                 }
             }
 
@@ -1105,7 +1123,7 @@ namespace StreamSplitter
                             OnProcessException(new InvalidOperationException($"Server based publication channel exception during proxy output: {ex.Message}", ex));
                         }
 
-                        m_totalBytesSent += image.Length;
+                        TotalBytesSent += image.Length;
 
                         // Sleep for a moment between config frame and data frame transmissions
                         Thread.Sleep(1);
@@ -1144,7 +1162,7 @@ namespace StreamSplitter
 
             // We track bytes received so that connection can be restarted if data is not flowing
             m_bytesReceived += length;
-            m_totalBytesSent += length;
+            TotalBytesSent += length;
         }
 
         private void m_frameParser_ReceivedConfigurationFrame(object sender, EventArgs<IConfigurationFrame> e)
@@ -1180,13 +1198,13 @@ namespace StreamSplitter
             if (HandleException(e.Argument1))
                 OnProcessException(new InvalidOperationException($"Connection attempt failed due to exception: {e.Argument1.Message}", e.Argument1));
 
-            m_streamProxyStatus.ConnectionState = ConnectionState.Disconnected;
+            StreamProxyStatus.ConnectionState = ConnectionState.Disconnected;
         }
 
         private void m_frameParser_ConnectionEstablished(object sender, EventArgs e)
         {
             OnStatusMessage("Initiating {0} {1} based connection...", m_frameParser.PhasorProtocol.GetFormattedProtocolName(), m_frameParser.TransportProtocol.ToString().ToUpper());
-            m_streamProxyStatus.ConnectionState = ConnectionState.ConnectedNoData;
+            StreamProxyStatus.ConnectionState = ConnectionState.ConnectedNoData;
 
             // Enable data stream monitor for connections that support commands
             if (m_dataStreamMonitor is not null)
@@ -1195,7 +1213,7 @@ namespace StreamSplitter
             // Reinitialize proxy connection if needed...
             if (m_enabled && m_clientBasedPublishChannel is not null && m_clientBasedPublishChannel.CurrentState != ClientState.Connected)
             {
-                ThreadPool.QueueUserWorkItem(state =>
+                ThreadPool.QueueUserWorkItem(_ =>
                 {
                     m_clientBasedPublishChannel.Disconnect();
                     m_clientBasedPublishChannel.ConnectAsync();
@@ -1206,13 +1224,13 @@ namespace StreamSplitter
         private void m_frameParser_ConnectionAttempt(object sender, EventArgs e)
         {
             OnStatusMessage("Attempting connection...");
-            m_streamProxyStatus.ConnectionState = ConnectionState.Disconnected;
+            StreamProxyStatus.ConnectionState = ConnectionState.Disconnected;
         }
 
         private void m_frameParser_ConnectionTerminated(object sender, EventArgs e)
         {
             OnStatusMessage("Connection terminated.");
-            m_streamProxyStatus.ConnectionState = ConnectionState.Disconnected;
+            StreamProxyStatus.ConnectionState = ConnectionState.Disconnected;
 
             // Reset proxy connection
             if (m_enabled)
@@ -1240,13 +1258,18 @@ namespace StreamSplitter
         private void m_frameParser_ServerStarted(object sender, EventArgs e)
         {
             OnStatusMessage("TCP server based data channel listener started.");
-            m_streamProxyStatus.ConnectionState = ConnectionState.Disconnected;
+            StreamProxyStatus.ConnectionState = ConnectionState.Disconnected;
         }
 
         private void m_frameParser_ServerStopped(object sender, EventArgs e)
         {
             OnStatusMessage("TCP server based data channel listener stopped.");
-            m_streamProxyStatus.ConnectionState = ConnectionState.Disabled;
+            StreamProxyStatus.ConnectionState = ConnectionState.Disabled;
+        }
+
+        private void m_frameParser_ServerIndexUpdated(object sender, EventArgs e)
+        {
+            m_frameParser.DeviceID = AccessID;
         }
 
         #endregion
@@ -1264,7 +1287,7 @@ namespace StreamSplitter
         private void udpPublishChannel_ReceiveClientDataComplete(object sender, EventArgs<Guid, byte[], int> e)
         {
             // Queue up device command handling on a different thread since this will often
-            // engage sending data back on the same command channel and we want this async
+            // engage sending data back on the same command channel, and we want this async
             // thread to complete gracefully...
             if (m_publishChannel is null)
                 ThreadPool.QueueUserWorkItem(DeviceCommandHandlerProc, e);
@@ -1274,13 +1297,12 @@ namespace StreamSplitter
         {
             Exception ex = e.Argument2;
 
-            if (HandleException(ex))
-            {
-                if (ex is SocketException)
-                    OnProcessException(new InvalidOperationException($"Socket exception occurred on the UDP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
-                else
-                    OnProcessException(new InvalidOperationException($"UDP publication channel exception occurred while sending client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
-            }
+            if (!HandleException(ex))
+                return;
+
+            OnProcessException(ex is SocketException ?
+                new InvalidOperationException($"Socket exception occurred on the UDP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex) :
+                new InvalidOperationException($"UDP publication channel exception occurred while sending client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
         }
 
         private void udpPublishChannel_ServerStarted(object sender, EventArgs e)
@@ -1305,10 +1327,8 @@ namespace StreamSplitter
         private void tcpPublishChannel_ClientDisconnected(object sender, EventArgs<Guid> e)
         {
             Guid clientID = e.Argument;
-
             OnStatusMessage("Client \"{0}\" disconnected from TCP publication channel.", GetConnectionID(m_publishChannel, clientID));
-
-            m_connectionIDCache.TryRemove(clientID, out string connectionID);
+            m_connectionIDCache.TryRemove(clientID, out _);
         }
 
         private void tcpPublishChannel_ClientConnectingException(object sender, EventArgs<Exception> e)
@@ -1329,13 +1349,12 @@ namespace StreamSplitter
         {
             Exception ex = e.Argument2;
 
-            if (HandleException(ex))
-            {
-                if (ex is SocketException)
-                    OnProcessException(new InvalidOperationException($"Socket exception occurred on the TCP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
-                else
-                    OnProcessException(new InvalidOperationException($"TCP publication channel exception occurred while sending client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
-            }
+            if (!HandleException(ex))
+                return;
+
+            OnProcessException(ex is SocketException ?
+                new InvalidOperationException($"Socket exception occurred on the TCP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex) :
+                new InvalidOperationException($"TCP publication channel exception occurred while sending client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
         }
 
         private void tcpPublishChannel_ServerStarted(object sender, EventArgs e)
@@ -1362,17 +1381,17 @@ namespace StreamSplitter
             OnStatusMessage("TCP publishing client disconnected from TCP listening server channel \"{0}\".", m_clientBasedPublishChannel.ServerUri);
 
             // Reinitialize client connection if it was just disconnected...
-            if (m_enabled && m_frameParser.IsConnected)
-            {
-                m_streamProxyStatus.ConnectionState = ConnectionState.ConnectedNoData;
+            if (!m_enabled || !m_frameParser.IsConnected)
+                return;
 
-                new Action(() =>
-                {
-                    if (m_clientBasedPublishChannel.CurrentState == ClientState.Disconnected)
-                        m_clientBasedPublishChannel.ConnectAsync();
-                })
-                .DelayAndExecute(1000);
-            }
+            StreamProxyStatus.ConnectionState = ConnectionState.ConnectedNoData;
+
+            new Action(() =>
+            {
+                if (m_clientBasedPublishChannel.CurrentState == ClientState.Disconnected)
+                    m_clientBasedPublishChannel.ConnectAsync();
+            })
+            .DelayAndExecute(1000);
         }
 
         private void tcpClientBasedPublishChannel_ConnectionException(object sender, EventArgs<Exception> e)
@@ -1393,13 +1412,12 @@ namespace StreamSplitter
         {
             Exception ex = e.Argument;
 
-            if (HandleException(ex))
-            {
-                if (ex is SocketException)
-                    OnProcessException(new InvalidOperationException($"Socket exception occurred on the TCP publication client channel while attempting to send client data to TCP listening server \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex));
-                else
-                    OnProcessException(new InvalidOperationException($"TCP publication client channel exception occurred while sending client data to TCP listening server \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex));
-            }
+            if (!HandleException(ex))
+                return;
+
+            OnProcessException(ex is SocketException ?
+                new InvalidOperationException($"Socket exception occurred on the TCP publication client channel while attempting to send client data to TCP listening server \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex) :
+                new InvalidOperationException($"TCP publication client channel exception occurred while sending client data to TCP listening server \"{m_clientBasedPublishChannel.ServerUri}\": {ex.Message}", ex));
         }
 
         #endregion
