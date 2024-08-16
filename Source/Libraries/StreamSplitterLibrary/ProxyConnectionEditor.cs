@@ -80,7 +80,7 @@ namespace StreamSplitter
         {
             InitializeComponent();
 
-            m_udpDestinations = new List<TextBox> { textBoxUdpRebroadcast0 };
+            m_udpDestinations = [textBoxUdpRebroadcast0];
             m_frameParser = new MultiProtocolFrameParser();
 
             // Initialize phasor protocol selection list
@@ -285,6 +285,31 @@ namespace StreamSplitter
                 case TransportProtocol.Udp:
                     sourceSettings["localport"] = textBoxUdpListeningPort.Text;
                     sourceSettings.Remove("isListener");
+
+                    if (checkBoxUseRemoteUdp.Checked)
+                    {
+                        string[] parts = textBoxRemoteUdpConnection.Text.Split(':');
+
+                        if (parts.Length != 2)
+                        {
+                            sourceSettings.Remove("server");
+                            sourceSettings.Remove("remoteport");
+                        }
+                        else
+                        {
+                            sourceSettings["server"] = parts[0].Trim();
+
+                            if (ushort.TryParse(parts[1].Trim(), out ushort remotePort))
+                                sourceSettings["remoteport"] = remotePort.ToString();
+                            else
+                                sourceSettings["remotePort"] = "0";
+                        }
+                    }
+                    else
+                    {
+                        sourceSettings.Remove("server");
+                        sourceSettings.Remove("remoteport");
+                    }
                     break;
             }
 
@@ -415,6 +440,26 @@ namespace StreamSplitter
                 case TransportProtocol.Udp:
                     if (sourceSettings.TryGetValue("localport", out setting))
                         textBoxUdpListeningPort.Text = setting;
+
+                    string remoteUdpConnection = null;
+
+                    if (sourceSettings.TryGetValue("server", out setting))
+                        remoteUdpConnection = setting.Trim();
+
+                    if (sourceSettings.TryGetValue("remoteport", out setting) && ushort.TryParse(setting.Trim(), out ushort remotePort))
+                        remoteUdpConnection = $"{remoteUdpConnection}:{remotePort}";
+                    else
+                        remoteUdpConnection = null;
+
+                    if (string.IsNullOrWhiteSpace(remoteUdpConnection))
+                    {
+                        checkBoxUseRemoteUdp.Checked = false;
+                    }
+                    else
+                    {
+                        checkBoxUseRemoteUdp.Checked = true;
+                        textBoxRemoteUdpConnection.Text = remoteUdpConnection;
+                    }
                     break;
             }
 
@@ -673,6 +718,24 @@ namespace StreamSplitter
             labelAlternateTcpConnection.Enabled = isChecked;
             textBoxAlternateTcpConnection.Enabled = isChecked;
             labelAltermateTcpConnectionFormat.Enabled = isChecked;
+
+            UpdateConnectionString();
+        }
+
+        private void checkBoxUseRemoteUdp_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxUseRemoteUdp.Checked)
+            {
+                checkBoxUseRemoteUdp.Location = checkBoxUseRemoteUdp.Location with { Y = 0 };
+                textBoxRemoteUdpConnection.Visible = true;
+                labelRemoteUdpConnectionFormat.Visible = true;
+            }
+            else
+            {
+                textBoxRemoteUdpConnection.Visible = false;
+                labelRemoteUdpConnectionFormat.Visible = false;
+                checkBoxUseRemoteUdp.Location = checkBoxUseRemoteUdp.Location with { Y = 22 };
+            }
 
             UpdateConnectionString();
         }
