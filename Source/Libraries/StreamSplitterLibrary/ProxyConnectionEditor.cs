@@ -281,6 +281,8 @@ namespace StreamSplitter
                         sourceSettings.Remove("isListener");
                         sourceSettings.Remove("port");
                     }
+
+                    sourceSettings.Remove("remoteport");
                     break;
                 case TransportProtocol.Udp:
                     sourceSettings["localport"] = textBoxUdpListeningPort.Text;
