@@ -81,6 +81,9 @@ namespace StreamSplitter
             this.labelTcpSourceSettings = new System.Windows.Forms.Label();
             this.checkBoxTcpSourceIsListener = new System.Windows.Forms.CheckBox();
             this.tabPageUdp = new System.Windows.Forms.TabPage();
+            this.checkBoxUseRemoteUdp = new System.Windows.Forms.CheckBox();
+            this.labelRemoteUdpConnectionFormat = new System.Windows.Forms.Label();
+            this.textBoxRemoteUdpConnection = new System.Windows.Forms.TextBox();
             this.labelUdpListeningPort = new System.Windows.Forms.Label();
             this.groupBoxProxyDestinations = new System.Windows.Forms.GroupBox();
             this.buttonApply = new System.Windows.Forms.Button();
@@ -107,9 +110,6 @@ namespace StreamSplitter
             this.textBoxConnectionString = new System.Windows.Forms.TextBox();
             this.panelCenterGroups = new System.Windows.Forms.Panel();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.labelRemoteUdpConnectionFormat = new System.Windows.Forms.Label();
-            this.textBoxRemoteUdpConnection = new System.Windows.Forms.TextBox();
-            this.checkBoxUseRemoteUdp = new System.Windows.Forms.CheckBox();
             this.toolTipEx = new StreamSplitter.ToolTipEx(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.groupBoxName.SuspendLayout();
@@ -382,6 +382,40 @@ namespace StreamSplitter
             this.tabPageUdp.TabIndex = 1;
             this.tabPageUdp.Text = " UDP";
             this.tabPageUdp.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxUseRemoteUdp
+            // 
+            this.checkBoxUseRemoteUdp.AutoSize = true;
+            this.checkBoxUseRemoteUdp.Location = new System.Drawing.Point(90, 22);
+            this.checkBoxUseRemoteUdp.Name = "checkBoxUseRemoteUdp";
+            this.checkBoxUseRemoteUdp.Size = new System.Drawing.Size(112, 17);
+            this.checkBoxUseRemoteUdp.TabIndex = 6;
+            this.checkBoxUseRemoteUdp.Text = "Use Remote UDP";
+            this.checkBoxUseRemoteUdp.UseVisualStyleBackColor = true;
+            this.checkBoxUseRemoteUdp.CheckedChanged += new System.EventHandler(this.checkBoxUseRemoteUdp_CheckedChanged);
+            // 
+            // labelRemoteUdpConnectionFormat
+            // 
+            this.labelRemoteUdpConnectionFormat.AutoSize = true;
+            this.labelRemoteUdpConnectionFormat.Location = new System.Drawing.Point(88, 41);
+            this.labelRemoteUdpConnectionFormat.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelRemoteUdpConnectionFormat.Name = "labelRemoteUdpConnectionFormat";
+            this.labelRemoteUdpConnectionFormat.Size = new System.Drawing.Size(97, 13);
+            this.labelRemoteUdpConnectionFormat.TabIndex = 5;
+            this.labelRemoteUdpConnectionFormat.Text = "Format: host:port";
+            this.labelRemoteUdpConnectionFormat.Visible = false;
+            // 
+            // textBoxRemoteUdpConnection
+            // 
+            this.textBoxRemoteUdpConnection.Location = new System.Drawing.Point(91, 18);
+            this.textBoxRemoteUdpConnection.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            this.textBoxRemoteUdpConnection.Name = "textBoxRemoteUdpConnection";
+            this.textBoxRemoteUdpConnection.Size = new System.Drawing.Size(112, 22);
+            this.textBoxRemoteUdpConnection.TabIndex = 4;
+            this.textBoxRemoteUdpConnection.Text = "localhost:4713";
+            this.toolTip.SetToolTip(this.textBoxRemoteUdpConnection, "Example: 192.168.1.10:4712");
+            this.textBoxRemoteUdpConnection.Visible = false;
+            this.textBoxRemoteUdpConnection.TextChanged += new System.EventHandler(this.ControlValueChanged);
             // 
             // labelUdpListeningPort
             // 
@@ -709,40 +743,6 @@ namespace StreamSplitter
             this.toolTip.InitialDelay = 50;
             this.toolTip.ReshowDelay = 10;
             this.toolTip.ShowAlways = true;
-            // 
-            // labelRemoteUdpConnectionFormat
-            // 
-            this.labelRemoteUdpConnectionFormat.AutoSize = true;
-            this.labelRemoteUdpConnectionFormat.Location = new System.Drawing.Point(88, 40);
-            this.labelRemoteUdpConnectionFormat.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.labelRemoteUdpConnectionFormat.Name = "labelRemoteUdpConnectionFormat";
-            this.labelRemoteUdpConnectionFormat.Size = new System.Drawing.Size(97, 13);
-            this.labelRemoteUdpConnectionFormat.TabIndex = 5;
-            this.labelRemoteUdpConnectionFormat.Text = "Format: host:port";
-            this.labelRemoteUdpConnectionFormat.Visible = false;
-            // 
-            // textBoxRemoteUdpConnection
-            // 
-            this.textBoxRemoteUdpConnection.Location = new System.Drawing.Point(91, 16);
-            this.textBoxRemoteUdpConnection.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.textBoxRemoteUdpConnection.Name = "textBoxRemoteUdpConnection";
-            this.textBoxRemoteUdpConnection.Size = new System.Drawing.Size(112, 22);
-            this.textBoxRemoteUdpConnection.TabIndex = 4;
-            this.textBoxRemoteUdpConnection.Text = "localhost:4713";
-            this.toolTip.SetToolTip(this.textBoxRemoteUdpConnection, "Example: 192.168.1.10:4712");
-            this.textBoxRemoteUdpConnection.Visible = false;
-            this.textBoxRemoteUdpConnection.TextChanged += new System.EventHandler(this.ControlValueChanged);
-            // 
-            // checkBoxUseRemoteUdp
-            // 
-            this.checkBoxUseRemoteUdp.AutoSize = true;
-            this.checkBoxUseRemoteUdp.Location = new System.Drawing.Point(90, 22);
-            this.checkBoxUseRemoteUdp.Name = "checkBoxUseRemoteUdp";
-            this.checkBoxUseRemoteUdp.Size = new System.Drawing.Size(112, 17);
-            this.checkBoxUseRemoteUdp.TabIndex = 6;
-            this.checkBoxUseRemoteUdp.Text = "Use Remote UDP";
-            this.checkBoxUseRemoteUdp.UseVisualStyleBackColor = true;
-            this.checkBoxUseRemoteUdp.CheckedChanged += new System.EventHandler(this.checkBoxUseRemoteUdp_CheckedChanged);
             // 
             // toolTipEx
             // 
