@@ -103,6 +103,7 @@ namespace StreamSplitter
         private readonly double m_socketErrorReportingInterval;
         private int m_lastSocketErrorNumber;
         private long m_lastSocketErrorTime;
+        private string m_connectionInfo;
         private volatile bool m_enabled;
 
         #endregion
@@ -121,6 +122,7 @@ namespace StreamSplitter
             // We are not here to validate/use data, just here to proxy it along...
             m_frameParser.CheckSumValidationFrameTypes = CheckSumValidationFrameTypes.NoFrames;
             m_frameParser.AutoStartDataParsingSequence = true;
+            m_frameParser.MaximumConnectionAttempts = 1;
 
             m_frameParser.ConnectionAttempt += m_frameParser_ConnectionAttempt;
             m_frameParser.ConnectionEstablished += m_frameParser_ConnectionEstablished;
@@ -251,6 +253,25 @@ namespace StreamSplitter
         }
 
         private int ServerIndex => m_frameParser?.ServerIndex ?? 0;
+
+        /// <summary>
+        /// Gets connection info for proxy.
+        /// </summary>
+        public string ConnectionInfo
+        {
+            get
+            {
+                string connectionInfo = m_frameParser?.ConnectionInfo;
+
+                if (connectionInfo is not null && connectionInfo.StartsWith("tcp://", StringComparison.Ordinal))
+                    connectionInfo = $"{connectionInfo}/{AccessID}";
+
+                if (m_accessIDList.Length > 1)
+                    connectionInfo = $"{connectionInfo} [IP #{ServerIndex + 1}]";
+
+                return connectionInfo;
+            }
+        }
 
         /// <summary>
         /// Gets or sets connection string used for <see cref="MultiProtocolFrameParser"/> data source.
@@ -1196,14 +1217,14 @@ namespace StreamSplitter
         private void m_frameParser_ConnectionException(object sender, EventArgs<Exception, int> e)
         {
             if (HandleException(e.Argument1))
-                OnProcessException(new InvalidOperationException($"Connection attempt failed due to exception: {e.Argument1.Message}", e.Argument1));
+                OnProcessException(new InvalidOperationException($"Connection attempt failed for {m_connectionInfo}: {e.Argument1.Message}", e.Argument1));
 
             StreamProxyStatus.ConnectionState = ConnectionState.Disconnected;
         }
 
         private void m_frameParser_ConnectionEstablished(object sender, EventArgs e)
         {
-            OnStatusMessage("Initiating {0} {1} based connection...", m_frameParser.PhasorProtocol.GetFormattedProtocolName(), m_frameParser.TransportProtocol.ToString().ToUpper());
+            OnStatusMessage($"Successfully connected to {m_connectionInfo}, initializing {m_frameParser.PhasorProtocol.GetFormattedProtocolName()} protocol...");
             StreamProxyStatus.ConnectionState = ConnectionState.ConnectedNoData;
 
             // Enable data stream monitor for connections that support commands
@@ -1223,18 +1244,21 @@ namespace StreamSplitter
 
         private void m_frameParser_ConnectionAttempt(object sender, EventArgs e)
         {
-            OnStatusMessage("Attempting connection...");
+            // Cache connection info before possible failure in case connection switches to another target
+            m_connectionInfo = ConnectionInfo;
+
+            OnStatusMessage($"Attempting {m_frameParser.PhasorProtocol.GetFormattedProtocolName()} protocol connection to {m_connectionInfo}...");
             StreamProxyStatus.ConnectionState = ConnectionState.Disconnected;
         }
 
         private void m_frameParser_ConnectionTerminated(object sender, EventArgs e)
         {
-            OnStatusMessage("Connection terminated.");
+            OnStatusMessage($"{m_frameParser.PhasorProtocol.GetFormattedProtocolName()} protocol connection to {m_connectionInfo} terminated.");
             StreamProxyStatus.ConnectionState = ConnectionState.Disconnected;
 
             // Reset proxy connection
             if (m_enabled)
-                new Action(Start).DelayAndExecute(1500);
+                new Action(Start).DelayAndExecute(1000);
         }
 
         private void m_frameParser_ConfigurationChanged(object sender, EventArgs e)
