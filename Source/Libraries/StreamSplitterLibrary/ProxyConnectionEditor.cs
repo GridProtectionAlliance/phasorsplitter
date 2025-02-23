@@ -544,7 +544,7 @@ namespace StreamSplitter
                     {
                         string[] clients = setting.Split(',').Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
 
-                        while (m_udpDestinations.Count - 1 > clients.Length)
+                        while (m_udpDestinations.Count > clients.Length)
                             RemoveDestinationClient();
 
                         while (m_udpDestinations.Count < clients.Length)
