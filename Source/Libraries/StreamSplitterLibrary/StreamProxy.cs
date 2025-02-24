@@ -1062,7 +1062,9 @@ namespace StreamSplitter
 
         private bool HandleException(Exception ex)
         {
-            while (true)
+            int i = 0;
+
+            while (i < 5)
             {
                 if (ex is SocketException socketEx)
                 {
@@ -1079,11 +1081,14 @@ namespace StreamSplitter
                 else if (ex.InnerException is not null)
                 {
                     ex = ex.InnerException;
+                    i++;
                     continue;
                 }
 
                 return true;
             }
+
+            return false;
         }
 
         #region [ Frame Parser Event Handlers ]
