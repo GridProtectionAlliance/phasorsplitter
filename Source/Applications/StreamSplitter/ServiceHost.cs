@@ -60,7 +60,7 @@ namespace StreamSplitter
         private const int DefaultMinThreadPoolWorkerSize = 25;
         private const int DefaultMaxThreadPoolWorkerSize = 100;
         private const int DefaultMinThreadPoolIOPortSize = (int)(DefaultMinThreadPoolWorkerSize + DefaultMinThreadPoolWorkerSize * 0.2D);
-        private const int DefaultMaxThreadPoolIOPortSize = (int)(DefaultMinThreadPoolWorkerSize + DefaultMinThreadPoolWorkerSize * 0.2D);
+        private const int DefaultMaxThreadPoolIOPortSize = (int)(DefaultMaxThreadPoolWorkerSize + DefaultMaxThreadPoolWorkerSize * 0.2D);
         private const int DefaultMaxLogFiles = 300;
 
         // Fields
