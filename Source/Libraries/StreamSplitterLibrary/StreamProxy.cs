@@ -1329,6 +1329,12 @@ namespace StreamSplitter
             if (!HandleException(ex))
                 return;
 
+            if (ex is NullReferenceException)
+            {
+                Logger.SwallowException(ex);
+                return;
+            }
+
             OnProcessException(ex is SocketException ?
                 new InvalidOperationException($"Socket exception occurred on the UDP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex) :
                 new InvalidOperationException($"UDP publication channel exception occurred while sending client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex));
@@ -1380,6 +1386,12 @@ namespace StreamSplitter
 
             if (!HandleException(ex))
                 return;
+
+            if (ex is NullReferenceException)
+            {
+                Logger.SwallowException(ex);
+                return;
+            }
 
             OnProcessException(ex is SocketException ?
                 new InvalidOperationException($"Socket exception occurred on the TCP publication channel while attempting to send client data to \"{GetConnectionID(m_publishChannel, e.Argument1)}\": {ex.Message}", ex) :
