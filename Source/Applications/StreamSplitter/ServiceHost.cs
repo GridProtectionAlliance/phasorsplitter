@@ -26,6 +26,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime;
@@ -37,6 +38,7 @@ using GSF;
 using GSF.Communication;
 using GSF.Configuration;
 using GSF.Console;
+using GSF.Diagnostics;
 using GSF.IO;
 using GSF.PhasorProtocols;
 using GSF.ServiceProcess;
@@ -55,6 +57,11 @@ namespace StreamSplitter
         // Constants
         private const string ConfigurationFileName = "ProxyConnections.xml";
         private const int ConfigurationBackups = 5;
+        private const int DefaultMinThreadPoolWorkerSize = 25;
+        private const int DefaultMaxThreadPoolWorkerSize = 100;
+        private const int DefaultMinThreadPoolIOPortSize = (int)(DefaultMinThreadPoolWorkerSize + DefaultMinThreadPoolWorkerSize * 0.2D);
+        private const int DefaultMaxThreadPoolIOPortSize = (int)(DefaultMinThreadPoolWorkerSize + DefaultMinThreadPoolWorkerSize * 0.2D);
+        private const int DefaultMaxLogFiles = 300;
 
         // Fields
         private AutoResetEvent m_configurationLoadComplete;
@@ -125,12 +132,89 @@ namespace StreamSplitter
             // Make sure default service settings exist
             ConfigurationFile configFile = ConfigurationFile.Current;
 
+            string servicePath = FilePath.GetAbsolutePath("");
+            string defaultLogPath = string.Format("{0}{1}Logs{1}", servicePath, Path.DirectorySeparatorChar);
+
             // System settings
             CategorizedSettingsElementCollection systemSettings = configFile.Settings["systemSettings"];
             systemSettings.Add("SocketErrorReportingInterval", "10", "Interval, in seconds, that defines the maximum reporting rate for duplicate exceptions on a connection.");
+            systemSettings.Add("MinThreadPoolWorkerThreads", DefaultMinThreadPoolWorkerSize, "Defines the minimum number of allowed thread pool worker threads.");
+            systemSettings.Add("MaxThreadPoolWorkerThreads", DefaultMaxThreadPoolWorkerSize, "Defines the maximum number of allowed thread pool worker threads.");
+            systemSettings.Add("MinThreadPoolIOPortThreads", DefaultMinThreadPoolIOPortSize, "Defines the minimum number of allowed thread pool I/O completion port threads (used by socket layer).");
+            systemSettings.Add("MaxThreadPoolIOPortThreads", DefaultMaxThreadPoolIOPortSize, "Defines the maximum number of allowed thread pool I/O completion port threads (used by socket layer).");
+            systemSettings.Add("LogPath", defaultLogPath, "Defines the path used to archive log files");
+            systemSettings.Add("MaxLogFiles", DefaultMaxLogFiles, "Defines the maximum number of log files to keep");
+            systemSettings.Add("DefaultCulture", "en-US", "Default culture to use for language, country/region and calendar formats.");
 
             // Create a handler for unobserved task exceptions
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
+            // Attempt to set default culture
+            try
+            {
+                string defaultCulture = systemSettings["DefaultCulture"].ValueAs("en-US");
+                CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture(defaultCulture);     // Defaults for date formatting, etc.
+                CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CreateSpecificCulture(defaultCulture);   // Culture for resource strings, etc.
+            }
+            catch (Exception ex)
+            {
+                DisplayStatusMessage("Failed to set default culture due to exception, defaulting to \"{1}\": {0}", UpdateType.Alarm, ex.Message, CultureInfo.CurrentCulture.Name.ToNonNullNorEmptyString("Undetermined"));
+                Logger.SwallowException(ex);
+            }
+
+            // Retrieve application log path as defined in the config file
+            string logPath = FilePath.GetAbsolutePath(systemSettings["LogPath"].Value);
+
+            // Make sure log directory exists
+            try
+            {
+                if (!Directory.Exists(logPath))
+                    Directory.CreateDirectory(logPath);
+            }
+            catch (Exception ex)
+            {
+                // Attempt to default back to common log file path
+                if (!Directory.Exists(defaultLogPath))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(defaultLogPath);
+                    }
+                    catch
+                    {
+                        defaultLogPath = servicePath;
+                    }
+                }
+
+                DisplayStatusMessage("Failed to create logging directory \"{0}\" due to exception, defaulting to \"{1}\": {2}", UpdateType.Alarm, logPath, defaultLogPath, ex.Message);
+                Logger.SwallowException(ex);
+                logPath = defaultLogPath;
+            }
+
+            int maxLogFiles = systemSettings["MaxLogFiles"].ValueAs(DefaultMaxLogFiles);
+
+            try
+            {
+                Logger.FileWriter.SetPath(logPath);
+                Logger.FileWriter.SetLoggingFileCount(maxLogFiles);
+            }
+            catch (Exception ex)
+            {
+                DisplayStatusMessage("Failed to set logging path \"{0}\" or max file count \"{1}\" due to exception: {2}", UpdateType.Alarm, logPath, maxLogFiles, ex.Message);
+                Logger.SwallowException(ex);
+            }
+
+            // Setup default thread pool size
+            try
+            {
+                ThreadPool.SetMinThreads(systemSettings["MinThreadPoolWorkerThreads"].ValueAs(DefaultMinThreadPoolWorkerSize), systemSettings["MinThreadPoolIOPortThreads"].ValueAs(DefaultMinThreadPoolIOPortSize));
+                ThreadPool.SetMaxThreads(systemSettings["MaxThreadPoolWorkerThreads"].ValueAs(DefaultMaxThreadPoolWorkerSize), systemSettings["MaxThreadPoolIOPortThreads"].ValueAs(DefaultMaxThreadPoolIOPortSize));
+            }
+            catch (Exception ex)
+            {
+                DisplayStatusMessage("Failed to set desired thread pool size due to exception: {0}", UpdateType.Alarm, ex.Message);
+                Logger.SwallowException(ex);
+            }
 
             // Initialize system settings
             m_configurationLoadComplete = new AutoResetEvent(true);
